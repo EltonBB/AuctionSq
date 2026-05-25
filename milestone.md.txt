@@ -1,70 +1,71 @@
 # milestone.md
 
-## Purpose
-
-This file is the project memory and progress tracker.
-
-The AI agent must read this file before starting work and update it after every meaningful completed task.
-
 ## Current Status
 
-Research phase complete; implementation plan created and awaiting user review.
-
-## Current Active Task
-
-Awaiting user review and approval of the `implementation_plan.md` artifact.
+AuctionSq is now a connected pre-production auction platform with a polished public site direction, Supabase-backed data, user account pages, and an admin control center. The app builds successfully and the local preview responds at `http://localhost:3000/`.
 
 ## Completed Work
 
-- Inspected the repository and verified available environment tools (Node v24.14, npm v11.11, git v2.53).
-- Ran CLI diagnostics on `create-next-app` to prepare clean setup arguments.
-- Formulated database schemas (profiles, products, categories, auctions, bids, orders, audit logs) and bid validation constraints.
-- Generated the comprehensive `implementation_plan.md` artifact for user review.
+- Rebranded the app metadata, public header/footer, dashboard header, auth pages, FAQ, how-it-works, and contact details from the copied Oferto direction to AuctionSq.
+- Added missing user dashboard routes:
+  - `/dashboard/profile`
+  - `/dashboard/addresses`
+  - `/dashboard/change-password`
+- Added guided profile completion, delivery details, and password update forms connected to existing Supabase/server actions.
+- Added admin dashboard structure and pages:
+  - `/admin`
+  - `/admin/products`
+  - `/admin/auctions`
+  - `/admin/bids`
+  - `/admin/orders`
+  - `/admin/users`
+  - `/admin/categories`
+  - `/admin/audit-logs`
+  - `/admin/settings`
+- Connected admin pages to existing actions for product creation, auction creation, auction cancellation/relisting, bid cancellation, order status updates, user blocking, category creation, audit review, and expired auction closing.
+- Added an admin authorization check before the manual expired-auction closer can run.
+- Updated the main category structure to:
+  - Teknologji
+  - Gaming
+  - Pajisje Shtepiake
+  - Vegla Pune
+  - Kuzhine
+  - Kozmetike & Pajisje
+  - Sport & Fitness
+  - Per Femije
+  - Te Ndryshme
+- Expanded Supabase seed data and applied it to the live Supabase project:
+  - 9 categories
+  - 9 products
+  - 9 auctions
+- Verified representative public routes return HTTP 200:
+  - `/`
+  - `/auctions`
+  - `/categories`
+  - `/login`
+- Verified production build with `npm run build`.
 
-## In Progress
+## Still Needs Review
 
-- Review and alignment on the implementation details with the user.
+- Visual review of spacing, copy, Albanian wording, product imagery, and exact AuctionSq brand tone.
+- Admin pages are functional and organized, but edit flows are still mostly list/create/action based rather than full dedicated add/edit detail screens.
+- Product image upload storage is not yet a polished upload UI; current admin product creation accepts image URLs.
+- Auth flows should be tested with real Supabase users, including admin role assignment and password reset emails.
+- Live bid behavior should be reviewed with multiple accounts before launch.
 
-## Next Tasks
+## What Should Be Tested Next
 
-1. Create the Next.js TS Tailwind CSS application using `create-next-app`.
-2. Configure Tailwind and style defaults with premium dark/light HSL palettes and sleek gradients.
-3. Build the Supabase database migrations (`schema.sql`) and set up row-level security (RLS) and triggers.
-4. Set up the route structure for public pages, user dashboards, and admin panels.
-5. Create Supabase client and Server Actions for user profile validation, transactional bidding, and admin overrides.
-6. Assemble pages and connect UI to Supabase database.
-7. Conduct manual and automated verification of end-to-end user and admin flows.
+1. Register a new user and confirm the profile completion requirement before bidding.
+2. Log in as an admin user and test product creation, auction creation, bid moderation, order status updates, category creation, and audit logs.
+3. Place bids on active auctions with two users and verify current price, bid count, and dashboard states.
+4. Run the expired-auction closer and verify winner/order creation.
+5. Test mobile layouts for home, auctions, auction detail, dashboard, and admin tables.
+6. Decide whether product image upload should use Supabase Storage before deployment.
 
 ## Important Decisions
 
-- This is a complete admin-controlled auction website.
-- This is not a marketplace.
-- Only admins can add products and create auctions.
-- Users must register/login before bidding.
-- Users must complete profile and delivery details before bidding.
-- Required user details:
-  - full name
-  - country
-  - city
-  - address
-  - phone number
-- Stack:
-  - Next.js (App Router, Server Actions)
-  - TypeScript
-  - Tailwind CSS
-  - shadcn/ui
-  - Supabase Auth
-  - Supabase Database (PostgreSQL with custom transaction functions and triggers)
-  - Supabase Storage (for product images)
-  - Supabase Realtime (for live bid synchronization)
-  - Vercel deployment
-- Do not use Prisma.
-
-## Open Questions
-
-- Bucket name for storage (defaulting to `product-images`).
-- Preferred animations or auditory feedback on live bids.
-
-## Notes
-
-Keep this file short and updated. Add completed work, next tasks, important decisions, and blockers as the project progresses.
+- AuctionSq remains an admin-controlled auction platform, not a marketplace.
+- Only admins can create products and auctions.
+- Users must be logged in and have complete delivery details before bidding.
+- Supabase is the source of truth for live data; local memory data remains a fallback for sandbox/dev behavior.
+- Vercel setup is intentionally left for later, per user instruction.

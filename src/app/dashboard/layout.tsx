@@ -50,7 +50,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <header className="bg-slate-900 border-b border-slate-850 px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-wider text-white">
           <Gavel className="w-5.5 h-5.5 text-blue-500 transform -rotate-45" />
-          <span>OFERTO<span className="text-blue-500">.</span></span>
+          <span>Auction<span className="text-blue-500">Sq</span></span>
         </Link>
 
         <div className="flex items-center gap-4 text-xs">

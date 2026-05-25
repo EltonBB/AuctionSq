@@ -30,7 +30,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] items-center gap-6 px-4 py-3">
           <Link href="/" className="shrink-0 text-[34px] font-black leading-none tracking-[-0.03em] text-[#082047]">
-            oferto<span className="text-[#1d4ed8]">j</span><span className="text-slate-400">.com</span>
+            Auction<span className="text-[#1d4ed8]">Sq</span>
           </Link>
 
           <Link href="/" className="hidden text-sm font-semibold text-slate-900 lg:block">
@@ -124,7 +124,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <footer className="border-t border-slate-200 bg-[#082047] py-12 text-white">
         <div className="mx-auto grid max-w-[1440px] gap-10 px-4 md:grid-cols-4">
           <div>
-            <div className="text-3xl font-black tracking-[-0.03em]">ofertoj.com</div>
+            <div className="text-3xl font-black tracking-[-0.03em]">AuctionSq</div>
             <p className="mt-3 max-w-xs text-sm leading-6 text-blue-100">
               Ankande online per produkte reale, te kontrolluara dhe te listuara nga ekipi yne.
             </p>

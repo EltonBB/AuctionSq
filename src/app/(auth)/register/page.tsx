@@ -25,7 +25,7 @@ export default function RegisterPage() {
             <Gavel className="w-6 h-6 transform -rotate-45" />
           </div>
           <h2 className="text-xl font-black text-white tracking-widest uppercase">
-            Regjistrohu në OFERTO
+            Regjistrohu ne AuctionSq
           </h2>
           <p className="text-slate-450 text-xs">
             Krijo një llogari falas për të filluar ofertimin në produktet tona.

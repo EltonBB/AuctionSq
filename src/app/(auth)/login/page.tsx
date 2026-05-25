@@ -12,13 +12,13 @@ export default function LoginPage() {
 
   const handleAutofill = (role: string) => {
     if (role === "admin") {
-      setEmailInput("admin@oferto.com");
+      setEmailInput("admin@auctionsq.com");
       setPasswordInput("admin123");
     } else if (role === "incomplete") {
-      setEmailInput("incomplete@oferto.com");
+      setEmailInput("incomplete@auctionsq.com");
       setPasswordInput("buyer123");
     } else {
-      setEmailInput("buyer@oferto.com");
+      setEmailInput("buyer@auctionsq.com");
       setPasswordInput("buyer123");
     }
   };
@@ -40,7 +40,7 @@ export default function LoginPage() {
             <Gavel className="w-6 h-6 transform -rotate-45" />
           </div>
           <h2 className="text-xl font-black text-white tracking-widest uppercase">
-            Hyni në OFERTO
+            Hyni ne AuctionSq
           </h2>
           <p className="text-slate-450 text-xs">
             Vendosni email-in dhe fjalëkalimin për të hyrë në panelin tuaj.

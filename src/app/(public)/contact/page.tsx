@@ -40,7 +40,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h4 className="font-bold text-white text-sm">Adresa Email</h4>
-                <p className="text-slate-400 text-xs mt-0.5">support@oferto.com</p>
+                <p className="text-slate-400 text-xs mt-0.5">support@auctionsq.com</p>
                 <p className="text-slate-500 text-3xs italic">Përgjigje brenda 24 orëve</p>
               </div>
             </div>

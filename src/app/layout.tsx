@@ -14,17 +14,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Oferto | Premium Admin-Controlled Online Auctions",
-    template: "%s | Oferto Auctions",
+    default: "AuctionSq | Premium Admin-Controlled Online Auctions",
+    template: "%s | AuctionSq",
   },
-  description: "Oferto. Garo. Fito. Bid on authentic, verified products in secure, admin-controlled online auctions. Authentic items, transparent bidding, and fast delivery.",
-  metadataBase: new URL("https://oferto.com"),
-  keywords: ["online auction", "ankande online", "albania auctions", "bid and win", "oferto", "garo fito"],
+  description: "AuctionSq is a trusted auction platform for verified products, transparent bidding, and clear delivery tracking.",
+  metadataBase: new URL("https://auctionsq.com"),
+  keywords: ["online auction", "ankande online", "albania auctions", "bid and win", "AuctionSq"],
   openGraph: {
-    title: "Oferto | Premium Admin-Controlled Online Auctions",
-    description: "Bid on authentic, verified products in secure, admin-controlled online auctions.",
-    url: "https://oferto.com",
-    siteName: "Oferto Auctions",
+    title: "AuctionSq | Premium Admin-Controlled Online Auctions",
+    description: "Browse verified products, bid with confidence, and track every win from one clean platform.",
+    url: "https://auctionsq.com",
+    siteName: "AuctionSq",
     locale: "sq_AL",
     type: "website",
   },

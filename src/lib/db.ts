@@ -85,11 +85,15 @@ export interface AuditLog {
 // SEED DATA & STATE CACHE FOR SANDBOX
 // =====================================================================
 const MOCK_CATEGORIES: Category[] = [
-  { id: "cat-1", name: "Telefona & Teknologji", slug: "teknologji", description: "Smartphones, laptops, and tablets." },
-  { id: "cat-2", name: "Orë & Aksesorë", slug: "ore-aksesore", description: "Premium wristwatches and fine jewelry." },
-  { id: "cat-3", name: "Koleksione & Art", slug: "koleksione", description: "Rare collectibles, antique arts, and memorabilia." },
-  { id: "cat-4", name: "Vegla & Shtëpia", slug: "vegla-shtepia", description: "Home appliances, power tools, and smart home items." },
-  { id: "cat-5", name: "Sport & Jashtë", slug: "sport", description: "Bicycles, camping gear, and sports equipment." }
+  { id: "cat-1", name: "Teknologji", slug: "teknologji", description: "Telefona, laptopa, tablete, drone dhe pajisje smart." },
+  { id: "cat-2", name: "Gaming", slug: "gaming", description: "Konsola, aksesore gaming, monitor dhe pajisje streaming." },
+  { id: "cat-3", name: "Pajisje Shtepiake", slug: "pajisje-shtepiake", description: "Pajisje per shtepine, pastrim, ngrohje dhe smart home." },
+  { id: "cat-4", name: "Vegla Pune", slug: "vegla-pune", description: "Vegla elektrike, instrumente pune dhe sete profesionale." },
+  { id: "cat-5", name: "Kuzhine", slug: "kuzhine", description: "Pajisje kuzhine, espresso, blendera dhe aksesore gatimi." },
+  { id: "cat-6", name: "Kozmetike & Pajisje", slug: "kozmetike-pajisje", description: "Pajisje bukurie, kujdes personal dhe sete profesionale." },
+  { id: "cat-7", name: "Sport & Fitness", slug: "sport-fitness", description: "Pajisje fitness, sport dhe aktivitete ne natyre." },
+  { id: "cat-8", name: "Per Femije", slug: "per-femije", description: "Produkte te kontrolluara per femije dhe familje." },
+  { id: "cat-9", name: "Te Ndryshme", slug: "te-ndryshme", description: "Produkte te vecanta qe nuk futen ne kategorite e tjera." }
 ];
 
 const MOCK_PROFILES: Profile[] = [

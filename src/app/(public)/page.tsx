@@ -83,7 +83,7 @@ export default async function HomePage() {
               Kap ofertat me te mira. Produkte unike ne ankand.
             </h1>
             <p className="mt-6 max-w-[290px] text-sm leading-6 text-blue-100">
-              Lire e mire, oferto per te garuar dhe fito produktin.
+              Shfleto, vendos oferten tende dhe fito produktin.
             </p>
           </div>
 

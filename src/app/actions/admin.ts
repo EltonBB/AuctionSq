@@ -574,6 +574,8 @@ export async function toggleUserBlock(userId: string, isBlocked: boolean) {
 // Action to close all expired auctions on demand
 export async function runAuctionCloser() {
   try {
+    await checkAdminAuth();
+
     if (!isSupabaseConnected()) {
       // In-memory closer will run automatically during database reads
       revalidatePath("/");

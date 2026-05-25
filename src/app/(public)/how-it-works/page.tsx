@@ -8,7 +8,7 @@ export default function HowItWorksPage() {
       {/* Page Header */}
       <div className="text-center flex flex-col gap-4 max-w-xl mx-auto">
         <span className="text-blue-500 text-xs font-bold uppercase tracking-widest">Procedura</span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white">Si Funksionon Oferto?</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white">Si Funksionon AuctionSq?</h1>
         <p className="text-slate-400 text-sm leading-relaxed">
           Mësoni rregullat tona të thjeshta dhe të drejta të krijuara për të ofruar siguri maksimale për çdo blerës.
         </p>
@@ -22,7 +22,7 @@ export default function HowItWorksPage() {
           </div>
           <h3 className="font-extrabold text-white text-lg">Platformë e Kontrolluar (Jo Marketplace)</h3>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Ndryshe nga faqet e tjera ku çdokush mund të shesë çfarëdo gjëje, tek **Oferto** vetëm ekipi ynë i administratorëve mund të shtojë produkte dhe të krijojë ankande. Çdo produkt blihet, verifikohet teknikisht, pastrohet dhe fotografohet nga ne përpara se të listohet!
+            Ndryshe nga faqet e tjera ku cdokush mund te shese cfare do gjeje, tek AuctionSq vetem ekipi yne i administratoreve mund te shtoje produkte dhe te krijoje ankande. Cdo produkt blihet, verifikohet teknikisht, pastrohet dhe fotografohet nga ne perpara se te listohet.
           </p>
         </div>
 

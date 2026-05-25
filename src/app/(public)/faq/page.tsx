@@ -14,7 +14,7 @@ export default function FAQPage() {
     },
     {
       q: "A ka shitës të tretë në këtë faqe?",
-      a: "Jo. Kjo nuk është një faqe e tipit marketplace ku përdoruesit mund të shesin produktet e tyre. Të gjitha produktet sigurohen, testohen, certifikohen dhe postohen ekskluzivisht nga administratorët e Oferto. Kjo garanton që çdo produkt është 100% origjinal dhe në përputhje me raportin teknik të shfaqur."
+      a: "Jo. Kjo nuk eshte nje faqe marketplace ku perdoruesit shesin produktet e tyre. Te gjitha produktet sigurohen, testohen, certifikohen dhe postohen ekskluzivisht nga administratoret e AuctionSq. Kjo garanton qe cdo produkt eshte origjinal dhe ne perputhje me raportin teknik te shfaqur."
     },
     {
       q: "Si funksionon pagesa dhe dërgimi?",

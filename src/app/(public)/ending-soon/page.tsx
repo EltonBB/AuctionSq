@@ -82,7 +82,7 @@ export default async function EndingSoonPage() {
                   href={`/auctions/${auc.id}`}
                   className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow"
                 >
-                  Oferto Tani
+                  Vendos Oferte
                 </Link>
               </div>
             </div>

@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import { getSimulatedUser, getOrdersByUser } from "@/lib/db";
+import { getCurrentUserProfile, getOrdersByUser } from "@/lib/db";
 import OrderAddressForm from "@/app/components/OrderAddressForm";
 import { ShoppingBag, Calendar, CheckCircle2, Circle, MapPin } from "lucide-react";
 
 export const revalidate = 0;
 
 export default async function MyOrdersPage() {
-  const user = await getSimulatedUser();
+  const user = await getCurrentUserProfile();
   const orders = await getOrdersByUser(user.id);
 
   // Status translate map

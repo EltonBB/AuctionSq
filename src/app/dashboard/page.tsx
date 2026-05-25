@@ -1,12 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { getSimulatedUser, getBidsByUser, getOrdersByUser } from "@/lib/db";
+import { getCurrentUserProfile, getBidsByUser, getOrdersByUser } from "@/lib/db";
 import { Gavel, Award, ShoppingBag, Truck, ArrowRight, Package } from "lucide-react";
 
 export const revalidate = 0;
 
 export default async function DashboardOverviewPage() {
-  const user = await getSimulatedUser();
+  const user = await getCurrentUserProfile();
   const bids = await getBidsByUser(user.id);
   const orders = await getOrdersByUser(user.id);
 

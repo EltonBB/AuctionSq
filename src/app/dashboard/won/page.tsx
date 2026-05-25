@@ -1,12 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { getSimulatedUser, getOrdersByUser } from "@/lib/db";
+import { getCurrentUserProfile, getOrdersByUser } from "@/lib/db";
 import { Award, ShoppingBag } from "lucide-react";
 
 export const revalidate = 0;
 
 export default async function WonAuctionsPage() {
-  const user = await getSimulatedUser();
+  const user = await getCurrentUserProfile();
   const orders = await getOrdersByUser(user.id);
 
   const statusLabels: Record<string, string> = {

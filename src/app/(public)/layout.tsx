@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { getCategories, getSimulatedUser } from "@/lib/db";
+import { getCategories, getCurrentUserProfile } from "@/lib/db";
 import { signOut } from "@/app/actions/auth";
 import {
   Bell,
@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const user = await getSimulatedUser();
+  const user = await getCurrentUserProfile();
   const categories = await getCategories();
   const isLoggedIn = user && user.id !== "usr-guest";
 

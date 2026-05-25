@@ -1,12 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { getSimulatedUser, getBidsByUser } from "@/lib/db";
+import { getCurrentUserProfile, getBidsByUser } from "@/lib/db";
 import { Gavel, Eye } from "lucide-react";
 
 export const revalidate = 0;
 
 export default async function MyBidsPage() {
-  const user = await getSimulatedUser();
+  const user = await getCurrentUserProfile();
   const bids = await getBidsByUser(user.id);
 
   // Group bids by auction to show each listing exactly once

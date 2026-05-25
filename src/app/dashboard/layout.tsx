@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { getSimulatedUser } from "@/lib/db";
+import { getCurrentUserProfile } from "@/lib/db";
 import {
   User,
   LayoutDashboard,
@@ -18,7 +18,7 @@ import { signOut } from "@/app/actions/auth";
 export const revalidate = 0;
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const user = await getSimulatedUser();
+  const user = await getCurrentUserProfile();
 
   const isProfileComplete =
     !!user?.full_name &&

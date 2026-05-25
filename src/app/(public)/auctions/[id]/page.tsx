@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAuctionById, getAuctions, getBidsForAuction, getSimulatedUser } from "@/lib/db";
+import { getAuctionById, getAuctions, getBidsForAuction, getCurrentUserProfile } from "@/lib/db";
 import BiddingForm from "@/app/components/BiddingForm";
 import { AlertTriangle, ChevronRight, Heart, RotateCcw, ShieldCheck, Truck, UserCheck } from "lucide-react";
 
@@ -36,7 +36,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
 
   const bids = await getBidsForAuction(auctionId);
   const activeBids = bids.filter((bid) => bid.status === "active");
-  const user = await getSimulatedUser();
+  const user = await getCurrentUserProfile();
   const isLoggedIn = user && user.id !== "usr-guest";
   const isProfileComplete =
     isLoggedIn &&

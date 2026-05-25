@@ -404,6 +404,39 @@ export async function getSimulatedUser() {
   return db.profiles.find(p => p.id === `usr-${role}`) || db.profiles[2]; // Default to complete buyer
 }
 
+export async function getCurrentUserProfile(): Promise<Profile> {
+  if (isSupabaseConnected()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return db.profiles[0];
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) return profile;
+
+    return {
+      id: user.id,
+      full_name: user.user_metadata?.full_name || user.email || "User",
+      phone_number: "",
+      country: "Albania",
+      city: "",
+      address: "",
+      is_admin: false,
+      is_blocked: false,
+      created_at: user.created_at || new Date().toISOString(),
+    };
+  }
+
+  return getSimulatedUser();
+}
+
 export async function setSimulatedUserRole(role: string) {
   if (["guest", "incomplete", "complete", "admin"].includes(role)) {
     db.simulatedUserRole = role;

@@ -1,0 +1,70 @@
+# milestone.md
+
+## Purpose
+
+This file is the project memory and progress tracker.
+
+The AI agent must read this file before starting work and update it after every meaningful completed task.
+
+## Current Status
+
+Research phase complete; implementation plan created and awaiting user review.
+
+## Current Active Task
+
+Awaiting user review and approval of the `implementation_plan.md` artifact.
+
+## Completed Work
+
+- Inspected the repository and verified available environment tools (Node v24.14, npm v11.11, git v2.53).
+- Ran CLI diagnostics on `create-next-app` to prepare clean setup arguments.
+- Formulated database schemas (profiles, products, categories, auctions, bids, orders, audit logs) and bid validation constraints.
+- Generated the comprehensive `implementation_plan.md` artifact for user review.
+
+## In Progress
+
+- Review and alignment on the implementation details with the user.
+
+## Next Tasks
+
+1. Create the Next.js TS Tailwind CSS application using `create-next-app`.
+2. Configure Tailwind and style defaults with premium dark/light HSL palettes and sleek gradients.
+3. Build the Supabase database migrations (`schema.sql`) and set up row-level security (RLS) and triggers.
+4. Set up the route structure for public pages, user dashboards, and admin panels.
+5. Create Supabase client and Server Actions for user profile validation, transactional bidding, and admin overrides.
+6. Assemble pages and connect UI to Supabase database.
+7. Conduct manual and automated verification of end-to-end user and admin flows.
+
+## Important Decisions
+
+- This is a complete admin-controlled auction website.
+- This is not a marketplace.
+- Only admins can add products and create auctions.
+- Users must register/login before bidding.
+- Users must complete profile and delivery details before bidding.
+- Required user details:
+  - full name
+  - country
+  - city
+  - address
+  - phone number
+- Stack:
+  - Next.js (App Router, Server Actions)
+  - TypeScript
+  - Tailwind CSS
+  - shadcn/ui
+  - Supabase Auth
+  - Supabase Database (PostgreSQL with custom transaction functions and triggers)
+  - Supabase Storage (for product images)
+  - Supabase Realtime (for live bid synchronization)
+  - Vercel deployment
+- Do not use Prisma.
+
+## Open Questions
+
+- Bucket name for storage (defaulting to `product-images`).
+- Preferred animations or auditory feedback on live bids.
+
+## Notes
+
+Keep this file short and updated. Add completed work, next tasks, important decisions, and blockers as the project progresses.

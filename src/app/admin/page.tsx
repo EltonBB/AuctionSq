@@ -14,9 +14,24 @@ export default async function AdminOverviewPage() {
     getProfiles(),
     getAuditLogs(),
   ]);
-  const bidGroups = await Promise.all(auctions.map((auction) => getBidsForAuction(auction.id)));
-  const bidsCount = bidGroups.flat().length;
+  const auctionBidGroups = await Promise.all(
+    auctions.map(async (auction) => ({
+      auction,
+      bids: await getBidsForAuction(auction.id),
+    }))
+  );
+  const bidsCount = auctionBidGroups.flatMap((group) => group.bids).length;
   const activeAuctions = auctions.filter((auction) => auction.status === "active").length;
+  const highestActiveBids = auctionBidGroups
+    .filter(({ auction }) => auction.status === "active" || auction.status === "scheduled")
+    .map(({ auction, bids }) => ({
+      auction,
+      bid: bids.find((bid) => bid.status === "active"),
+      bidCount: bids.filter((bid) => bid.status === "active").length,
+    }))
+    .filter((item): item is typeof item & { bid: NonNullable<typeof item.bid> } => Boolean(item.bid))
+    .sort((a, b) => b.bid.amount - a.bid.amount)
+    .slice(0, 6);
   const openOrders = orders.filter((order) => !["delivered", "cancelled"].includes(order.status)).length;
   const recentWinners = orders.slice(0, 5);
   const statCards: [string, number, LucideIcon, string][] = [
@@ -97,7 +112,38 @@ export default async function AdminOverviewPage() {
                   </div>
                   <span className="text-sm font-black text-blue-700">{formatEurFromAll(auction.current_price)}</span>
                 </div>
-              ))}
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-black">Ofertat aktive me te larta</h2>
+            <Link href="/admin/bids" className="flex items-center gap-1 text-sm font-bold text-blue-700">
+              Hap <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid gap-3">
+            {highestActiveBids.length === 0 ? (
+              <p className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm text-slate-500">
+                Ende nuk ka oferta aktive nga klientet.
+              </p>
+            ) : (
+              highestActiveBids.map(({ auction, bid, bidCount }) => (
+                <div key={auction.id} className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-bold text-slate-900">{auction.product?.title}</p>
+                    <p className="text-xs text-slate-500">
+                      {bid.user?.full_name || "Klient"} - {bidCount} {bidCount === 1 ? "oferte" : "oferta"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-blue-700">{formatEurFromAll(bid.amount)}</p>
+                    <p className="text-[11px] font-semibold uppercase text-slate-400">me e larta</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 

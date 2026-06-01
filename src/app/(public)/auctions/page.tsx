@@ -65,38 +65,40 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 pb-3 lg:grid-cols-[1fr_320px]">
-            <div className="flex gap-3 overflow-x-auto">
-              <Link
-                href="/auctions"
-                className={`flex shrink-0 items-center gap-2 rounded-full border px-5 py-3 text-sm font-bold transition ${
-                  !activeCategorySlug
-                    ? "border-[#082047] bg-[#082047] text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:text-blue-700"
-                }`}
-              >
-                Te gjitha
-                <ChevronDown className="h-4 w-4" />
-              </Link>
-              {categories.map((category) => {
-                const isActive = activeCategorySlug === category.slug;
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/auctions?category=${category.slug}`}
-                    className={`shrink-0 rounded-full border px-5 py-3 text-sm font-bold transition ${
-                      isActive
-                        ? "border-[#082047] bg-[#082047] text-white"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:text-blue-700"
-                    }`}
-                  >
-                    {category.name}
-                  </Link>
-                );
-              })}
+          <div className="mt-10 grid gap-4 border-t border-slate-200 pt-5">
+            <div className="min-w-0 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex w-max gap-3">
+                <Link
+                  href="/auctions"
+                  className={`flex shrink-0 items-center gap-2 rounded-full border px-5 py-3 text-sm font-bold transition ${
+                    !activeCategorySlug
+                      ? "border-[#082047] bg-[#082047] text-white"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:text-blue-700"
+                  }`}
+                >
+                  Te gjitha
+                  <ChevronDown className="h-4 w-4" />
+                </Link>
+                {categories.map((category) => {
+                  const isActive = activeCategorySlug === category.slug;
+                  return (
+                    <Link
+                      key={category.id}
+                      href={`/auctions?category=${category.slug}`}
+                      className={`shrink-0 rounded-full border px-5 py-3 text-sm font-bold transition ${
+                        isActive
+                          ? "border-[#082047] bg-[#082047] text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:text-blue-700"
+                      }`}
+                    >
+                      {category.name}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
-            <form method="GET" action="/auctions" className="relative">
+            <form method="GET" action="/auctions" className="relative w-full max-w-md">
               {activeCategorySlug && <input type="hidden" name="category" value={activeCategorySlug} />}
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
               <input

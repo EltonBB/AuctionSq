@@ -35,7 +35,7 @@ export default async function AdminAuctionsPage() {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-5">
           <h1 className="text-2xl font-black">Ankandet</h1>

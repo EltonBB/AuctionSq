@@ -17,7 +17,8 @@ function Message({ state }: { state: any }) {
   );
 }
 
-const input = "rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500";
+const input = "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500";
+const fieldLabel = "grid gap-2 text-xs font-bold text-slate-600";
 
 export function ProductCreateForm({ categories }: { categories: Category[] }) {
   const [state, formAction, isPending] = useActionState(createProduct, null);
@@ -78,16 +79,16 @@ export function AuctionCreateForm({ products }: { products: Product[] }) {
           <option value="">Nuk ka produkte te lira per ankand</option>
         )}
       </select>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-1 text-xs font-bold text-slate-500">
+      <div className="grid gap-4">
+        <label className={fieldLabel}>
           Oferta minimale fillestare (EUR)
           <input name="startingPrice" required type="number" min="1" placeholder="p.sh 50" className={input} />
         </label>
-        <label className="grid gap-1 text-xs font-bold text-slate-500">
+        <label className={fieldLabel}>
           Hapi minimal i ofertes (EUR)
           <input name="minIncrement" required type="number" min="1" defaultValue="1" placeholder="p.sh 1" className={input} />
         </label>
-        <label className="grid gap-1 text-xs font-bold text-slate-500 sm:col-span-2">
+        <label className={fieldLabel}>
           Kohezgjatja e ankandit (ore)
           <input name="durationHours" required type="number" min="1" max="168" defaultValue="24" placeholder="24" className={input} />
         </label>

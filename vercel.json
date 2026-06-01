@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/auctions/finalize",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
+{}

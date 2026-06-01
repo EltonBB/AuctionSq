@@ -5,10 +5,10 @@ import { signOut } from "@/app/actions/auth";
 import {
   Bell,
   ChevronDown,
+  CircleUserRound,
   Gamepad2,
   Gavel,
   Heart,
-  LayoutDashboard,
   LogIn,
   LogOut,
   Search,
@@ -17,6 +17,8 @@ import {
   UserPlus,
   Wrench,
 } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUserProfile();
@@ -66,21 +68,40 @@ export default async function PublicLayout({ children }: { children: React.React
               </Link>
             ) : (
               <>
-                <Link
-                  href="/dashboard"
-                  className="hidden items-center gap-2 rounded-full border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-blue-200 hover:text-blue-700 sm:flex"
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                  Paneli Im
-                </Link>
-                {user?.is_admin && (
+                {user?.is_admin ? (
                   <Link
                     href="/admin"
-                    className="hidden items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-100 lg:flex"
+                    className="hidden items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-100 sm:flex"
                   >
                     <ShieldCheck className="h-4 w-4" />
-                    Admin
+                    Paneli Admin
                   </Link>
+                ) : (
+                  <details className="relative hidden sm:block">
+                    <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-200 hover:text-blue-700">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-rose-100 text-xs font-black uppercase text-rose-700">
+                        {(user?.full_name || "U").slice(0, 2)}
+                      </span>
+                      <span>Llogaria</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </summary>
+                    <div className="absolute right-0 z-30 mt-2 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                      <div className="border-b border-slate-100 px-4 py-3">
+                        <p className="font-bold text-slate-900">{user?.full_name || "Perdorues"}</p>
+                        <p className="truncate text-xs text-slate-500">{user?.email || "N/A"}</p>
+                      </div>
+                      <div className="grid p-2 text-sm">
+                        <Link href="/profile" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100">
+                          <CircleUserRound className="h-4 w-4 text-slate-500" />
+                          Profili
+                        </Link>
+                        <Link href="/winners" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100">
+                          <Gavel className="h-4 w-4 text-slate-500" />
+                          Porosite e Mia
+                        </Link>
+                      </div>
+                    </div>
+                  </details>
                 )}
                 <form action={signOut}>
                   <button type="submit" className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-blue-200 hover:text-blue-700" aria-label="Sign out">

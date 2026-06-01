@@ -77,18 +77,19 @@ export function PasswordForm() {
 }
 
 export function ProfileCompletionCard({ user }: { user: Profile }) {
-  const isComplete = !!user.full_name && !!user.phone_number && !!user.city && !!user.address;
+  const hasAddressData = !!user.full_name && !!user.phone_number && !!user.city && !!user.address;
+  const canBid = hasAddressData && !!user.email_verified;
 
   return (
-    <div className={`rounded-2xl border p-5 ${isComplete ? "border-emerald-500/20 bg-emerald-500/10" : "border-amber-500/20 bg-amber-500/10"}`}>
+    <div className={`rounded-2xl border p-5 ${canBid ? "border-emerald-500/20 bg-emerald-500/10" : "border-amber-500/20 bg-amber-500/10"}`}>
       <div className="flex items-start gap-3">
-        <MapPin className={`mt-1 h-5 w-5 ${isComplete ? "text-emerald-300" : "text-amber-300"}`} />
+        <MapPin className={`mt-1 h-5 w-5 ${canBid ? "text-emerald-300" : "text-amber-300"}`} />
         <div>
-          <h3 className="font-black text-white">{isComplete ? "Profili eshte gati per ofertim" : "Plotesoni profilin per te ofruar"}</h3>
+          <h3 className="font-black text-white">{canBid ? "Profili eshte gati per ofertim" : "Plotesoni profilin per te ofruar"}</h3>
           <p className="mt-1 text-sm leading-6 text-slate-300">
-            {isComplete
-              ? "Te dhenat e kontaktit dhe dergeses jane ruajtur. Keto perdoren kur fitoni nje ankand."
-              : "Per te mbrojtur ankandet, cdo perdorues duhet te kete telefonin, qytetin dhe adresen perpara se te vendose oferta."}
+            {canBid
+              ? "Te dhenat e kontaktit dhe verifikimi i emailit jane ne rregull. Llogaria mund te vendose oferta."
+              : "Per te mbrojtur ankandet, cdo perdorues duhet te plotesoje profilin dhe te konfirmoje emailin perpara ofertimit."}
           </p>
         </div>
       </div>

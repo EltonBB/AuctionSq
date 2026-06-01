@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { getCurrentUserProfile, getOrdersByUser } from "@/lib/db";
 import OrderAddressForm from "@/app/components/OrderAddressForm";
+import PollingRefresh from "@/app/components/PollingRefresh";
 import { ShoppingBag, Calendar, CheckCircle2, Circle, MapPin } from "lucide-react";
 
 export const revalidate = 0;
@@ -54,6 +55,7 @@ export default async function MyOrdersPage() {
 
   return (
     <div className="flex flex-col gap-8 text-left">
+      <PollingRefresh intervalMs={15000} />
       <div>
         <h1 className="text-2xl font-extrabold text-white">Porositë e Mia</h1>
         <p className="text-slate-400 text-sm mt-1">Ndiqni progresin e dërgesave dhe konfirmoni adresat e dërgesave.</p>

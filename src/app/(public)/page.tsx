@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { getAuctions } from "@/lib/db";
+import { formatEurFromAll } from "@/lib/currency";
+import PollingRefresh from "@/app/components/PollingRefresh";
 import { ArrowRight, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 
 export const revalidate = 0;
@@ -48,7 +50,7 @@ function ProductCard({
         <div className="mt-3 flex items-end justify-between gap-3">
           <div>
             <div className="text-xl font-black text-blue-700">
-              {auction.current_price.toLocaleString()} L
+              {formatEurFromAll(auction.current_price)}
             </div>
             <div className="text-[11px] font-medium text-slate-400">Oferta aktuale</div>
           </div>
@@ -69,6 +71,7 @@ export default async function HomePage() {
 
   return (
     <div className="bg-white">
+      <PollingRefresh intervalMs={15000} />
       <section className="bg-[#082047] text-white">
         <div className="mx-auto grid max-w-[1440px] gap-8 px-4 py-10 lg:grid-cols-[330px_1fr] lg:py-16">
           <div className="flex flex-col justify-center">

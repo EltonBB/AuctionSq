@@ -1,14 +1,10 @@
 import { createBrowserClient } from "@supabase/ssr";
-
-function getSupabaseKey() {
-  return process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "placeholder-anon-key";
-}
+import { getSupabaseEnv } from "./config";
 
 export function createClient() {
+  const env = getSupabaseEnv();
   return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-    getSupabaseKey()
+    env.url,
+    env.publishableKey
   );
 }

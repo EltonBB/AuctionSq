@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { getAuctions, getCategories } from "@/lib/db";
+import { formatEurFromAll } from "@/lib/currency";
+import PollingRefresh from "@/app/components/PollingRefresh";
 import { ChevronDown, Heart, Search, SlidersHorizontal } from "lucide-react";
 
 export const revalidate = 0;
@@ -45,6 +47,7 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
 
   return (
     <div className="bg-white">
+      <PollingRefresh intervalMs={15000} />
       <section className="border-b border-slate-200 bg-slate-50">
         <div className="mx-auto max-w-[1440px] px-4 py-8">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -62,7 +65,7 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_320px]">
+          <div className="mt-8 grid gap-4 pb-3 lg:grid-cols-[1fr_320px]">
             <div className="flex gap-3 overflow-x-auto">
               <Link
                 href="/auctions"
@@ -108,7 +111,7 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-4 py-10">
+      <section className="mx-auto max-w-[1440px] px-4 pb-10 pt-12">
         <div className="mb-7 flex items-center justify-between text-sm text-slate-500">
           <div className="flex items-center gap-2 font-semibold">
             <SlidersHorizontal className="h-4 w-4" />
@@ -157,7 +160,7 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
                   <div className="mt-4 flex items-end justify-between gap-3">
                     <div>
                       <div className="text-xl font-black text-blue-700">
-                        {auction.current_price.toLocaleString()} L
+                        {formatEurFromAll(auction.current_price)}
                       </div>
                       <div className="text-[11px] font-medium text-slate-400">Oferta aktuale</div>
                     </div>

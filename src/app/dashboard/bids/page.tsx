@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getCurrentUserProfile, getBidsByUser } from "@/lib/db";
+import PollingRefresh from "@/app/components/PollingRefresh";
 import { Gavel, Eye } from "lucide-react";
 
 export const revalidate = 0;
@@ -22,6 +23,7 @@ export default async function MyBidsPage() {
 
   return (
     <div className="flex flex-col gap-8 text-left">
+      <PollingRefresh intervalMs={15000} />
       <div>
         <h1 className="text-2xl font-extrabold text-white">Ofertat e Mia</h1>
         <p className="text-slate-400 text-sm mt-1">Lista e plotë e ankandeve ku ju keni vendosur oferta.</p>

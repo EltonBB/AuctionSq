@@ -73,7 +73,7 @@ export default async function WonAuctionsPage() {
 
               <div className="border-t border-slate-900 pt-4 flex gap-3 mt-auto">
                 <Link
-                  href="/dashboard/orders"
+                  href="/profile"
                   className="flex-grow text-center py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow shadow-blue-500/10 flex items-center justify-center gap-1.5"
                 >
                   <ShoppingBag className="w-4 h-4" />

@@ -1,18 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-
-function getSupabaseKey() {
-  return process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "placeholder-anon-key";
-}
+import { getSupabaseEnv } from "./config";
 
 export async function createClient() {
   const cookieStore = await cookies();
+  const env = getSupabaseEnv();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-    getSupabaseKey(),
+    env.url,
+    env.publishableKey,
     {
       cookies: {
         getAll() {
@@ -34,9 +30,10 @@ export async function createClient() {
 }
 
 export function createAdminClient() {
+  const env = getSupabaseEnv({ requireServiceRole: true });
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-role-key",
+    env.url,
+    env.serviceRoleKey as string,
     {
       cookies: {
         getAll() {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useActionState } from "react";
-import { createAuction, createProduct } from "@/app/actions/admin";
+import { createAuction, createProduct, updateProduct } from "@/app/actions/admin";
 import type { Category, Product } from "@/lib/db";
 import { AlertCircle, CheckCircle2, Gavel, PackagePlus } from "lucide-react";
 
@@ -41,7 +41,17 @@ export function ProductCreateForm({ categories }: { categories: Category[] }) {
       </select>
       <textarea name="description" rows={4} placeholder="Pershkrim i qarte per bleresin" className={input} />
       <textarea name="testingNotes" rows={3} placeholder="Shenime testimi, defekte, garanci, kontroll teknik" className={input} />
-      <textarea name="imageUrls" rows={3} placeholder="URL imazhesh, ndare me presje" className={input} />
+      <label className="grid gap-1.5 text-xs font-bold text-slate-500">
+        Foto produkti (max 5MB per foto)
+        <input
+          name="images"
+          type="file"
+          accept="image/*"
+          multiple
+          required
+          className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-700"
+        />
+      </label>
       <button disabled={isPending} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#082047] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-blue-900 disabled:opacity-60">
         <PackagePlus className="h-4 w-4" />
         {isPending ? "Duke shtuar..." : "Shto produktin"}
@@ -52,29 +62,114 @@ export function ProductCreateForm({ categories }: { categories: Category[] }) {
 
 export function AuctionCreateForm({ products }: { products: Product[] }) {
   const [state, formAction, isPending] = useActionState(createAuction, null);
-  const now = new Date();
-  const start = new Date(now.getTime() + 30 * 60_000).toISOString().slice(0, 16);
-  const end = new Date(now.getTime() + 48 * 60 * 60_000).toISOString().slice(0, 16);
+  const hasProducts = products.length > 0;
 
   return (
     <form action={formAction} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div>
         <h2 className="text-lg font-black text-slate-950">Programo ankand</h2>
-        <p className="mt-1 text-sm text-slate-500">Lidhu me nje produkt, cakto cmimin dhe afatin.</p>
+        <p className="mt-1 text-sm text-slate-500">Lidhu me nje produkt, cakto oferten minimale dhe kohezgjatjen ne ore. Cmimi rritet vetem nga ofertat e klienteve.</p>
       </div>
       <Message state={state} />
-      <select name="productId" className={input} defaultValue={products[0]?.id || ""}>
-        {products.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}
+      <select name="productId" className={input} defaultValue={products[0]?.id || ""} disabled={!hasProducts}>
+        {hasProducts ? (
+          products.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)
+        ) : (
+          <option value="">Nuk ka produkte te lira per ankand</option>
+        )}
       </select>
       <div className="grid gap-4 sm:grid-cols-2">
-        <input name="startingPrice" required type="number" min="1" placeholder="Cmimi fillestar" className={input} />
-        <input name="minIncrement" required type="number" min="1" defaultValue="500" placeholder="Hapi minimal" className={input} />
-        <input name="startTime" required type="datetime-local" defaultValue={start} className={input} />
-        <input name="endTime" required type="datetime-local" defaultValue={end} className={input} />
+        <label className="grid gap-1 text-xs font-bold text-slate-500">
+          Oferta minimale fillestare (EUR)
+          <input name="startingPrice" required type="number" min="1" placeholder="p.sh 50" className={input} />
+        </label>
+        <label className="grid gap-1 text-xs font-bold text-slate-500">
+          Hapi minimal i ofertes (EUR)
+          <input name="minIncrement" required type="number" min="1" defaultValue="1" placeholder="p.sh 1" className={input} />
+        </label>
+        <label className="grid gap-1 text-xs font-bold text-slate-500 sm:col-span-2">
+          Kohezgjatja e ankandit (ore)
+          <input name="durationHours" required type="number" min="1" max="168" defaultValue="24" placeholder="24" className={input} />
+        </label>
       </div>
-      <button disabled={isPending} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#082047] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-blue-900 disabled:opacity-60">
+      <button disabled={isPending || !hasProducts} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#082047] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-blue-900 disabled:opacity-60">
         <Gavel className="h-4 w-4" />
         {isPending ? "Duke krijuar..." : "Krijo ankandin"}
+      </button>
+    </form>
+  );
+}
+
+export function ProductUpdateForm({
+  products,
+  categories,
+  defaultProductId,
+}: {
+  products: Product[];
+  categories: Category[];
+  defaultProductId?: string;
+}) {
+  const [state, formAction, isPending] = useActionState(
+    async (_: unknown, formData: FormData) => {
+      const productId = String(formData.get("productId") || "");
+      return updateProduct(productId, formData);
+    },
+    null
+  );
+
+  return (
+    <form action={formAction} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div>
+        <h2 className="text-lg font-black text-slate-950">Përditëso produkt</h2>
+        <p className="mt-1 text-sm text-slate-500">Edito të dhënat e produktit ose ndrysho statusin.</p>
+      </div>
+      <Message state={state} />
+      <select name="productId" className={input} defaultValue={defaultProductId || products[0]?.id || ""}>
+        {products.map((product) => (
+          <option key={product.id} value={product.id}>
+            {product.title}
+          </option>
+        ))}
+      </select>
+      <input name="title" required placeholder="Titulli i ri i produktit" className={input} />
+      <select name="categoryId" className={input} defaultValue={categories[0]?.id || ""}>
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
+      </select>
+      <select name="condition" className={input} defaultValue="like_new">
+        <option value="new">I ri</option>
+        <option value="like_new">Si i ri</option>
+        <option value="used_good">I perdorur, gjendje e mire</option>
+        <option value="used_fair">I perdorur, gjendje e pranueshme</option>
+      </select>
+      <select name="status" className={input} defaultValue="active">
+        <option value="active">Aktiv</option>
+        <option value="inactive">Joaktiv</option>
+      </select>
+      <textarea name="description" rows={3} placeholder="Pershkrim i perditesuar" className={input} />
+      <textarea name="testingNotes" rows={3} placeholder="Shenime testimi" className={input} />
+      <label className="grid gap-1.5 text-xs font-bold text-slate-500">
+        Foto të reja (opsionale)
+        <input
+          name="images"
+          type="file"
+          accept="image/*"
+          multiple
+          className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-700"
+        />
+      </label>
+      <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+        <input type="checkbox" name="keepExistingImages" value="true" defaultChecked />
+        Mbaj fotot ekzistuese
+      </label>
+      <button
+        disabled={isPending}
+        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#082047] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-blue-900 disabled:opacity-60"
+      >
+        {isPending ? "Duke ruajtur..." : "Ruaj përditësimin"}
       </button>
     </form>
   );

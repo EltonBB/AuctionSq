@@ -1,20 +1,33 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-function getSupabaseKey() {
-  return process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "placeholder-anon-key";
-}
+import { getSupabaseEnv } from "./config";
 
 export async function updateSession(request: NextRequest) {
+  let env;
+  try {
+    env = getSupabaseEnv();
+  } catch {
+    if (request.nextUrl.pathname !== "/setup-required") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/setup-required";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next({ request });
+  }
+
+  if (request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("code")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    return NextResponse.redirect(url);
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-    getSupabaseKey(),
+    env.url,
+    env.publishableKey,
     {
       cookies: {
         getAll() {
@@ -40,30 +53,42 @@ export async function updateSession(request: NextRequest) {
 
   const url = request.nextUrl.clone();
 
-  // 1. Protect /dashboard and /admin routes from unauthenticated users
-  if ((url.pathname.startsWith("/dashboard") || url.pathname.startsWith("/admin")) && !user) {
+  const isAdminRoute = url.pathname.startsWith("/admin");
+  const isLegacyDashboardRoute = url.pathname.startsWith("/dashboard");
+  const isProfileRoute = url.pathname.startsWith("/profile");
+
+  // 1. Protect user/admin account routes from unauthenticated users
+  if ((isLegacyDashboardRoute || isAdminRoute || isProfileRoute) && !user) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // 2. Redirect logged-in users away from /login and /register
-  if (user && (url.pathname.startsWith("/login") || url.pathname.startsWith("/register"))) {
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
-
-  // 3. Prevent non-admin users from accessing /admin paths
-  if (user && url.pathname.startsWith("/admin")) {
+  let isAdmin = false;
+  if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_admin")
       .eq("id", user.id)
       .single();
+    isAdmin = !!profile?.is_admin;
+  }
 
-    if (!profile || !profile.is_admin) {
-      url.pathname = "/";
-      return NextResponse.redirect(url);
-    }
+  // 2. Redirect logged-in users away from /login and /register
+  if (user && (url.pathname.startsWith("/login") || url.pathname.startsWith("/register"))) {
+    url.pathname = isAdmin ? "/admin" : "/profile";
+    return NextResponse.redirect(url);
+  }
+
+  // 3. Remove client panel routes. Keep admin panel only.
+  if (user && isLegacyDashboardRoute) {
+    url.pathname = isAdmin ? "/admin" : "/profile";
+    return NextResponse.redirect(url);
+  }
+
+  // 4. Prevent non-admin users from accessing /admin paths
+  if (user && isAdminRoute && !isAdmin) {
+    url.pathname = "/profile";
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;

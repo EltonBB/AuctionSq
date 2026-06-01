@@ -1,16 +1,19 @@
 "use client";
 
-import React, { useState, useTransition, useEffect } from "react";
-import { placeBid } from "@/app/actions/bids";
-import { AlertCircle, CheckCircle2, Gavel, User, KeyRound, Ban } from "lucide-react";
+import React, { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import { AlertCircle, BadgeCheck, Ban, CheckCircle2, Gavel, KeyRound, User } from "lucide-react";
+import { placeBid } from "@/app/actions/bids";
+import { allToEur, formatEurFromAll } from "@/lib/currency";
 
 interface BiddingFormProps {
   auctionId: string;
   currentPrice: number;
   minIncrement: number;
+  isAdmin: boolean;
   isLoggedIn: boolean;
   isProfileComplete: boolean;
+  isAccountVerified: boolean;
   isBlocked: boolean;
   hasBids: boolean;
   startingPrice: number;
@@ -20,85 +23,97 @@ export default function BiddingForm({
   auctionId,
   currentPrice,
   minIncrement,
+  isAdmin,
   isLoggedIn,
   isProfileComplete,
+  isAccountVerified,
   isBlocked,
   hasBids,
-  startingPrice
+  startingPrice,
 }: BiddingFormProps) {
-  const defaultMinBid = hasBids ? currentPrice + minIncrement : startingPrice;
-  const [bidValue, setBidValue] = useState<number>(defaultMinBid);
+  const defaultMinBidAll = hasBids ? currentPrice + minIncrement : startingPrice;
+  const defaultMinBidEur = allToEur(defaultMinBidAll);
+  const minIncrementEur = allToEur(minIncrement);
+  const [bidValueEur, setBidValueEur] = useState<number>(defaultMinBidEur);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Reset bid input when currentPrice changes (e.g. someone else placed a bid)
   useEffect(() => {
-    setBidValue(defaultMinBid);
-  }, [currentPrice, defaultMinBid]);
+    setBidValueEur(defaultMinBidEur);
+  }, [defaultMinBidEur]);
 
-  const handleQuickAdd = (inc: number) => {
-    setBidValue((prev) => Math.max(prev, defaultMinBid) + inc);
+  const handleQuickAdd = (increment: number) => {
+    setBidValueEur((previous) => Math.max(previous, defaultMinBidEur) + increment);
   };
 
-  const handleBidSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBidSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
     setSuccess(null);
 
-    if (bidValue < defaultMinBid) {
-      setError(`Ofertat e vlefshme duhet të jenë të paktën Leka ${defaultMinBid.toLocaleString()}`);
+    if (bidValueEur < defaultMinBidEur) {
+      setError(`Oferta duhet te jete te pakten ${formatEurFromAll(defaultMinBidAll)}.`);
       return;
     }
 
     startTransition(async () => {
-      const res = await placeBid(auctionId, bidValue);
-      if (res.success) {
-        setSuccess(res.message || "Bidi juaj u vendos me sukses!");
-        // Auto clear success message after 5 seconds
-        setTimeout(() => setSuccess(null), 5000);
-      } else {
-        setError(res.error || "Ndodhi një gabim gjatë vendosjes së ofertës.");
+      const response = await placeBid(auctionId, bidValueEur);
+      if (!response.success) {
+        setError(response.error || "Vendosja e ofertes deshtoi.");
+        return;
       }
+
+      setSuccess(response.message || "Oferta u vendos me sukses.");
+      setTimeout(() => setSuccess(null), 5000);
     });
   };
 
-  // State: Suspended/Blocked user
+  if (isLoggedIn && isAdmin) {
+    return (
+      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-amber-300">
+          <Ban className="h-4 w-4" />
+          Llogari administratori
+        </div>
+      </div>
+    );
+  }
+
   if (isLoggedIn && isBlocked) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 p-5 rounded-2xl flex flex-col gap-3 text-left">
-        <div className="flex items-center gap-2 text-red-500 font-bold">
-          <Ban className="w-5 h-5 flex-shrink-0" />
-          <span>Llogaria Juaj Është e Pezulluar</span>
+      <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-red-400">
+          <Ban className="h-4 w-4" />
+          Llogaria eshte kufizuar
         </div>
-        <p className="text-slate-400 text-sm leading-relaxed">
-          Administratorët kanë kufizuar llogarinë tuaj nga kryerja e ofertave për shkak të shkeljes së rregullores ose sjelljeve të dyshimta.
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+          Kjo llogari nuk mund te vendose oferta derisa kufizimi te hiqet nga administratori.
         </p>
       </div>
     );
   }
 
-  // State: Guest/Unauthenticated
   if (!isLoggedIn) {
     return (
-      <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex flex-col gap-4 text-left shadow-md">
-        <div className="flex items-center gap-2.5 text-amber-500 font-bold text-sm uppercase">
-          <KeyRound className="w-4 h-4 text-amber-500" />
-          <span>Kërkohet Hyrje në Llogari</span>
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-amber-400">
+          <KeyRound className="h-4 w-4" />
+          Duhet hyrje ne llogari
         </div>
-        <p className="text-slate-400 text-sm leading-relaxed">
-          Për të vendosur oferta dhe marrë pjesë në ankande të kontrolluara, duhet të krijoni një llogari ose të hyni në llogarinë tuaj.
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+          Hyni ose regjistrohuni per te vendosur oferta ne ankand.
         </p>
-        <div className="grid grid-cols-2 gap-3 mt-1">
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <Link
             href="/login"
-            className="flex items-center justify-center py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:bg-slate-900 transition-colors text-xs uppercase"
+            className="rounded-xl border border-slate-800 bg-slate-950 py-2.5 text-center text-xs font-bold uppercase text-slate-300 transition hover:bg-slate-900"
           >
             Hyni
           </Link>
           <Link
             href="/register"
-            className="flex items-center justify-center py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all text-xs uppercase shadow shadow-blue-500/10"
+            className="rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold uppercase text-white transition hover:bg-blue-700"
           >
             Regjistrohu
           </Link>
@@ -107,95 +122,108 @@ export default function BiddingForm({
     );
   }
 
-  // State: Logged-in profile incomplete
   if (!isProfileComplete) {
     return (
-      <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-2xl flex flex-col gap-4 text-left shadow-md">
-        <div className="flex items-center gap-2.5 text-rose-400 font-bold text-sm uppercase">
-          <User className="w-4.5 h-4.5 text-rose-400" />
-          <span>Plotësoni Profilin tuaj</span>
+      <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-rose-400">
+          <User className="h-4 w-4" />
+          Ploteso profilin
         </div>
-        <p className="text-slate-400 text-sm leading-relaxed">
-          Për të parandaluar ofertat abuzive, duhet të plotësoni adresën tuaj dhe numrin e telefonit përpara se të ofroni.
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+          Vendos telefonin, qytetin dhe adresen e dergeses para se te ofrosh.
         </p>
         <Link
-          href="/dashboard/profile"
-          className="w-full text-center py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider transition-colors mt-1 shadow-lg shadow-rose-500/15"
+          href="/profile"
+          className="mt-4 block rounded-xl bg-rose-600 py-3 text-center text-xs font-bold uppercase tracking-wide text-white transition hover:bg-rose-700"
         >
-          Plotëso Adresën e Dërgimit
+          Ploteso profilin
+        </Link>
+      </div>
+    );
+  }
+
+  if (!isAccountVerified) {
+    return (
+      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-6 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-amber-300">
+          <BadgeCheck className="h-4 w-4" />
+          Llogaria duhet verifikuar
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+          Vetem perdoruesit me email te verifikuar mund te vendosin oferta.
+        </p>
+        <Link
+          href="/profile"
+          className="mt-4 block rounded-xl bg-amber-600 py-3 text-center text-xs font-bold uppercase tracking-wide text-white transition hover:bg-amber-700"
+        >
+          Hap profilin
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-900/40 border border-slate-900 p-6 rounded-2xl flex flex-col gap-5 text-left shadow-lg">
-      <div className="flex items-center gap-2 text-blue-400 font-bold text-sm uppercase tracking-wider">
-        <Gavel className="w-4 h-4 text-blue-500 transform -rotate-45" />
-        <span>Vendos Oferten Tënde</span>
+    <div className="rounded-2xl border border-slate-900 bg-slate-900/40 p-6 text-left shadow-lg">
+      <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-blue-400">
+        <Gavel className="h-4 w-4 -rotate-45 text-blue-500" />
+        Vendos oferten
       </div>
 
-      <form onSubmit={handleBidSubmit} className="flex flex-col gap-4">
-        {/* Bid Input */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-slate-500 text-xs uppercase font-medium">Bidi i Ri (në Llek)</label>
-          <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-850 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/30 transition-all flex items-center">
+      <form onSubmit={handleBidSubmit} className="mt-4 grid gap-4">
+        <div className="grid gap-1.5">
+            <label className="text-xs font-medium uppercase text-slate-500">Shuma ne EUR</label>
+          <div className="relative flex items-center overflow-hidden rounded-xl border border-slate-850 bg-slate-950 transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/30">
             <input
               type="number"
-              value={bidValue}
-              onChange={(e) => setBidValue(Math.max(0, parseInt(e.target.value) || 0))}
+              step="0.01"
+              value={bidValueEur}
+              onChange={(event) => setBidValueEur(Math.max(0, parseFloat(event.target.value) || 0))}
               disabled={isPending}
-              className="bg-transparent pl-4 pr-16 py-3.5 w-full text-lg font-black text-white focus:outline-none placeholder:text-slate-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-full bg-transparent py-3.5 pl-4 pr-14 text-lg font-black text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
-            <span className="absolute right-4 font-extrabold text-xs text-slate-500 uppercase tracking-widest pointer-events-none">
-              Llek
+            <span className="pointer-events-none absolute right-4 text-xs font-extrabold uppercase tracking-widest text-slate-500">
+              EUR
             </span>
           </div>
-          <span className="text-slate-500 text-2xs uppercase mt-0.5">
-            Bidi minimal i lejuar: <span className="font-extrabold text-slate-400">{defaultMinBid.toLocaleString()} Llek</span>
+          <span className="text-2xs uppercase text-slate-500">
+              Minimumi i lejuar: <span className="font-extrabold text-slate-300">{formatEurFromAll(defaultMinBidAll)}</span>
           </span>
         </div>
 
-        {/* Quick Add buttons */}
         <div className="grid grid-cols-3 gap-2">
-          {[`+${minIncrement.toLocaleString()}`, `+${(minIncrement * 2).toLocaleString()}`, `+${(minIncrement * 5).toLocaleString()}`].map((label, idx) => {
-            const multi = [1, 2, 5][idx];
-            return (
-              <button
-                type="button"
-                key={idx}
-                disabled={isPending}
-                onClick={() => handleQuickAdd(minIncrement * multi)}
-                className="py-2.5 rounded-lg bg-slate-950 hover:bg-slate-900 border border-slate-850 text-slate-400 hover:text-white font-black text-2xs uppercase tracking-wider transition-colors"
-              >
-                {label}
-              </button>
-            );
-          })}
+          {[1, 2, 5].map((multiplier) => (
+            <button
+              key={multiplier}
+              type="button"
+              disabled={isPending}
+              onClick={() => handleQuickAdd(minIncrementEur * multiplier)}
+              className="rounded-lg border border-slate-850 bg-slate-950 py-2.5 text-2xs font-black uppercase tracking-wider text-slate-400 transition hover:bg-slate-900 hover:text-white"
+            >
+              +{(minIncrementEur * multiplier).toFixed(2)}
+            </button>
+          ))}
         </div>
 
-        {/* Messages */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg flex items-start gap-2 text-red-500 text-xs leading-relaxed animate-shake">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs leading-relaxed text-red-500">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg flex items-start gap-2 text-emerald-400 text-xs leading-relaxed">
-            <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs leading-relaxed text-emerald-400">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{success}</span>
           </div>
         )}
 
-        {/* Submit button */}
         <button
           type="submit"
           disabled={isPending}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-blue-800 disabled:to-indigo-850 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 scale-100 hover:scale-[1.01] active:scale-[0.99] transition-all"
+          className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 disabled:from-blue-800 disabled:to-indigo-850"
         >
-          {isPending ? "Duke Procesuar..." : "Vendos Ofertën Tani"}
+          {isPending ? "Duke procesuar..." : "Vendos oferten"}
         </button>
       </form>
     </div>

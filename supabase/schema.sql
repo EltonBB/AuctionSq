@@ -26,6 +26,7 @@ CREATE TABLE public.profiles (
     country TEXT DEFAULT 'Albania',
     city TEXT,
     address TEXT,
+    postal_code TEXT,
     is_admin BOOLEAN NOT NULL DEFAULT false,
     is_blocked BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -139,26 +140,36 @@ BEGIN
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
-        COALESCE((NEW.raw_user_meta_data->>'is_admin')::boolean, false)
+        false
     );
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+CREATE OR REPLACE FUNCTION public.current_user_is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.profiles
+    WHERE id = auth.uid()
+      AND is_admin = true
+  );
+$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
 
 -- =====================================================================
 -- 9. TRANSACTIONAL BIDDING FUNCTION (SAFE FROM RACE CONDITIONS)
 -- =====================================================================
 CREATE OR REPLACE FUNCTION public.place_bid(
     p_auction_id UUID,
-    p_user_id UUID,
     p_bid_amount NUMERIC(12, 2)
 )
 RETURNS UUID AS $$
 DECLARE
+    v_request_user_id UUID;
     v_auction_status TEXT;
     v_start_time TIMESTAMPTZ;
     v_end_time TIMESTAMPTZ;
@@ -166,12 +177,28 @@ DECLARE
     v_current_price NUMERIC(12, 2);
     v_min_increment NUMERIC(12, 2);
     v_is_blocked BOOLEAN;
+    v_is_admin BOOLEAN;
     v_full_name TEXT;
     v_phone_number TEXT;
     v_city TEXT;
     v_address TEXT;
     v_new_bid_id UUID;
+    v_email_confirmed_at TIMESTAMPTZ;
 BEGIN
+    v_request_user_id := auth.uid();
+    IF v_request_user_id IS NULL THEN
+        RAISE EXCEPTION 'You must be logged in to place a bid.';
+    END IF;
+
+    SELECT email_confirmed_at
+    INTO v_email_confirmed_at
+    FROM auth.users
+    WHERE id = v_request_user_id;
+
+    IF v_email_confirmed_at IS NULL THEN
+        RAISE EXCEPTION 'Please verify your email address before placing bids.';
+    END IF;
+
     -- 1. Lock the auction row for writing to prevent parallel transactions from double bidding
     SELECT status, start_time, end_time, starting_price, current_price, min_increment
     INTO v_auction_status, v_start_time, v_end_time, v_starting_price, v_current_price, v_min_increment
@@ -180,13 +207,17 @@ BEGIN
     FOR UPDATE;
 
     -- 2. Validate user profiles exists, is complete, and is not restricted/blocked
-    SELECT is_blocked, full_name, phone_number, city, address
-    INTO v_is_blocked, v_full_name, v_phone_number, v_city, v_address
+    SELECT is_blocked, is_admin, full_name, phone_number, city, address
+    INTO v_is_blocked, v_is_admin, v_full_name, v_phone_number, v_city, v_address
     FROM public.profiles
-    WHERE id = p_user_id;
+    WHERE id = v_request_user_id;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'User profile not found.';
+    END IF;
+
+    IF v_is_admin THEN
+        RAISE EXCEPTION 'ti je admini nuk mund te ofrosh';
     END IF;
 
     IF v_is_blocked THEN
@@ -235,7 +266,7 @@ BEGIN
 
     -- 5. Insert the new active bid
     INSERT INTO public.bids (auction_id, user_id, amount, status)
-    VALUES (p_auction_id, p_user_id, p_bid_amount, 'active')
+    VALUES (p_auction_id, v_request_user_id, p_bid_amount, 'active')
     RETURNING id INTO v_new_bid_id;
 
     -- 6. Update current auction price
@@ -246,11 +277,14 @@ BEGIN
 
     RETURN v_new_bid_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- =====================================================================
 -- 10. EXPIRED AUCTIONS CLOSER
 -- =====================================================================
+CREATE UNIQUE INDEX IF NOT EXISTS orders_one_per_auction_idx
+ON public.orders (auction_id);
+
 CREATE OR REPLACE FUNCTION public.close_expired_auctions()
 RETURNS TABLE (
     auction_id UUID,
@@ -270,66 +304,77 @@ DECLARE
     v_address TEXT;
     v_new_order_id UUID;
 BEGIN
-    -- Loop through active/scheduled auctions that have reached their end_time
-    FOR r IN 
-        SELECT id, product_id, end_time, status 
-        FROM public.auctions 
-        WHERE (status = 'active' OR status = 'scheduled') AND now() >= end_time
+    FOR r IN
+        SELECT a.id, a.starting_price
+        FROM public.auctions a
+        WHERE a.status IN ('active', 'scheduled')
+          AND now() >= a.end_time
+        FOR UPDATE SKIP LOCKED
     LOOP
-        -- Find highest active bid
-        SELECT id, user_id, amount 
+        SELECT b.id, b.user_id, b.amount
         INTO v_highest_bid_id, v_highest_bid_user_id, v_highest_bid_amount
-        FROM public.bids
-        WHERE auction_id = r.id AND status = 'active'
-        ORDER BY amount DESC, created_at ASC
+        FROM public.bids b
+        WHERE b.auction_id = r.id AND b.status = 'active'
+        ORDER BY b.amount DESC, b.created_at ASC
         LIMIT 1;
 
         IF FOUND THEN
-            -- We have a winner! Get winner's delivery details
-            SELECT full_name, phone_number, country, city, address
+            SELECT p.full_name, p.phone_number, p.country, p.city, p.address
             INTO v_full_name, v_phone_number, v_country, v_city, v_address
-            FROM public.profiles
-            WHERE id = v_highest_bid_user_id;
+            FROM public.profiles p
+            WHERE p.id = v_highest_bid_user_id;
 
-            -- Update auction with winner
             UPDATE public.auctions
             SET status = 'ended',
                 winner_id = v_highest_bid_user_id,
                 winning_bid_id = v_highest_bid_id,
+                current_price = v_highest_bid_amount,
                 updated_at = now()
             WHERE id = r.id;
 
-            -- Create order for the winner
             INSERT INTO public.orders (
-                auction_id, winner_id, final_price, 
-                full_name, phone_number, country, city, address, 
+                auction_id, winner_id, final_price,
+                full_name, phone_number, country, city, address,
                 status
             )
-            VALUES (
+            SELECT
                 r.id, v_highest_bid_user_id, v_highest_bid_amount,
-                COALESCE(v_full_name, 'Winner Account'), COALESCE(v_phone_number, 'N/A'),
-                COALESCE(v_country, 'Albania'), COALESCE(v_city, 'Tirana'), COALESCE(v_address, 'Pending confirmation'),
+                COALESCE(v_full_name, 'Winner Account'),
+                COALESCE(v_phone_number, 'N/A'),
+                COALESCE(v_country, 'Albania'),
+                COALESCE(v_city, 'Tirana'),
+                COALESCE(v_address, 'Pending confirmation'),
                 'pending_confirmation'
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM public.orders o
+                WHERE o.auction_id = r.id
             )
             RETURNING id INTO v_new_order_id;
 
-            -- Populate output columns
+            IF v_new_order_id IS NULL THEN
+                SELECT o.id INTO v_new_order_id
+                FROM public.orders o
+                WHERE o.auction_id = r.id;
+            END IF;
+
             auction_id := r.id;
             winner_id := v_highest_bid_user_id;
             final_price := v_highest_bid_amount;
             order_id := v_new_order_id;
             RETURN NEXT;
         ELSE
-            -- No bids, mark as ended without winner
             UPDATE public.auctions
             SET status = 'ended',
+                winner_id = NULL,
+                winning_bid_id = NULL,
+                current_price = starting_price,
                 updated_at = now()
             WHERE id = r.id;
         END IF;
-
     END LOOP;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
 -- =====================================================================
 -- 11. ROW-LEVEL SECURITY (RLS) POLICIES
@@ -349,45 +394,43 @@ CREATE POLICY "Allow public read-only access to categories" ON public.categories
     FOR SELECT TO public USING (true);
 
 CREATE POLICY "Allow admin write access to categories" ON public.categories
-    FOR ALL TO authenticated USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-    );
+    FOR ALL TO authenticated USING (public.current_user_is_admin())
+    WITH CHECK (public.current_user_is_admin());
 
 -- Profile Policies
-CREATE POLICY "Allow public read access to active profiles" ON public.profiles
-    FOR SELECT TO public USING (true);
+CREATE POLICY "Allow users to read own profile or admins" ON public.profiles
+    FOR SELECT TO authenticated USING (
+        auth.uid() = id OR public.current_user_is_admin()
+    );
 
 CREATE POLICY "Allow users to update their own profiles" ON public.profiles
     FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Allow admins full access to profiles" ON public.profiles
-    FOR ALL TO authenticated USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-    );
+    FOR ALL TO authenticated USING (public.current_user_is_admin())
+    WITH CHECK (public.current_user_is_admin());
 
 -- Product Policies
 CREATE POLICY "Allow public read access to products" ON public.products
-    FOR SELECT TO public USING (status = 'active' OR EXISTS (
-        SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true
-    ));
+    FOR SELECT TO public USING (status = 'active' OR public.current_user_is_admin());
 
 CREATE POLICY "Allow admin full access to products" ON public.products
-    FOR ALL TO authenticated USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-    );
+    FOR ALL TO authenticated USING (public.current_user_is_admin())
+    WITH CHECK (public.current_user_is_admin());
 
 -- Auction Policies
 CREATE POLICY "Allow public read access to auctions" ON public.auctions
     FOR SELECT TO public USING (true);
 
 CREATE POLICY "Allow admin full access to auctions" ON public.auctions
-    FOR ALL TO authenticated USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-    );
+    FOR ALL TO authenticated USING (public.current_user_is_admin())
+    WITH CHECK (public.current_user_is_admin());
 
 -- Bid Policies
-CREATE POLICY "Allow public read access to bids" ON public.bids
-    FOR SELECT TO public USING (true);
+CREATE POLICY "Allow users to read own bids or admins" ON public.bids
+    FOR SELECT TO authenticated USING (
+        auth.uid() = user_id OR public.current_user_is_admin()
+    );
 
 CREATE POLICY "Allow authenticated users to place bids" ON public.bids
     FOR INSERT TO authenticated WITH CHECK (
@@ -399,15 +442,13 @@ CREATE POLICY "Allow authenticated users to place bids" ON public.bids
     );
 
 CREATE POLICY "Allow admin to manage bids" ON public.bids
-    FOR ALL TO authenticated USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-    );
+    FOR ALL TO authenticated USING (public.current_user_is_admin())
+    WITH CHECK (public.current_user_is_admin());
 
 -- Order Policies
 CREATE POLICY "Allow users to see their own orders" ON public.orders
     FOR SELECT TO authenticated USING (
-        auth.uid() = winner_id OR 
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+        auth.uid() = winner_id OR public.current_user_is_admin()
     );
 
 CREATE POLICY "Allow users to confirm their own order delivery details" ON public.orders
@@ -418,17 +459,74 @@ CREATE POLICY "Allow users to confirm their own order delivery details" ON publi
     );
 
 CREATE POLICY "Allow admins full access to orders" ON public.orders
-    FOR ALL TO authenticated USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-    );
+    FOR ALL TO authenticated USING (public.current_user_is_admin())
+    WITH CHECK (public.current_user_is_admin());
 
 -- Audit Log Policies
 CREATE POLICY "Allow admins to read audit logs" ON public.audit_logs
-    FOR SELECT TO authenticated USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-    );
+    FOR SELECT TO authenticated USING (public.current_user_is_admin());
 
 CREATE POLICY "Allow systems or admins to write audit logs" ON public.audit_logs
-    FOR INSERT TO authenticated WITH CHECK (
-        EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+    FOR INSERT TO authenticated WITH CHECK (public.current_user_is_admin());
+
+-- =====================================================================
+-- 12. RPC GRANTS AND STORAGE POLICIES
+-- =====================================================================
+
+REVOKE ALL ON FUNCTION public.place_bid(UUID, NUMERIC) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.place_bid(UUID, NUMERIC) FROM anon;
+REVOKE ALL ON FUNCTION public.place_bid(UUID, NUMERIC) FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.place_bid(UUID, NUMERIC) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.current_user_is_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO anon;
+GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO service_role;
+
+REVOKE ALL ON FUNCTION public.close_expired_auctions() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.close_expired_auctions() FROM anon;
+REVOKE ALL ON FUNCTION public.close_expired_auctions() FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.close_expired_auctions() TO service_role;
+
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'product-images',
+    'product-images',
+    true,
+    5242880,
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+)
+ON CONFLICT (id) DO UPDATE
+SET
+    public = EXCLUDED.public,
+    file_size_limit = EXCLUDED.file_size_limit,
+    allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+DROP POLICY IF EXISTS "Public read product images" ON storage.objects;
+CREATE POLICY "Public read product images" ON storage.objects
+    FOR SELECT TO public
+    USING (bucket_id = 'product-images');
+
+DROP POLICY IF EXISTS "Admins upload product images" ON storage.objects;
+CREATE POLICY "Admins upload product images" ON storage.objects
+    FOR INSERT TO authenticated
+    WITH CHECK (
+        bucket_id = 'product-images' AND public.current_user_is_admin()
+    );
+
+DROP POLICY IF EXISTS "Admins update product images" ON storage.objects;
+CREATE POLICY "Admins update product images" ON storage.objects
+    FOR UPDATE TO authenticated
+    USING (
+        bucket_id = 'product-images' AND public.current_user_is_admin()
+    )
+    WITH CHECK (
+        bucket_id = 'product-images' AND public.current_user_is_admin()
+    );
+
+DROP POLICY IF EXISTS "Admins delete product images" ON storage.objects;
+CREATE POLICY "Admins delete product images" ON storage.objects
+    FOR DELETE TO authenticated
+    USING (
+        bucket_id = 'product-images' AND public.current_user_is_admin()
     );

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getCurrentUserProfile, getBidsByUser, getOrdersByUser } from "@/lib/db";
+import PollingRefresh from "@/app/components/PollingRefresh";
 import { Gavel, Award, ShoppingBag, Truck, ArrowRight, Package } from "lucide-react";
 
 export const revalidate = 0;
@@ -20,6 +21,7 @@ export default async function DashboardOverviewPage() {
 
   return (
     <div className="flex flex-col gap-8 text-left">
+      <PollingRefresh intervalMs={15000} />
       {/* Welcome Banner */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Mirëseerdhe, {user.full_name}!</h1>

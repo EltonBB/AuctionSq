@@ -2,8 +2,10 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAuctionById, getAuctions, getBidsForAuction, getCurrentUserProfile } from "@/lib/db";
+import { formatEurFromAll } from "@/lib/currency";
 import BiddingForm from "@/app/components/BiddingForm";
-import { AlertTriangle, ChevronRight, Heart, RotateCcw, ShieldCheck, Truck, UserCheck } from "lucide-react";
+import PollingRefresh from "@/app/components/PollingRefresh";
+import { AlertTriangle, Award, ChevronRight, Heart, RotateCcw, ShieldCheck, Truck, UserCheck } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -37,13 +39,15 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
   const bids = await getBidsForAuction(auctionId);
   const activeBids = bids.filter((bid) => bid.status === "active");
   const user = await getCurrentUserProfile();
+  const isOwnerAdmin = !!user?.is_admin;
   const isLoggedIn = user && user.id !== "usr-guest";
   const isProfileComplete =
-    isLoggedIn &&
+    (isOwnerAdmin || isLoggedIn) &&
     !!user.full_name &&
-    !!user.phone_number &&
-    !!user.city &&
-    !!user.address;
+    (isOwnerAdmin || (!!user.phone_number && !!user.city && !!user.address));
+  const isAccountVerified = isOwnerAdmin || (isLoggedIn && !!user.email_verified);
+  const isEnded = auc.status === "ended";
+  const isWinner = isLoggedIn && auc.winner_id === user.id;
 
   const relatedAuctions = (await getAuctions())
     .filter((auction) => auction.id !== auctionId && auction.status === "active")
@@ -51,6 +55,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
 
   return (
     <div className="bg-white">
+      <PollingRefresh intervalMs={10000} />
       <div className="mx-auto max-w-[1440px] px-4 py-8">
         <div className="mb-8 flex items-center gap-2 text-xs font-semibold text-slate-500">
           <Link href="/" className="hover:text-blue-700">Ballina</Link>
@@ -70,7 +75,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
                 className="aspect-[1.18] w-full object-cover"
               />
               <span className="absolute left-5 top-5 rounded-full bg-[#082047] px-4 py-2 text-xs font-black uppercase tracking-wide text-white">
-                Ankand aktiv
+                {isEnded ? "Ankand i mbyllur" : "Ankand aktiv"}
               </span>
               <button className="absolute right-5 top-5 flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 backdrop-blur" aria-label="Save auction">
                 <Heart className="h-6 w-6" />
@@ -103,7 +108,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
                     {auc.category?.name || "Kategori"}
                   </span>
                   <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase text-blue-800">
-                    Aktiv
+                    {isEnded ? "Mbyllur" : "Aktiv"}
                   </span>
                 </div>
                 <h1 className="text-3xl font-black leading-tight tracking-[-0.03em] text-slate-950">
@@ -114,11 +119,11 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
               <div className="grid grid-cols-2 border-b border-slate-200">
                 <div className="p-6">
                   <div className="text-xs font-bold uppercase text-slate-400">Cmimi fillestar</div>
-                  <div className="mt-2 text-lg font-black text-slate-700">{auc.starting_price.toLocaleString()} L</div>
+                  <div className="mt-2 text-lg font-black text-slate-700">{formatEurFromAll(auc.starting_price)}</div>
                 </div>
                 <div className="border-l border-slate-200 p-6 text-right">
                   <div className="text-xs font-bold uppercase text-slate-400">Oferte aktive</div>
-                  <div className="mt-2 text-3xl font-black text-blue-700">{auc.current_price.toLocaleString()} L</div>
+                  <div className="mt-2 text-3xl font-black text-blue-700">{formatEurFromAll(auc.current_price)}</div>
                 </div>
               </div>
 
@@ -134,16 +139,38 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
               </div>
 
               <div className="bg-[#082047] p-5">
-                <BiddingForm
-                  auctionId={auc.id}
-                  currentPrice={auc.current_price}
-                  minIncrement={auc.min_increment}
-                  isLoggedIn={isLoggedIn}
-                  isProfileComplete={isProfileComplete}
-                  isBlocked={user?.is_blocked || false}
-                  hasBids={activeBids.length > 0}
-                  startingPrice={auc.starting_price}
-                />
+                {isEnded ? (
+                  <div className="rounded-2xl border border-white/20 bg-white/10 p-5 text-left text-white">
+                    {isWinner ? (
+                      <>
+                        <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-200">
+                          <Award className="h-4 w-4" />
+                          Urime, ju fituat
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-blue-50">
+                          Ju jeni ofertuesi me i larte per kete ankand. Administratori do te vazhdoje me procesimin e porosise.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm leading-6 text-blue-50">
+                        Ankandi ka perfunduar. Produkti iu dha ofertuesit me oferten me te larte.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <BiddingForm
+                    auctionId={auc.id}
+                    currentPrice={auc.current_price}
+                    minIncrement={auc.min_increment}
+                    isAdmin={isOwnerAdmin}
+                    isLoggedIn={isLoggedIn}
+                    isProfileComplete={isProfileComplete}
+                    isAccountVerified={isAccountVerified}
+                    isBlocked={isOwnerAdmin ? false : user?.is_blocked || false}
+                    hasBids={activeBids.length > 0}
+                    startingPrice={auc.starting_price}
+                  />
+                )}
               </div>
 
               <div className="space-y-3 p-6 text-sm text-slate-600">
@@ -191,7 +218,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
                           {new Date(bid.created_at).toLocaleString("sq-AL")}
                         </div>
                       </div>
-                      <div className="text-lg font-black text-blue-700">{bid.amount.toLocaleString()} L</div>
+                      <div className="text-lg font-black text-blue-700">{formatEurFromAll(bid.amount)}</div>
                     </div>
                   );
                 })}
@@ -208,7 +235,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
                   <img src={auction.product?.images?.[0]} alt={auction.product?.title} className="h-20 w-20 rounded-xl object-cover" />
                   <div className="min-w-0">
                     <div className="line-clamp-2 text-sm font-bold text-slate-950">{auction.product?.title}</div>
-                    <div className="mt-2 text-sm font-black text-blue-700">{auction.current_price.toLocaleString()} L</div>
+                    <div className="mt-2 text-sm font-black text-blue-700">{formatEurFromAll(auction.current_price)}</div>
                   </div>
                 </Link>
               ))}

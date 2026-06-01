@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { getAuctions } from "@/lib/db";
 import CountdownTimer from "@/app/components/CountdownTimer";
+import PollingRefresh from "@/app/components/PollingRefresh";
 import { Clock, Gavel } from "lucide-react";
 
 export const revalidate = 0;
@@ -24,6 +25,7 @@ export default async function EndingSoonPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 flex flex-col gap-10">
+      <PollingRefresh intervalMs={10000} />
       <div className="flex flex-col gap-4 text-left">
         <span className="text-red-500 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
           <Clock className="w-3.5 h-3.5 text-red-500 animate-pulse" />

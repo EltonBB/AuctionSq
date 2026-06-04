@@ -34,13 +34,12 @@ export default async function PublicLayout({ children }: { children: React.React
   const navLinks = [
     { href: "/", label: "Ballina", icon: Home },
     { href: "/auctions", label: "Ankandet", icon: Gavel },
-    { href: "/categories", label: "Kategorite", icon: Grid2X2 },
   ];
 
   return (
     <div className="brand-surface min-h-screen text-[#352B24] lg:grid lg:grid-cols-[248px_1fr]">
-      <aside className="sticky top-0 hidden h-screen border-r border-[#f0d9c4] bg-[#fffdf8]/90 px-5 py-6 backdrop-blur lg:block">
-        <BrandLogo />
+      <aside className="sticky top-0 hidden h-screen border-r border-[#f0d9c4] bg-[#fffdf8]/90 px-5 py-6 backdrop-blur lg:relative lg:block">
+        <BrandLogo className="px-1" />
         <Link
           href={user?.is_admin ? "/admin/products" : "/auctions"}
           className="mt-7 flex items-center justify-center gap-2 rounded-xl bg-[#D96C2D] px-4 py-3 text-sm font-black text-white shadow-[0_12px_24px_rgba(217,108,45,0.22)] transition hover:bg-[#bf5520]"
@@ -56,13 +55,13 @@ export default async function PublicLayout({ children }: { children: React.React
               {label}
             </Link>
           ))}
-          <div className="mt-2 flex items-center justify-between rounded-xl px-3 py-3 font-bold text-[#5e4c3f]">
+          <Link href="/categories" className="mt-2 flex items-center justify-between rounded-xl px-3 py-3 font-bold text-[#5e4c3f] transition hover:bg-[#F7D8B5]/50 hover:text-[#D96C2D]">
             <span className="inline-flex items-center gap-3">
               <Grid2X2 className="h-4 w-4 text-[#D96C2D]" />
               Kategorite
             </span>
             <ChevronDown className="h-4 w-4 text-[#8a7565]" />
-          </div>
+          </Link>
           {categories.slice(0, 7).map((category, index) => {
             const Icon = categoryIcons[index % categoryIcons.length];
             return (
@@ -83,6 +82,17 @@ export default async function PublicLayout({ children }: { children: React.React
             <HelpCircle className="h-4 w-4 text-[#D96C2D]" />
             Si funksionon
           </Link>
+        </div>
+
+        <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-[#f3d7b8] bg-[#fff0dc] p-4 shadow-[0_16px_32px_rgba(217,108,45,0.12)]">
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/gold-bidder-medal.png" alt="" className="h-14 w-14 object-contain" />
+            <div>
+              <p className="text-sm font-black text-[#352B24]">Fito me shume.</p>
+              <p className="mt-1 text-xs leading-5 text-[#6f5b4c]">Ankande te zgjedhura dhe cmime qe ia vlejne.</p>
+            </div>
+          </div>
         </div>
       </aside>
 

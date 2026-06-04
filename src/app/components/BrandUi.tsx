@@ -65,6 +65,9 @@ export function BrandAuctionCard({ auction, compact = false }: { auction: Auctio
             <div className="text-[11px] font-semibold text-[#8a7565]">Koha e mbetur</div>
           </div>
         </div>
+        <div className="mt-4 rounded-lg border border-[#D96C2D]/45 px-4 py-2 text-center text-xs font-black text-[#D96C2D] transition group-hover:bg-[#D96C2D] group-hover:text-white">
+          Bej oferte
+        </div>
       </div>
     </Link>
   );

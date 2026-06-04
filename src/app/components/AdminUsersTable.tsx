@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { submitToggleUserBlock } from "@/app/actions/admin";
 import type { Profile } from "@/lib/db";
@@ -26,10 +26,10 @@ export function AdminUsersTable({ users }: { users: Profile[] }) {
             const complete = !!user.phone_number && !!user.city && !!user.address;
             return (
               <tr key={user.id}>
-                <td className="py-4 font-bold">{user.full_name || "Pa emër"}</td>
+                <td className="py-4 font-bold">{user.full_name || "Pa emer"}</td>
                 <td className="text-slate-500">{user.phone_number || "Mungon"}</td>
                 <td className="max-w-xs truncate text-slate-500">
-                  {complete ? `${user.city}, ${user.address}` : "Profili i paplotë"}
+                  {complete ? `${user.city}, ${user.address}` : "Profili i paplote"}
                 </td>
                 <td>
                   <span
@@ -41,7 +41,7 @@ export function AdminUsersTable({ users }: { users: Profile[] }) {
                           : "bg-amber-50 text-amber-700"
                     }`}
                   >
-                    {user.is_blocked ? "i bllokuar" : complete ? "gati" : "i paplotë"}
+                    {user.is_blocked ? "i bllokuar" : complete ? "gati" : "i paplote"}
                   </span>
                 </td>
                 <td>
@@ -54,7 +54,7 @@ export function AdminUsersTable({ users }: { users: Profile[] }) {
                           ? "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                           : "border-red-200 text-red-700 hover:bg-red-50"
                       }`}
-                      confirmMessage={user.is_blocked ? "Zhblloko këtë klient?" : "Blloko këtë klient?"}
+                      confirmMessage={user.is_blocked ? "Zhblloko kete klient?" : "Blloko kete klient?"}
                     >
                       {user.is_blocked ? "Zhblloko" : "Blloko"}
                     </ConfirmSubmitButton>
@@ -68,3 +68,4 @@ export function AdminUsersTable({ users }: { users: Profile[] }) {
     </div>
   );
 }
+

@@ -71,8 +71,8 @@ export default function BiddingForm({
 
   if (isLoggedIn && isAdmin) {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5 text-left">
-        <div className="flex items-center gap-2 text-sm font-bold uppercase text-amber-300">
+      <div className="rounded-2xl border border-[#E6A52F]/35 bg-[#E6A52F]/10 p-5 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#E6A52F]">
           <Ban className="h-4 w-4" />
           Llogari administratori
         </div>
@@ -82,12 +82,12 @@ export default function BiddingForm({
 
   if (isLoggedIn && isBlocked) {
     return (
-      <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-left">
-        <div className="flex items-center gap-2 text-sm font-bold uppercase text-red-400">
+      <div className="rounded-2xl border border-red-300 bg-red-50 p-5 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-red-700">
           <Ban className="h-4 w-4" />
           Llogaria eshte kufizuar
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+        <p className="mt-2 text-sm leading-relaxed text-[#6f5b4c]">
           Kjo llogari nuk mund te vendose oferta derisa kufizimi te hiqet nga administratori.
         </p>
       </div>
@@ -96,24 +96,24 @@ export default function BiddingForm({
 
   if (!isLoggedIn) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-left">
-        <div className="flex items-center gap-2 text-sm font-bold uppercase text-amber-400">
+      <div className="rounded-2xl border border-[#f0d9c4] bg-white/10 p-6 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#E6A52F]">
           <KeyRound className="h-4 w-4" />
           Duhet hyrje ne llogari
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+        <p className="mt-2 text-sm leading-relaxed text-[#FFF8F1]">
           Hyni ose regjistrohuni per te vendosur oferta ne ankand.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Link
             href="/login"
-            className="rounded-xl border border-slate-800 bg-slate-950 py-2.5 text-center text-xs font-bold uppercase text-slate-300 transition hover:bg-slate-900"
+            className="rounded-xl border border-white/15 bg-white/10 py-2.5 text-center text-xs font-bold uppercase text-white transition hover:bg-white/15"
           >
             Hyni
           </Link>
           <Link
             href="/register"
-            className="rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold uppercase text-white transition hover:bg-blue-700"
+            className="rounded-xl bg-[#D96C2D] py-2.5 text-center text-xs font-bold uppercase text-white transition hover:bg-[#bf5520]"
           >
             Regjistrohu
           </Link>
@@ -124,17 +124,17 @@ export default function BiddingForm({
 
   if (!isProfileComplete) {
     return (
-      <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6 text-left">
-        <div className="flex items-center gap-2 text-sm font-bold uppercase text-rose-400">
+      <div className="rounded-2xl border border-[#D96C2D]/35 bg-[#D96C2D]/10 p-6 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#F7D8B5]">
           <User className="h-4 w-4" />
           Ploteso profilin
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+        <p className="mt-2 text-sm leading-relaxed text-[#FFF8F1]">
           Vendos telefonin, qytetin dhe adresen e dergeses para se te ofrosh.
         </p>
         <Link
           href="/profile"
-          className="mt-4 block rounded-xl bg-rose-600 py-3 text-center text-xs font-bold uppercase tracking-wide text-white transition hover:bg-rose-700"
+          className="mt-4 block rounded-xl bg-[#D96C2D] py-3 text-center text-xs font-bold uppercase tracking-wide text-white transition hover:bg-[#bf5520]"
         >
           Ploteso profilin
         </Link>
@@ -144,17 +144,17 @@ export default function BiddingForm({
 
   if (!isAccountVerified) {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-6 text-left">
-        <div className="flex items-center gap-2 text-sm font-bold uppercase text-amber-300">
+      <div className="rounded-2xl border border-[#E6A52F]/35 bg-[#E6A52F]/10 p-6 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#F7D8B5]">
           <BadgeCheck className="h-4 w-4" />
           Llogaria duhet verifikuar
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+        <p className="mt-2 text-sm leading-relaxed text-[#FFF8F1]">
           Vetem perdoruesit me email te verifikuar mund te vendosin oferta.
         </p>
         <Link
           href="/profile"
-          className="mt-4 block rounded-xl bg-amber-600 py-3 text-center text-xs font-bold uppercase tracking-wide text-white transition hover:bg-amber-700"
+          className="mt-4 block rounded-xl bg-[#E6A52F] py-3 text-center text-xs font-bold uppercase tracking-wide text-[#352B24] transition hover:bg-[#d79920]"
         >
           Hap profilin
         </Link>
@@ -163,16 +163,16 @@ export default function BiddingForm({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-900 bg-slate-900/40 p-6 text-left shadow-lg">
-      <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-blue-400">
-        <Gavel className="h-4 w-4 -rotate-45 text-blue-500" />
+    <div className="rounded-2xl border border-white/15 bg-white/10 p-6 text-left shadow-lg">
+      <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#F7D8B5]">
+        <Gavel className="h-4 w-4 -rotate-45 text-[#E6A52F]" />
         Vendos oferten
       </div>
 
       <form onSubmit={handleBidSubmit} className="mt-4 grid gap-4">
         <div className="grid gap-1.5">
-            <label className="text-xs font-medium uppercase text-slate-500">Shuma ne EUR</label>
-          <div className="relative flex items-center overflow-hidden rounded-xl border border-slate-850 bg-slate-950 transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/30">
+            <label className="text-xs font-medium uppercase text-[#F7D8B5]">Shuma ne EUR</label>
+          <div className="relative flex items-center overflow-hidden rounded-xl border border-white/15 bg-[#2a211b] transition focus-within:border-[#D96C2D] focus-within:ring-1 focus-within:ring-[#D96C2D]/30">
             <input
               type="number"
               step="0.01"
@@ -181,12 +181,12 @@ export default function BiddingForm({
               disabled={isPending}
               className="w-full bg-transparent py-3.5 pl-4 pr-14 text-lg font-black text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
-            <span className="pointer-events-none absolute right-4 text-xs font-extrabold uppercase tracking-widest text-slate-500">
+            <span className="pointer-events-none absolute right-4 text-xs font-extrabold uppercase tracking-widest text-[#F7D8B5]/70">
               EUR
             </span>
           </div>
-          <span className="text-2xs uppercase text-slate-500">
-              Minimumi i lejuar: <span className="font-extrabold text-slate-300">{formatEurFromAll(defaultMinBidAll)}</span>
+          <span className="text-2xs uppercase text-[#F7D8B5]/70">
+              Minimumi i lejuar: <span className="font-extrabold text-white">{formatEurFromAll(defaultMinBidAll)}</span>
           </span>
         </div>
 
@@ -197,7 +197,7 @@ export default function BiddingForm({
               type="button"
               disabled={isPending}
               onClick={() => handleQuickAdd(minIncrementEur * multiplier)}
-              className="rounded-lg border border-slate-850 bg-slate-950 py-2.5 text-2xs font-black uppercase tracking-wider text-slate-400 transition hover:bg-slate-900 hover:text-white"
+              className="rounded-lg border border-white/15 bg-white/10 py-2.5 text-2xs font-black uppercase tracking-wider text-[#F7D8B5] transition hover:bg-white/15 hover:text-white"
             >
               +{(minIncrementEur * multiplier).toFixed(2)}
             </button>
@@ -221,7 +221,7 @@ export default function BiddingForm({
         <button
           type="submit"
           disabled={isPending}
-          className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 disabled:from-blue-800 disabled:to-indigo-850"
+          className="w-full rounded-xl bg-gradient-to-r from-[#D96C2D] to-[#E6A52F] py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-[#D96C2D]/20 transition hover:from-[#bf5520] hover:to-[#d79920] disabled:opacity-60"
         >
           {isPending ? "Duke procesuar..." : "Vendos oferten"}
         </button>
@@ -229,3 +229,4 @@ export default function BiddingForm({
     </div>
   );
 }
+

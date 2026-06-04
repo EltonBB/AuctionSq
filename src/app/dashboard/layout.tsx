@@ -15,3 +15,4 @@ export default async function DashboardLayout() {
 
   redirect("/profile");
 }
+

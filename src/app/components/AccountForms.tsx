@@ -96,3 +96,4 @@ export function ProfileCompletionCard({ user }: { user: Profile }) {
     </div>
   );
 }
+

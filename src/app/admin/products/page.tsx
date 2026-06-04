@@ -43,27 +43,27 @@ export default async function AdminProductsPage() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
         <div className="mb-5">
           <h1 className="text-2xl font-black">Produktet</h1>
-          <p className="mt-1 text-sm text-slate-500">Liste e paster me veprime te thjeshta per adminin.</p>
+          <p className="mt-1 text-sm text-[#8a7565]">Liste e paster me veprime te thjeshta per adminin.</p>
         </div>
 
-        <form action={quickAction} className="mb-5 grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_1fr_auto]">
-          <select name="productId" defaultValue={products[0]?.id || ""} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+        <form action={quickAction} className="mb-5 grid gap-3 rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 sm:grid-cols-[1fr_1fr_auto]">
+          <select name="productId" defaultValue={products[0]?.id || ""} className="rounded-lg border border-[#f0d9c4] bg-white/86 px-3 py-2 text-sm">
             {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.title}
               </option>
             ))}
           </select>
-          <select name="action" defaultValue="deactivate" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+          <select name="action" defaultValue="deactivate" className="rounded-lg border border-[#f0d9c4] bg-white/86 px-3 py-2 text-sm">
             <option value="deactivate">Caktivizo</option>
             <option value="activate">Aktivizo</option>
             <option value="delete">Fshij plotesisht</option>
           </select>
           <ConfirmSubmitButton
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#082047] px-4 py-2 text-xs font-black uppercase text-white"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#D96C2D] px-4 py-2 text-xs font-black uppercase text-white"
             confirmMessage="Je i sigurt per kete veprim mbi produktin?"
           >
             Ekzekuto
@@ -72,24 +72,24 @@ export default async function AdminProductsPage() {
 
         <div className="grid gap-3">
           {products.map((product) => (
-            <article key={product.id} className="rounded-xl border border-slate-200 p-3">
+            <article key={product.id} className="rounded-xl border border-[#f0d9c4] p-3">
               <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
                 <div className="flex min-w-0 gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={product.images?.[0]} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" />
                   <div className="min-w-0">
-                    <h2 className="truncate text-base font-black text-slate-900">{product.title}</h2>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-600">{product.description || "Pa pershkrim."}</p>
+                    <h2 className="truncate text-base font-black text-[#352B24]">{product.title}</h2>
+                    <p className="mt-1 line-clamp-2 text-sm text-[#6f5b4c]">{product.description || "Pa pershkrim."}</p>
                     <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
-                      <span className="rounded-md bg-slate-100 px-2 py-1">
+                      <span className="rounded-md bg-[#FFF8F1] px-2 py-1">
                         {categories.find((c) => c.id === product.category_id)?.name || "Pa kategori"}
                       </span>
-                      <span className="rounded-md bg-blue-50 px-2 py-1 text-blue-700">{conditionLabel[product.condition]}</span>
+                      <span className="rounded-md bg-[#FFF8F1] px-2 py-1 text-[#D96C2D]">{conditionLabel[product.condition]}</span>
                       <span className={`rounded-md px-2 py-1 ${product.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
                         {product.status === "active" ? "aktiv" : "joaktiv"}
                       </span>
                     </div>
-                    {product.testing_notes ? <p className="mt-2 line-clamp-1 text-xs text-slate-500">Testim: {product.testing_notes}</p> : null}
+                    {product.testing_notes ? <p className="mt-2 line-clamp-1 text-xs text-[#8a7565]">Testim: {product.testing_notes}</p> : null}
                   </div>
                 </div>
 
@@ -97,7 +97,7 @@ export default async function AdminProductsPage() {
                   <input type="hidden" name="productId" value={product.id} />
                   <input type="hidden" name="status" value={product.status === "active" ? "inactive" : "active"} />
                   <ConfirmSubmitButton
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-50"
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-xs font-black text-[#5e4c3f] hover:bg-[#FFF8F1]"
                     confirmMessage={product.status === "active" ? "Caktivizo kete produkt?" : "Aktivizo kete produkt?"}
                   >
                     {product.status === "active" ? "Caktivizo" : "Aktivizo"}
@@ -116,3 +116,5 @@ export default async function AdminProductsPage() {
     </div>
   );
 }
+
+

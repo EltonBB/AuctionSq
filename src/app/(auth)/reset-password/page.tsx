@@ -1,24 +1,18 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Suspense, useActionState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Gavel, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound } from "lucide-react";
 import { requestPasswordReset, updatePassword } from "@/app/actions/auth";
+import { BrandLogo } from "@/app/components/BrandUi";
 
 function Message({ state }: { state: any }) {
   if (!state?.error && !state?.success) return null;
-
   const success = !!state?.success;
   return (
-    <div
-      className={`p-3 rounded-xl flex items-start gap-2 text-xs leading-relaxed ${
-        success
-          ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-          : "bg-red-500/10 border border-red-500/20 text-red-500"
-      }`}
-    >
-      {success ? <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
+    <div className={`flex items-start gap-2 rounded-xl border p-3 text-xs leading-relaxed ${success ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}>
+      {success ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /> : <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />}
       <span>{state.message || state.error}</span>
     </div>
   );
@@ -32,77 +26,50 @@ function ResetPasswordContent() {
   const [updateState, updateAction, updatePending] = useActionState(updatePassword, null);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-slate-100 relative">
-      <Link href="/login" className="absolute top-6 left-6 flex items-center gap-1.5 text-xs text-slate-450 hover:text-white transition-colors">
-        <ArrowLeft className="w-4 h-4" />
+    <div className="brand-surface relative flex min-h-screen flex-col items-center justify-center p-4 text-[#352B24]">
+      <Link href="/login" className="absolute left-6 top-6 flex items-center gap-1.5 text-xs font-bold text-[#6f5b4c] transition-colors hover:text-[#D96C2D]">
+        <ArrowLeft className="h-4 w-4" />
         <span>Kthehu pas</span>
       </Link>
 
-      <div className="w-full max-w-md bg-slate-900/40 border border-slate-900 rounded-3xl p-8 flex flex-col gap-6 shadow-xl text-left relative overflow-hidden">
-        <div className="flex flex-col items-center gap-2.5 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-500 flex items-center justify-center">
-            <Gavel className="w-6 h-6 transform -rotate-45" />
+      <div className="flex w-full max-w-md flex-col gap-6 rounded-[28px] border border-[#f0d9c4] bg-white/90 p-8 text-left shadow-[0_22px_60px_rgba(53,43,36,0.08)]">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <BrandLogo />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F7D8B5] bg-[#F7D8B5] text-[#D96C2D]">
+            <KeyRound className="h-6 w-6" />
           </div>
-          <h2 className="text-xl font-black text-white tracking-widest uppercase">
-            {isRecovery ? "Vendos Fjalekalim te Ri" : "Rikthe Fjalekalimin"}
+          <h2 className="text-xl font-black uppercase tracking-wide text-[#352B24]">
+            {isRecovery ? "Vendos fjalekalim te ri" : "Rikthe fjalekalimin"}
           </h2>
-          <p className="text-slate-450 text-xs">
-            {isRecovery
-              ? "Vendos fjalekalimin e ri per llogarine tende."
-              : "Shkruaj email-in dhe do te dergojme nje link rikuperimi."}
+          <p className="text-xs leading-5 text-[#6f5b4c]">
+            {isRecovery ? "Vendos fjalekalimin e ri per llogarine tende." : "Shkruaj email-in dhe do te dergojme nje link rikuperimi."}
           </p>
         </div>
 
         {isRecovery ? (
           <form action={updateAction} className="flex flex-col gap-4">
             <Message state={updateState} />
-            <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-2xs uppercase font-semibold">Fjalekalimi i ri</label>
-              <input
-                type="password"
-                name="password"
-                required
-                minLength={6}
-                className="px-4 py-3 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-2xs uppercase font-semibold">Konfirmo fjalekalimin</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                required
-                minLength={6}
-                className="px-4 py-3 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={updatePending}
-              className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-black text-xs uppercase tracking-widest transition-colors shadow-lg shadow-blue-500/20 mt-2"
-            >
-              {updatePending ? "Duke ruajtur..." : "Perditeso Fjalekalimin"}
+            <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
+              Fjalekalimi i ri
+              <input type="password" name="password" required minLength={6} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+            </label>
+            <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
+              Konfirmo fjalekalimin
+              <input type="password" name="confirmPassword" required minLength={6} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+            </label>
+            <button type="submit" disabled={updatePending} className="mt-2 w-full rounded-xl bg-[#D96C2D] py-3.5 text-xs font-black uppercase tracking-widest text-white transition hover:bg-[#bf5520] disabled:opacity-60">
+              {updatePending ? "Duke ruajtur..." : "Perditeso fjalekalimin"}
             </button>
           </form>
         ) : (
           <form action={requestAction} className="flex flex-col gap-4">
             <Message state={requestState} />
-            <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-2xs uppercase font-semibold">Adresa Email</label>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="emri@shembull.com"
-                className="px-4 py-3 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={requestPending}
-              className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-black text-xs uppercase tracking-widest transition-colors shadow-lg shadow-blue-500/20 mt-2"
-            >
-              {requestPending ? "Duke derguar..." : "Dergo Linkun e Rikthimit"}
+            <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
+              Adresa email
+              <input type="email" name="email" required placeholder="emri@shembull.com" className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+            </label>
+            <button type="submit" disabled={requestPending} className="mt-2 w-full rounded-xl bg-[#D96C2D] py-3.5 text-xs font-black uppercase tracking-widest text-white transition hover:bg-[#bf5520] disabled:opacity-60">
+              {requestPending ? "Duke derguar..." : "Dergo linkun e rikthimit"}
             </button>
           </form>
         )}
@@ -113,8 +80,9 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#FFF8F1]" />}>
       <ResetPasswordContent />
     </Suspense>
   );
 }
+

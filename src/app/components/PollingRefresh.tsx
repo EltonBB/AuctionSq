@@ -24,3 +24,4 @@ export default function PollingRefresh({ intervalMs = 15000 }: PollingRefreshPro
 
   return null;
 }
+

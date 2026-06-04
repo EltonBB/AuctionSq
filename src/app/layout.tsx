@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -14,17 +14,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "AuctionSq | Premium Admin-Controlled Online Auctions",
-    template: "%s | AuctionSq",
+    default: "NjeKlik | Ankande te kontrolluara online",
+    template: "%s | NjeKlik",
   },
-  description: "AuctionSq is a trusted auction platform for verified products, transparent bidding, and clear delivery tracking.",
-  metadataBase: new URL("https://auctionsq.com"),
-  keywords: ["online auction", "ankande online", "albania auctions", "bid and win", "AuctionSq"],
+  description: "NjeKlik eshte platforme ankandesh per produkte te kontrolluara, ofertim transparent dhe dergese te qarte.",
+  metadataBase: new URL("https://njeklik.com"),
+  keywords: ["online auction", "ankande online", "albania auctions", "bid and win", "NjeKlik"],
   openGraph: {
-    title: "AuctionSq | Premium Admin-Controlled Online Auctions",
-    description: "Browse verified products, bid with confidence, and track every win from one clean platform.",
-    url: "https://auctionsq.com",
-    siteName: "AuctionSq",
+    title: "NjeKlik | Ankande te kontrolluara online",
+    description: "Shfleto produkte te verifikuara, oferto me siguri dhe ndiq Cdo fitore nga nje platforme e paster.",
+    url: "https://njeklik.com",
+    siteName: "NjeKlik",
     locale: "sq_AL",
     type: "website",
   },
@@ -40,7 +40,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth dark" suppressHydrationWarning>
+    <html lang="sq" className="scroll-smooth" suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased text-foreground bg-background transition-colors duration-300 min-h-screen flex flex-col`}
@@ -50,3 +50,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

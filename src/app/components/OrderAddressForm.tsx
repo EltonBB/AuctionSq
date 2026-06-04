@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useTransition } from "react";
 import { updateOrderAddress } from "@/app/actions/admin";
@@ -37,11 +37,11 @@ export default function OrderAddressForm({
     startTransition(async () => {
       const res = await updateOrderAddress(orderId, fullName, phone, city, address);
       if (res.success) {
-        setSuccess(res.message || "Adresa u përditësua!");
+        setSuccess(res.message || "Adresa u perditesua!");
         setIsEditing(false);
         setTimeout(() => setSuccess(null), 3000);
       } else {
-        setError(res.error || "Ndodhi një gabim.");
+        setError(res.error || "Ndodhi nje gabim.");
       }
     });
   };
@@ -85,7 +85,7 @@ export default function OrderAddressForm({
           <div className="flex justify-between items-center">
             <span className="text-blue-400 text-2xs uppercase font-extrabold tracking-wider flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-blue-500" />
-              <span>Përditëso Adresën e Dërgimit</span>
+              <span>Perditeso Adresen e Dergimit</span>
             </span>
             <button
               type="button"
@@ -98,7 +98,7 @@ export default function OrderAddressForm({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-3xs uppercase font-semibold">Emri i plotë i marrësit</label>
+              <label className="text-slate-500 text-3xs uppercase font-semibold">Emri i plote i marresit</label>
               <input
                 type="text"
                 required
@@ -136,7 +136,7 @@ export default function OrderAddressForm({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-3xs uppercase font-semibold">Rruga, Pallati, Hyrja (Adresa e plotë)</label>
+              <label className="text-slate-500 text-3xs uppercase font-semibold">Rruga, Pallati, Hyrja (Adresa e plote)</label>
               <input
                 type="text"
                 required
@@ -169,3 +169,4 @@ export default function OrderAddressForm({
     </div>
   );
 }
+

@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 220 33% 98%;
-    --foreground: 224 71% 4%;
+    --background: 33 100% 97%;
+    --foreground: 25 20% 17%;
     --card: 0 0% 100%;
     --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 142.1 76.2% 36.3%;
-    --accent-foreground: 355.7 100% 97.3%;
+    --primary: 23 67% 51%;
+    --primary-foreground: 33 100% 97%;
+    --secondary: 32 82% 85%;
+    --secondary-foreground: 25 20% 17%;
+    --muted: 32 82% 92%;
+    --muted-foreground: 25 19% 46%;
+    --accent: 38 78% 55%;
+    --accent-foreground: 25 20% 17%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: 29 56% 86%;
+    --input: 29 56% 86%;
+    --ring: 23 67% 51%;
     --radius: 0.75rem;
     --warning: 24.6 95% 53.1%;
     --warning-foreground: 0 0% 100%;
@@ -63,6 +63,22 @@
   }
 }
 
+.brand-surface {
+  background:
+    radial-gradient(circle at top left, rgba(230, 165, 47, 0.14), transparent 30rem),
+    linear-gradient(180deg, #fff8f1 0%, #fffdf9 45%, #fff8f1 100%);
+}
+
+.brand-card {
+  border: 1px solid #f0d9c4;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 16px 44px rgba(53, 43, 36, 0.06);
+}
+
+.brand-focus {
+  @apply outline-none focus:border-[#D96C2D] focus:ring-2 focus:ring-[#D96C2D]/15;
+}
+
 /* Glassmorphism Classes */
 .glass-panel {
   @apply bg-white/75 dark:bg-slate-900/75 backdrop-blur-md border border-white/20 dark:border-white/5;
@@ -78,7 +94,7 @@
 
 /* Beautiful custom gradients */
 .gradient-primary {
-  @apply bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500;
+  @apply bg-gradient-to-r from-[#D96C2D] to-[#E6A52F];
 }
 
 .gradient-success {
@@ -90,7 +106,7 @@
 }
 
 .gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 dark:from-blue-400 dark:via-indigo-400 dark:to-emerald-400;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#D96C2D] via-[#E6A52F] to-[#352B24];
 }
 
 /* Premium Animations */
@@ -138,7 +154,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-800 rounded-full hover:bg-slate-400 dark:hover:bg-slate-700 transition-colors;
+  @apply bg-[#D96C2D]/35 rounded-full hover:bg-[#D96C2D]/60 transition-colors;
 }
 
 /* Glow Badge */

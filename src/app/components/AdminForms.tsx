@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useActionState } from "react";
 import { createAuction, createProduct, updateProduct } from "@/app/actions/admin";
@@ -8,7 +8,7 @@ import { AlertCircle, CheckCircle2, Gavel, PackagePlus } from "lucide-react";
 function Message({ state }: { state: any }) {
   if (!state?.error && !state?.success) return null;
   return (
-    <div className={`rounded-xl border p-3 text-xs ${state?.success ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300" : "border-red-500/20 bg-red-500/10 text-red-300"}`}>
+    <div className={`rounded-xl border p-3 text-xs ${state?.success ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}>
       <div className="flex gap-2">
         {state?.success ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
         <span>{state?.message || state?.error}</span>
@@ -17,17 +17,17 @@ function Message({ state }: { state: any }) {
   );
 }
 
-const input = "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500";
-const fieldLabel = "grid gap-2 text-xs font-bold text-slate-600";
+const input = "brand-focus w-full rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm text-[#352B24]";
+const fieldLabel = "grid gap-2 text-xs font-bold text-[#6f5b4c]";
 
 export function ProductCreateForm({ categories }: { categories: Category[] }) {
   const [state, formAction, isPending] = useActionState(createProduct, null);
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <form action={formAction} className="grid gap-4 rounded-[24px] border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
       <div>
-        <h2 className="text-lg font-black text-slate-950">Shto produkt</h2>
-        <p className="mt-1 text-sm text-slate-500">Krijo inventar te kontrolluar perpara se ta kthesh ne ankand.</p>
+        <h2 className="text-lg font-black text-[#352B24]">Shto produkt</h2>
+        <p className="mt-1 text-sm text-[#6f5b4c]">Krijo inventar te kontrolluar perpara se ta kthesh ne ankand.</p>
       </div>
       <Message state={state} />
       <input name="title" required placeholder="Titulli i produktit" className={input} />
@@ -42,7 +42,7 @@ export function ProductCreateForm({ categories }: { categories: Category[] }) {
       </select>
       <textarea name="description" rows={4} placeholder="Pershkrim i qarte per bleresin" className={input} />
       <textarea name="testingNotes" rows={3} placeholder="Shenime testimi, defekte, garanci, kontroll teknik" className={input} />
-      <label className="grid gap-1.5 text-xs font-bold text-slate-500">
+      <label className="grid gap-1.5 text-xs font-bold text-[#6f5b4c]">
         Foto produkti (max 5MB per foto)
         <input
           name="images"
@@ -50,10 +50,10 @@ export function ProductCreateForm({ categories }: { categories: Category[] }) {
           accept="image/*"
           multiple
           required
-          className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-700"
+          className="rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-xs text-[#6f5b4c]"
         />
       </label>
-      <button disabled={isPending} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#082047] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-blue-900 disabled:opacity-60">
+      <button disabled={isPending} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#D96C2D] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-[#bf5520] disabled:opacity-60">
         <PackagePlus className="h-4 w-4" />
         {isPending ? "Duke shtuar..." : "Shto produktin"}
       </button>
@@ -66,10 +66,10 @@ export function AuctionCreateForm({ products }: { products: Product[] }) {
   const hasProducts = products.length > 0;
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <form action={formAction} className="grid gap-4 rounded-[24px] border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
       <div>
-        <h2 className="text-lg font-black text-slate-950">Programo ankand</h2>
-        <p className="mt-1 text-sm text-slate-500">Lidhu me nje produkt, cakto oferten minimale dhe kohezgjatjen ne ore. Cmimi rritet vetem nga ofertat e klienteve.</p>
+        <h2 className="text-lg font-black text-[#352B24]">Programo ankand</h2>
+        <p className="mt-1 text-sm text-[#6f5b4c]">Lidhu me nje produkt, cakto oferten minimale dhe kohezgjatjen ne ore. Cmimi rritet vetem nga ofertat e klienteve.</p>
       </div>
       <Message state={state} />
       <select name="productId" className={input} defaultValue={products[0]?.id || ""} disabled={!hasProducts}>
@@ -93,7 +93,7 @@ export function AuctionCreateForm({ products }: { products: Product[] }) {
           <input name="durationHours" required type="number" min="1" max="168" defaultValue="24" placeholder="24" className={input} />
         </label>
       </div>
-      <button disabled={isPending || !hasProducts} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#082047] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-blue-900 disabled:opacity-60">
+      <button disabled={isPending || !hasProducts} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#D96C2D] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-[#bf5520] disabled:opacity-60">
         <Gavel className="h-4 w-4" />
         {isPending ? "Duke krijuar..." : "Krijo ankandin"}
       </button>
@@ -119,10 +119,10 @@ export function ProductUpdateForm({
   );
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <form action={formAction} className="grid gap-4 rounded-[24px] border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
       <div>
-        <h2 className="text-lg font-black text-slate-950">Përditëso produkt</h2>
-        <p className="mt-1 text-sm text-slate-500">Edito të dhënat e produktit ose ndrysho statusin.</p>
+        <h2 className="text-lg font-black text-[#352B24]">Perditeso produkt</h2>
+        <p className="mt-1 text-sm text-[#6f5b4c]">Edito te dhenat e produktit ose ndrysho statusin.</p>
       </div>
       <Message state={state} />
       <select name="productId" className={input} defaultValue={defaultProductId || products[0]?.id || ""}>
@@ -152,26 +152,28 @@ export function ProductUpdateForm({
       </select>
       <textarea name="description" rows={3} placeholder="Pershkrim i perditesuar" className={input} />
       <textarea name="testingNotes" rows={3} placeholder="Shenime testimi" className={input} />
-      <label className="grid gap-1.5 text-xs font-bold text-slate-500">
-        Foto të reja (opsionale)
+      <label className="grid gap-1.5 text-xs font-bold text-[#6f5b4c]">
+        Foto te reja (opsionale)
         <input
           name="images"
           type="file"
           accept="image/*"
           multiple
-          className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-700"
+          className="rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-xs text-[#6f5b4c]"
         />
       </label>
-      <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+      <label className="inline-flex items-center gap-2 text-xs font-semibold text-[#6f5b4c]">
         <input type="checkbox" name="keepExistingImages" value="true" defaultChecked />
         Mbaj fotot ekzistuese
       </label>
       <button
         disabled={isPending}
-        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#082047] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-blue-900 disabled:opacity-60"
+        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#D96C2D] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-[#bf5520] disabled:opacity-60"
       >
-        {isPending ? "Duke ruajtur..." : "Ruaj përditësimin"}
+        {isPending ? "Duke ruajtur..." : "Ruaj perditesimin"}
       </button>
     </form>
   );
 }
+
+

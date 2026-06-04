@@ -8,3 +8,4 @@ export default async function ProfilePage() {
   const orders = user.id === "usr-guest" ? [] : await getOrdersByUser(user.id);
   return <ProfileWorkspace user={user} orders={orders} />;
 }
+

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Link from "next/link";
 import { getCurrentUserProfile, getBidsByUser } from "@/lib/db";
 import PollingRefresh from "@/app/components/PollingRefresh";
@@ -26,13 +26,13 @@ export default async function MyBidsPage() {
       <PollingRefresh intervalMs={15000} />
       <div>
         <h1 className="text-2xl font-extrabold text-white">Ofertat e Mia</h1>
-        <p className="text-slate-400 text-sm mt-1">Lista e plotë e ankandeve ku ju keni vendosur oferta.</p>
+        <p className="text-slate-400 text-sm mt-1">Lista e plote e ankandeve ku ju keni vendosur oferta.</p>
       </div>
 
       {uniqueBids.length === 0 ? (
         <div className="text-center py-20 bg-slate-900/20 rounded-3xl border border-slate-900 flex flex-col items-center gap-3">
           <Gavel className="w-16 h-16 text-slate-700" />
-          <h3 className="font-bold text-slate-400 text-lg">Nuk keni asnjë ofertë aktive</h3>
+          <h3 className="font-bold text-slate-400 text-lg">Nuk keni asnje oferte aktive</h3>
           <p className="text-slate-500 text-sm">Gjeni produkte fantastike dhe filloni ofertimin tuaj.</p>
           <Link href="/auctions" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs uppercase mt-2 transition-colors">
             Shfleto Ankande Aktive
@@ -45,8 +45,8 @@ export default async function MyBidsPage() {
               <thead className="bg-slate-950/60 border-b border-slate-900 text-slate-400 font-extrabold uppercase tracking-wider text-3xs">
                 <tr>
                   <th scope="col" className="px-6 py-4">Produkti</th>
-                  <th scope="col" className="px-6 py-4">Bidi Juaj Më i Lartë</th>
-                  <th scope="col" className="px-6 py-4">Ofertë Aktive</th>
+                  <th scope="col" className="px-6 py-4">Bidi Juaj Me i Larte</th>
+                  <th scope="col" className="px-6 py-4">Oferte Aktive</th>
                   <th scope="col" className="px-6 py-4 text-center">Gjendja</th>
                   <th scope="col" className="px-6 py-4 text-right">Veprime</th>
                 </tr>
@@ -63,7 +63,7 @@ export default async function MyBidsPage() {
                     badgeLabel = "Mbyllur";
                     badgeStyle = "bg-slate-800 text-slate-450";
                   } else if (isHighest) {
-                    badgeLabel = "Në Udhëheqje";
+                    badgeLabel = "Ne Udheheqje";
                     badgeStyle = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25";
                   } else {
                     badgeLabel = "Tej-kaluar";
@@ -111,3 +111,4 @@ export default async function MyBidsPage() {
     </div>
   );
 }
+

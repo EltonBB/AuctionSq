@@ -41,10 +41,11 @@ export default function AdminOrderStatusForm({
       )}
       <button
         disabled={pending}
-        className="rounded-xl bg-[#082047] px-4 py-2 text-xs font-black uppercase text-white disabled:opacity-60"
+        className="rounded-xl bg-[#D96C2D] px-4 py-2 text-xs font-black uppercase text-white shadow-sm transition hover:bg-[#c45f27] disabled:opacity-60"
       >
         {pending ? "Duke perditesuar..." : "Perditeso statusin"}
       </button>
     </form>
   );
 }
+

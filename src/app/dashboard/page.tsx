@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Link from "next/link";
 import { getCurrentUserProfile, getBidsByUser, getOrdersByUser } from "@/lib/db";
 import PollingRefresh from "@/app/components/PollingRefresh";
@@ -24,8 +24,8 @@ export default async function DashboardOverviewPage() {
       <PollingRefresh intervalMs={15000} />
       {/* Welcome Banner */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Mirëseerdhe, {user.full_name}!</h1>
-        <p className="text-slate-400 text-sm mt-1">Ndiqni bidet tuaja aktive, fitimet, dhe gjendjen e dërgesave.</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Mireseerdhe, {user.full_name}!</h1>
+        <p className="text-slate-400 text-sm mt-1">Ndiqni bidet tuaja aktive, fitimet, dhe gjendjen e dergesave.</p>
       </div>
 
       {/* Grid of Metric Cards */}
@@ -45,7 +45,7 @@ export default async function DashboardOverviewPage() {
             <Award className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-slate-500 text-3xs font-extrabold uppercase tracking-wider block">Ankande të Fituara</span>
+            <span className="text-slate-500 text-3xs font-extrabold uppercase tracking-wider block">Ankande te Fituara</span>
             <span className="text-2xl font-black text-white">{wonAuctionsCount}</span>
           </div>
         </div>
@@ -55,7 +55,7 @@ export default async function DashboardOverviewPage() {
             <ShoppingBag className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-slate-500 text-3xs font-extrabold uppercase tracking-wider block">Porosi në Proçes</span>
+            <span className="text-slate-500 text-3xs font-extrabold uppercase tracking-wider block">Porosi ne Proces</span>
             <span className="text-2xl font-black text-white">{pendingOrders.length}</span>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default async function DashboardOverviewPage() {
             <Truck className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-slate-500 text-3xs font-extrabold uppercase tracking-wider block">Porosi të Dorëzuara</span>
+            <span className="text-slate-500 text-3xs font-extrabold uppercase tracking-wider block">Porosi te Dorezuara</span>
             <span className="text-2xl font-black text-white">{completedOrders.length}</span>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default async function DashboardOverviewPage() {
           <div className="flex justify-between items-center border-b border-slate-900 pb-3">
             <h3 className="font-extrabold text-white text-base">Ofertat e Fundit</h3>
             <Link href="/dashboard/bids" className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-0.5">
-              <span>Shiko të gjitha</span>
+              <span>Shiko te gjitha</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -86,7 +86,7 @@ export default async function DashboardOverviewPage() {
           {activeBids.length === 0 ? (
             <div className="text-center py-12 text-slate-550 text-xs flex flex-col items-center gap-2">
               <Gavel className="w-10 h-10 text-slate-800" />
-              <span>Nuk keni vendosur ende asnjë ofertë.</span>
+              <span>Nuk keni vendosur ende asnje oferte.</span>
               <Link href="/auctions" className="text-blue-400 hover:underline text-xs mt-1">Shfleto ankandet aktive</Link>
             </div>
           ) : (
@@ -106,7 +106,7 @@ export default async function DashboardOverviewPage() {
                     <div className="text-right flex flex-col gap-1">
                       <span className="font-black text-slate-200">{bid.amount.toLocaleString()} Llek</span>
                       <span className={`px-2 py-0.5 rounded text-3xs font-semibold ${isHighest ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25" : "bg-amber-500/10 text-amber-400 border border-amber-500/25"}`}>
-                        {isHighest ? "Në Krye" : "Tej-kaluar"}
+                        {isHighest ? "Ne Krye" : "Tej-kaluar"}
                       </span>
                     </div>
                   </div>
@@ -119,9 +119,9 @@ export default async function DashboardOverviewPage() {
         {/* Recent Orders Table preview */}
         <div className="bg-slate-900/20 border border-slate-900 p-6 rounded-2xl flex flex-col gap-4">
           <div className="flex justify-between items-center border-b border-slate-900 pb-3">
-            <h3 className="font-extrabold text-white text-base">Porositë e Fundit</h3>
+            <h3 className="font-extrabold text-white text-base">Porosite e Fundit</h3>
             <Link href="/dashboard/orders" className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-0.5">
-              <span>Shiko të gjitha</span>
+              <span>Shiko te gjitha</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -129,17 +129,17 @@ export default async function DashboardOverviewPage() {
           {orders.length === 0 ? (
             <div className="text-center py-12 text-slate-550 text-xs flex flex-col items-center gap-2">
               <Package className="w-10 h-10 text-slate-800" />
-              <span>Nuk keni ende asnjë porosi të krijuar.</span>
+              <span>Nuk keni ende asnje porosi te krijuar.</span>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               {orders.slice(0, 4).map((order) => {
                 const statusLabels: Record<string, string> = {
-                  pending_confirmation: "Në Pritje Konfirmimi",
+                  pending_confirmation: "Ne Pritje Konfirmimi",
                   confirmed: "Konfirmuar",
-                  processing: "Në Proçesim",
-                  out_for_delivery: "Nisur me Postë",
-                  delivered: "Dorëzuar",
+                  processing: "Ne Procesim",
+                  out_for_delivery: "Nisur me Poste",
+                  delivered: "Dorezuar",
                   cancelled: "Anuluar"
                 };
 
@@ -178,3 +178,4 @@ export default async function DashboardOverviewPage() {
     </div>
   );
 }
+

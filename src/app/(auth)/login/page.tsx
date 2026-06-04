@@ -1,76 +1,62 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useActionState } from "react";
 import { signIn } from "@/app/actions/auth";
-import { Gavel, AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, KeyRound } from "lucide-react";
+import { BrandLogo } from "@/app/components/BrandUi";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(signIn, null);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-slate-100 relative">
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-1.5 text-xs text-slate-450 hover:text-white transition-colors">
-        <ArrowLeft className="w-4 h-4" />
+    <div className="brand-surface relative flex min-h-screen flex-col items-center justify-center p-4 text-[#352B24]">
+      <Link href="/" className="absolute left-6 top-6 flex items-center gap-1.5 text-xs font-bold text-[#6f5b4c] transition-colors hover:text-[#D96C2D]">
+        <ArrowLeft className="h-4 w-4" />
         <span>Kthehu pas</span>
       </Link>
 
-      <div className="w-full max-w-md bg-slate-900/40 border border-slate-900 rounded-3xl p-8 flex flex-col gap-6 shadow-xl text-left relative overflow-hidden">
-        <div className="flex flex-col items-center gap-2.5 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-500 flex items-center justify-center">
-            <Gavel className="w-6 h-6 transform -rotate-45" />
+      <div className="flex w-full max-w-md flex-col gap-6 rounded-[28px] border border-[#f0d9c4] bg-white/90 p-8 text-left shadow-[0_22px_60px_rgba(53,43,36,0.08)]">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <BrandLogo />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F7D8B5] bg-[#F7D8B5] text-[#D96C2D]">
+            <KeyRound className="h-6 w-6" />
           </div>
-          <h2 className="text-xl font-black text-white tracking-widest uppercase">Hyni ne AuctionSq</h2>
-          <p className="text-slate-450 text-xs">Vendosni email-in dhe fjalekalimin per te hyre ne panelin tuaj.</p>
+          <h2 className="text-xl font-black uppercase tracking-wide text-[#352B24]">Hyni ne NjeKlik</h2>
+          <p className="text-xs leading-5 text-[#6f5b4c]">Vendosni email-in dhe fjalekalimin per te hyre ne llogarine tuaj.</p>
         </div>
 
         <form action={formAction} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-slate-500 text-2xs uppercase font-semibold">Adresa Email</label>
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="emri@shembull.com"
-              className="px-4 py-3 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
-            />
-          </div>
+          <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
+            Adresa email
+            <input type="email" name="email" required placeholder="emri@shembull.com" className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+          </label>
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <label className="text-slate-550 text-2xs uppercase font-semibold">Fjalekalimi</label>
-              <Link href="/reset-password" className="text-3xs text-blue-400 hover:text-blue-300">
+          <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
+            <span className="flex items-center justify-between">
+              Fjalekalimi
+              <Link href="/reset-password" className="text-[11px] normal-case text-[#D96C2D] hover:text-[#bf5520]">
                 Harruat fjalekalimin?
               </Link>
-            </div>
-            <input
-              type="password"
-              name="password"
-              required
-              placeholder="••••••••"
-              className="px-4 py-3 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
-            />
-          </div>
+            </span>
+            <input type="password" name="password" required placeholder="--------" className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+          </label>
 
           {state?.error && (
-            <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex items-start gap-2 text-red-500 text-xs leading-relaxed">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-relaxed text-red-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{state.error}</span>
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isPending}
-            className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-black text-xs uppercase tracking-widest transition-colors shadow-lg shadow-blue-500/20 mt-2"
-          >
-            {isPending ? "Duke ju identifikuar..." : "Hyni ne Llogari"}
+          <button type="submit" disabled={isPending} className="mt-2 w-full rounded-xl bg-[#D96C2D] py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-[0_12px_28px_rgba(217,108,45,0.22)] transition hover:bg-[#bf5520] disabled:opacity-60">
+            {isPending ? "Duke ju identifikuar..." : "Hyni ne llogari"}
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-500 border-t border-slate-900 pt-4 mt-2">
+        <div className="border-t border-[#f0d9c4] pt-4 text-center text-xs text-[#6f5b4c]">
           Nuk keni ende llogari?{" "}
-          <Link href="/register" className="text-blue-400 hover:text-blue-300 font-bold">
+          <Link href="/register" className="font-black text-[#D96C2D] hover:text-[#bf5520]">
             Regjistrohu tani
           </Link>
         </div>
@@ -78,3 +64,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

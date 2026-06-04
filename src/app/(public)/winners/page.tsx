@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Award, Calendar, ChevronRight, Crown, Gavel, Sparkles } from "lucide-react";
 import PollingRefresh from "@/app/components/PollingRefresh";
 import { getAuctions } from "@/lib/db";
@@ -26,47 +26,42 @@ export default async function WinnersPage() {
   }).length;
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="mx-auto max-w-[1500px] px-4 py-10">
       <PollingRefresh intervalMs={15000} />
-      <section className="bg-[#071f43]">
-        <div className="mx-auto max-w-[1440px] px-4 py-12 text-white">
-          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
-            <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-100">
-                <Award className="h-3.5 w-3.5" />
-                Porosite e Mia
-              </p>
-              <h1 className="mt-4 text-4xl font-black tracking-[-0.03em] sm:text-5xl">
-                Historia e fitoreve dhe porosive te mbyllura.
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100/90">
-                Ndiqni ankandet qe jane mbyllur me sukses, fituesit e shpallur dhe cmimet fituese.
-              </p>
+      <section className="rounded-[28px] border border-[#f0d9c4] bg-[#fff3e6] p-8 md:p-10">
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div>
+            <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#D96C2D]">
+              <Award className="h-3.5 w-3.5" />
+              Fituesit
+            </p>
+            <h1 className="mt-4 text-4xl font-black tracking-[-0.04em] text-[#352B24] sm:text-6xl">
+              Historia e fitoreve dhe porosive te mbyllura.
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6f5b4c]">
+              Ndiq ankandet e mbyllura me sukses, fituesit e shpallur dhe cmimet fituese.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-[#f0d9c4] bg-white/75 p-4">
+              <p className="text-xs font-bold uppercase text-[#8a7565]">Totali fitoreve</p>
+              <p className="mt-2 text-3xl font-black text-[#D96C2D]">{endedAuctions.length}</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-blue-100">Totali fitoreve</p>
-                <p className="mt-2 text-3xl font-black">{endedAuctions.length}</p>
-              </div>
-              <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-blue-100">Ky muaj</p>
-                <p className="mt-2 text-3xl font-black">{thisMonthWinners}</p>
-              </div>
+            <div className="rounded-2xl border border-[#f0d9c4] bg-white/75 p-4">
+              <p className="text-xs font-bold uppercase text-[#8a7565]">Ky muaj</p>
+              <p className="mt-2 text-3xl font-black text-[#D96C2D]">{thisMonthWinners}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-4 py-10">
+      <section className="mt-8">
         {endedAuctions.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-14 text-center shadow-sm">
-            <Crown className="mx-auto h-14 w-14 text-slate-300" />
-            <h2 className="mt-4 text-2xl font-black text-slate-900">Ende pa porosi te mbyllura</h2>
-            <p className="mt-2 text-sm text-slate-500">Ka produkte aktive ne ankand. Vendos oferten tende per t&apos;u bere fitues.</p>
-            <Link
-              href="/auctions"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#082047] px-6 py-3 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#12366d]"
-            >
+          <div className="rounded-[28px] border border-[#f0d9c4] bg-white/84 p-14 text-center shadow-sm">
+            <Crown className="mx-auto h-14 w-14 text-[#E6A52F]" />
+            <h2 className="mt-4 text-2xl font-black text-[#352B24]">Ende pa porosi te mbyllura</h2>
+            <p className="mt-2 text-sm text-[#6f5b4c]">Ka produkte aktive ne ankand. Vendos oferten tende per t&apos;u bere fitues.</p>
+            <Link href="/auctions" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#D96C2D] px-6 py-3 text-sm font-black uppercase tracking-wide text-white">
               Shko te ankandet
               <ChevronRight className="h-4 w-4" />
             </Link>
@@ -74,45 +69,42 @@ export default async function WinnersPage() {
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {endedAuctions.map((auction) => (
-              <div key={auction.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="relative aspect-[1.3] bg-slate-50">
+              <div key={auction.id} className="overflow-hidden rounded-[24px] border border-[#f0d9c4] bg-white/86 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
+                <div className="relative aspect-[1.3] bg-[#F7D8B5]/25">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={auction.product?.images?.[0] || "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&auto=format&fit=crop&q=80"}
                     alt={auction.product?.title}
                     className="h-full w-full object-cover"
                   />
-                  <span className="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-slate-950">
+                  <span className="absolute left-3 top-3 rounded-full bg-[#E6A52F] px-3 py-1 text-[10px] font-black uppercase tracking-wide text-[#352B24]">
                     Fitues
                   </span>
                 </div>
-
                 <div className="p-4">
-                  <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-[#D96C2D]">
                     {auction.category?.name || "Kategori"}
                   </p>
-                  <h3 className="mt-2 line-clamp-2 min-h-[44px] text-base font-black text-slate-950">
+                  <h3 className="mt-2 line-clamp-2 min-h-[44px] text-base font-black text-[#352B24]">
                     {auction.product?.title}
                   </h3>
-
-                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+                  <div className="mt-4 rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 text-sm">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Fituesi</span>
-                      <span className="font-bold text-emerald-700">{maskName(auction.winner_id || "")}</span>
+                      <span className="text-[#6f5b4c]">Fituesi</span>
+                      <span className="font-bold text-[#D96C2D]">{maskName(auction.winner_id || "")}</span>
                     </div>
                     <div className="mt-2 flex items-center justify-between">
-                      <span className="text-slate-500">Cmimi fitues</span>
-                  <span className="font-black text-blue-700">{formatEurFromAll(auction.current_price)}</span>
+                      <span className="text-[#6f5b4c]">emimi fitues</span>
+                      <span className="font-black text-[#D96C2D]">{formatEurFromAll(auction.current_price)}</span>
                     </div>
                   </div>
-
-                  <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+                  <div className="mt-4 flex items-center justify-between border-t border-[#f0d9c4] pt-3 text-xs text-[#6f5b4c]">
                     <span className="inline-flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5" />
                       {new Date(auction.end_time).toLocaleDateString("sq-AL")}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 font-bold text-slate-600">
-                      <Sparkles className="h-3.5 w-3.5 text-blue-700" />
+                    <span className="inline-flex items-center gap-1.5 font-bold">
+                      <Sparkles className="h-3.5 w-3.5 text-[#D96C2D]" />
                       Ankand i mbyllur
                     </span>
                   </div>
@@ -122,13 +114,13 @@ export default async function WinnersPage() {
           </div>
         )}
 
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="inline-flex items-center gap-2 text-sm font-bold text-slate-700">
-            <Gavel className="h-4 w-4 text-blue-700" />
+        <div className="mt-8 rounded-[24px] border border-[#f0d9c4] bg-white/84 p-5 shadow-sm">
+          <p className="inline-flex items-center gap-2 text-sm font-black text-[#352B24]">
+            <Gavel className="h-4 w-4 text-[#D96C2D]" />
             Doni te testoni ofertimin?
           </p>
-          <p className="mt-1 text-sm text-slate-500">Kemi shtuar produkte me afat aktiv qe mund te testohen direkt nga faqja e ankandeve.</p>
-          <Link href="/auctions" className="mt-3 inline-flex items-center gap-1 text-sm font-black text-blue-700 hover:text-blue-800">
+          <p className="mt-1 text-sm text-[#6f5b4c]">Kemi produkte me afat aktiv qe mund te testohen direkt nga faqja e ankandeve.</p>
+          <Link href="/auctions" className="mt-3 inline-flex items-center gap-1 text-sm font-black text-[#D96C2D]">
             Hap ankandet aktive
             <ChevronRight className="h-4 w-4" />
           </Link>
@@ -137,3 +129,4 @@ export default async function WinnersPage() {
     </div>
   );
 }
+

@@ -36,7 +36,7 @@ export function AdminSidebarNav({
             key={link.href}
             href={link.href}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition ${
-              active ? "bg-[#082047] text-white" : "text-slate-600 hover:bg-slate-100 hover:text-[#082047]"
+              active ? "bg-[#D96C2D] text-white shadow-[0_10px_24px_rgba(217,108,45,0.2)]" : "text-[#6f5b4c] hover:bg-[#F7D8B5]/45 hover:text-[#D96C2D]"
             }`}
           >
             <Icon className="h-4 w-4" />
@@ -97,3 +97,4 @@ export function ConfirmSubmitButton({
     </button>
   );
 }
+

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Link from "next/link";
 import { getAuditLogs, getAuctions, getBidsForAuction, getOrders, getProducts, getProfiles } from "@/lib/db";
 import { formatEurFromAll } from "@/lib/currency";
@@ -44,48 +44,48 @@ export default async function AdminOverviewPage() {
 
   return (
     <div className="grid gap-6">
-      <div className="rounded-2xl bg-[#082047] p-6 text-white">
-        <p className="text-sm font-bold uppercase text-blue-200">Qendra e kontrollit</p>
-        <h1 className="mt-2 text-3xl font-black">Operacionet e AuctionSq</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100">
+      <div className="rounded-2xl bg-[#fff3e6] p-6 text-[#352B24] border border-[#f0d9c4]">
+        <p className="text-sm font-bold uppercase text-[#D96C2D]">Qendra e kontrollit</p>
+        <h1 className="mt-2 text-3xl font-black">Operacionet e NjeKlik</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6f5b4c]">
           Ankandet e skaduara mbyllen automatikisht. Fituesit dhe porosite krijohen automatikisht ne sistem.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">
         {statCards.map(([label, value, Icon, href]) => (
-          <Link key={label} href={href} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <Icon className="h-6 w-6 text-blue-700" />
+          <Link key={label} href={href} className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <Icon className="h-6 w-6 text-[#D96C2D]" />
             <div className="mt-4 text-3xl font-black">{value}</div>
-            <div className="mt-1 text-sm font-bold text-slate-500">{label}</div>
+            <div className="mt-1 text-sm font-bold text-[#6f5b4c]">{label}</div>
           </Link>
         ))}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-black">Fituesit e fundit</h2>
-            <Link href="/admin/orders" className="flex items-center gap-1 text-sm font-bold text-blue-700">
+            <Link href="/admin/orders" className="flex items-center gap-1 text-sm font-bold text-[#D96C2D]">
               Hap <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="grid gap-3">
             {recentWinners.length === 0 ? (
-              <p className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm text-slate-500">Nuk ka ankande te mbyllura me fitues ende.</p>
+              <p className="rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 text-sm text-[#6f5b4c]">Nuk ka ankande te mbyllura me fitues ende.</p>
             ) : (
               recentWinners.map((order) => (
-                <div key={order.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <div key={order.id} className="flex items-center justify-between rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3">
                   <div>
-                    <p className="font-bold text-slate-900">{order.auction?.product?.title}</p>
-                    <p className="text-xs text-slate-500">Fituesi: {order.winner?.full_name || "I panjohur"} • {new Date(order.created_at).toLocaleString()}</p>
+                    <p className="font-bold text-[#352B24]">{order.auction?.product?.title}</p>
+                    <p className="text-xs text-[#6f5b4c]">Fituesi: {order.winner?.full_name || "I panjohur"} - {new Date(order.created_at).toLocaleString()}</p>
                   </div>
                   <div className="text-right">
                     <p className="inline-flex items-center gap-1 text-xs font-bold uppercase text-emerald-700">
                       <Award className="h-3.5 w-3.5" />
                       Fitues
                     </p>
-                    <p className="text-sm font-black text-blue-700">{formatEurFromAll(order.final_price)}</p>
+                    <p className="text-sm font-black text-[#D96C2D]">{formatEurFromAll(order.final_price)}</p>
                   </div>
                 </div>
               ))
@@ -93,10 +93,10 @@ export default async function AdminOverviewPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-black">Ankandet aktive</h2>
-            <Link href="/admin/auctions" className="flex items-center gap-1 text-sm font-bold text-blue-700">
+            <Link href="/admin/auctions" className="flex items-center gap-1 text-sm font-bold text-[#D96C2D]">
               Hap <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -105,41 +105,41 @@ export default async function AdminOverviewPage() {
               .filter((auction) => auction.status === "active" || auction.status === "scheduled")
               .slice(0, 6)
               .map((auction) => (
-                <div key={auction.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <div key={auction.id} className="flex items-center justify-between rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3">
                   <div>
-                    <p className="font-bold text-slate-900">{auction.product?.title}</p>
-                    <p className="text-xs text-slate-500">{auction.status} • mbaron me {new Date(auction.end_time).toLocaleString()}</p>
+                    <p className="font-bold text-[#352B24]">{auction.product?.title}</p>
+                    <p className="text-xs text-[#6f5b4c]">{auction.status} - mbaron me {new Date(auction.end_time).toLocaleString()}</p>
                   </div>
-                  <span className="text-sm font-black text-blue-700">{formatEurFromAll(auction.current_price)}</span>
+                  <span className="text-sm font-black text-[#D96C2D]">{formatEurFromAll(auction.current_price)}</span>
                 </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-black">Ofertat aktive me te larta</h2>
-            <Link href="/admin/bids" className="flex items-center gap-1 text-sm font-bold text-blue-700">
+            <Link href="/admin/bids" className="flex items-center gap-1 text-sm font-bold text-[#D96C2D]">
               Hap <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="grid gap-3">
             {highestActiveBids.length === 0 ? (
-              <p className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm text-slate-500">
+              <p className="rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 text-sm text-[#6f5b4c]">
                 Ende nuk ka oferta aktive nga klientet.
               </p>
             ) : (
               highestActiveBids.map(({ auction, bid, bidCount }) => (
-                <div key={auction.id} className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <div key={auction.id} className="flex items-center justify-between gap-4 rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3">
                   <div className="min-w-0">
-                    <p className="truncate font-bold text-slate-900">{auction.product?.title}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="truncate font-bold text-[#352B24]">{auction.product?.title}</p>
+                    <p className="text-xs text-[#6f5b4c]">
                       {bid.user?.full_name || "Klient"} - {bidCount} {bidCount === 1 ? "oferte" : "oferta"}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-black text-blue-700">{formatEurFromAll(bid.amount)}</p>
-                    <p className="text-[11px] font-semibold uppercase text-slate-400">me e larta</p>
+                    <p className="text-sm font-black text-[#D96C2D]">{formatEurFromAll(bid.amount)}</p>
+                    <p className="text-[11px] font-semibold uppercase text-[#8a7565]">me e larta</p>
                   </div>
                 </div>
               ))
@@ -147,18 +147,18 @@ export default async function AdminOverviewPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-black">Audit logs te fundit</h2>
-            <Link href="/admin/audit-logs" className="flex items-center gap-1 text-sm font-bold text-blue-700">
+            <h2 className="font-black">Aktiviteti i fundit</h2>
+            <Link href="/admin/audit-logs" className="flex items-center gap-1 text-sm font-bold text-[#D96C2D]">
               Hap <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="grid gap-3">
             {logs.slice(0, 6).map((log) => (
-              <div key={log.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                <p className="font-bold text-slate-900">{log.action}</p>
-                <p className="text-xs text-slate-500">{log.performer?.full_name || "Sistem"} • {new Date(log.created_at).toLocaleString()}</p>
+              <div key={log.id} className="rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3">
+                <p className="font-bold text-[#352B24]">{log.action}</p>
+                <p className="text-xs text-[#6f5b4c]">{log.performer?.full_name || "Sistem"} - {new Date(log.created_at).toLocaleString()}</p>
               </div>
             ))}
           </div>
@@ -167,3 +167,6 @@ export default async function AdminOverviewPage() {
     </div>
   );
 }
+
+
+

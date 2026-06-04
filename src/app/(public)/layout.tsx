@@ -1,20 +1,25 @@
-import React from "react";
+﻿import React from "react";
 import Link from "next/link";
 import { getCategories, getCurrentUserProfile } from "@/lib/db";
 import { signOut } from "@/app/actions/auth";
+import { BrandLogo } from "@/app/components/BrandUi";
 import {
   Bell,
   ChevronDown,
   CircleUserRound,
   Gamepad2,
   Gavel,
+  Grid2X2,
   Heart,
-  LogIn,
+  HelpCircle,
+  Home,
   LogOut,
+  Menu,
+  Monitor,
   Search,
   ShieldCheck,
   Sparkles,
-  UserPlus,
+  Trophy,
   Wrench,
 } from "lucide-react";
 
@@ -24,156 +29,188 @@ export default async function PublicLayout({ children }: { children: React.React
   const user = await getCurrentUserProfile();
   const categories = await getCategories();
   const isLoggedIn = user && user.id !== "usr-guest";
+  const categoryIcons = [Home, Monitor, Sparkles, Wrench, Gamepad2, Trophy, Grid2X2];
 
-  const categoryIcons = [Gamepad2, Sparkles, Wrench, ShieldCheck, Gavel];
+  const navLinks = [
+    { href: "/", label: "Ballina", icon: Home },
+    { href: "/auctions", label: "Ankandet", icon: Gavel },
+    { href: "/categories", label: "Kategorite", icon: Grid2X2 },
+  ];
 
   return (
-    <div className="min-h-screen bg-white text-slate-950">
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1440px] items-center gap-6 px-4 py-3">
-          <Link href="/" className="shrink-0 text-[34px] font-black leading-none tracking-[-0.03em] text-[#082047]">
-            Auction<span className="text-[#1d4ed8]">Sq</span>
-          </Link>
+    <div className="brand-surface min-h-screen text-[#352B24] lg:grid lg:grid-cols-[248px_1fr]">
+      <aside className="sticky top-0 hidden h-screen border-r border-[#f0d9c4] bg-[#fffdf8]/90 px-5 py-6 backdrop-blur lg:block">
+        <BrandLogo />
+        <Link
+          href={user?.is_admin ? "/admin/products" : "/auctions"}
+          className="mt-7 flex items-center justify-center gap-2 rounded-xl bg-[#D96C2D] px-4 py-3 text-sm font-black text-white shadow-[0_12px_24px_rgba(217,108,45,0.22)] transition hover:bg-[#bf5520]"
+        >
+          <Gavel className="h-4 w-4" />
+          {user?.is_admin ? "Shto produkt" : "Shiko ankandet"}
+        </Link>
 
-          <Link href="/" className="hidden text-sm font-semibold text-slate-900 lg:block">
-            Ballina
-          </Link>
-
-          <form action="/auctions" className="relative hidden flex-1 md:block">
-            <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-            <input
-              name="search"
-              placeholder="Kerko produktin qe deshiron..."
-              className="h-12 w-full rounded-full border border-slate-200 bg-slate-100 pl-14 pr-24 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white"
-            />
-            <span className="absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-400 lg:inline">
-              Ctrl + K
+        <nav className="mt-7 grid gap-1 text-sm">
+          {navLinks.map(({ href, label, icon: Icon }) => (
+            <Link key={href} href={href} className="flex items-center gap-3 rounded-xl px-3 py-3 font-bold text-[#5e4c3f] transition hover:bg-[#F7D8B5]/50 hover:text-[#D96C2D]">
+              <Icon className="h-4 w-4 text-[#D96C2D]" />
+              {label}
+            </Link>
+          ))}
+          <div className="mt-2 flex items-center justify-between rounded-xl px-3 py-3 font-bold text-[#5e4c3f]">
+            <span className="inline-flex items-center gap-3">
+              <Grid2X2 className="h-4 w-4 text-[#D96C2D]" />
+              Kategorite
             </span>
-          </form>
-
-          <div className="ml-auto flex items-center gap-3">
-            <button className="hidden h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-blue-200 hover:text-blue-700 sm:flex" aria-label="Favorites">
-              <Heart className="h-5 w-5" />
-            </button>
-            <button className="hidden h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-blue-200 hover:text-blue-700 sm:flex" aria-label="Notifications">
-              <Bell className="h-5 w-5" />
-            </button>
-
-            {!isLoggedIn ? (
-              <Link
-                href="/login"
-                className="rounded-full bg-[#082047] px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#12366d]"
-              >
-                Kycu / Regjistrohu
+            <ChevronDown className="h-4 w-4 text-[#8a7565]" />
+          </div>
+          {categories.slice(0, 7).map((category, index) => {
+            const Icon = categoryIcons[index % categoryIcons.length];
+            return (
+              <Link key={category.id} href={`/auctions?category=${category.slug}`} className="ml-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[#6f5b4c] transition hover:bg-[#F7D8B5]/45 hover:text-[#D96C2D]">
+                <Icon className="h-4 w-4 text-[#D96C2D]/75" />
+                {category.name}
               </Link>
-            ) : (
-              <>
-                {user?.is_admin ? (
-                  <Link
-                    href="/admin"
-                    className="hidden items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-100 sm:flex"
-                  >
-                    <ShieldCheck className="h-4 w-4" />
-                    Paneli Admin
-                  </Link>
-                ) : (
-                  <details className="relative hidden sm:block">
-                    <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-200 hover:text-blue-700">
-                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-rose-100 text-xs font-black uppercase text-rose-700">
-                        {(user?.full_name || "U").slice(0, 2)}
-                      </span>
-                      <span>Llogaria</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </summary>
-                    <div className="absolute right-0 z-30 mt-2 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-                      <div className="border-b border-slate-100 px-4 py-3">
-                        <p className="font-bold text-slate-900">{user?.full_name || "Perdorues"}</p>
-                        <p className="truncate text-xs text-slate-500">{user?.email || "N/A"}</p>
-                      </div>
-                      <div className="grid p-2 text-sm">
-                        <Link href="/profile" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100">
-                          <CircleUserRound className="h-4 w-4 text-slate-500" />
-                          Profili
-                        </Link>
-                        <Link href="/winners" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100">
-                          <Gavel className="h-4 w-4 text-slate-500" />
-                          Porosite e Mia
-                        </Link>
-                      </div>
-                    </div>
-                  </details>
-                )}
-                <form action={signOut}>
-                  <button type="submit" className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-blue-200 hover:text-blue-700" aria-label="Sign out">
-                    <LogOut className="h-4 w-4" />
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
+            );
+          })}
+        </nav>
 
-        <div className="border-t border-slate-100">
-          <div className="mx-auto flex max-w-[1440px] items-center gap-7 overflow-x-auto px-4 py-3 text-sm text-slate-700">
-            <Link href="/categories" className="flex shrink-0 items-center gap-2 border-r border-slate-200 pr-7 font-semibold text-slate-900">
-              Te gjitha kategorite
-              <ChevronDown className="h-4 w-4" />
-            </Link>
-            {categories.slice(0, 5).map((category, index) => {
-              const Icon = categoryIcons[index % categoryIcons.length];
-              return (
-                <Link key={category.id} href={`/auctions?category=${category.slug}`} className="flex shrink-0 items-center gap-2 font-medium transition hover:text-blue-700">
-                  <Icon className="h-5 w-5 text-slate-500" />
-                  {category.name}
+        <div className="mt-6 border-t border-[#f0d9c4] pt-5 text-sm">
+          <Link href="/winners" className="flex items-center gap-3 rounded-xl px-3 py-2.5 font-semibold text-[#6f5b4c] hover:bg-[#F7D8B5]/45">
+            <Trophy className="h-4 w-4 text-[#D96C2D]" />
+            Fituesit
+          </Link>
+          <Link href="/how-it-works" className="flex items-center gap-3 rounded-xl px-3 py-2.5 font-semibold text-[#6f5b4c] hover:bg-[#F7D8B5]/45">
+            <HelpCircle className="h-4 w-4 text-[#D96C2D]" />
+            Si funksionon
+          </Link>
+        </div>
+      </aside>
+
+      <div className="min-w-0">
+        <header className="sticky top-0 z-50 border-b border-[#f0d9c4] bg-[#fffdf8]/92 backdrop-blur">
+          <div className="mx-auto flex max-w-[1500px] items-center gap-4 px-4 py-3">
+            <details className="relative lg:hidden">
+              <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-[#f0d9c4] bg-white text-[#352B24]">
+                <Menu className="h-5 w-5" />
+              </summary>
+              <div className="absolute left-0 top-14 z-50 w-[min(88vw,320px)] rounded-2xl border border-[#f0d9c4] bg-white p-3 shadow-2xl">
+                <BrandLogo className="px-2" />
+                <div className="mt-3 grid gap-1">
+                  {[...navLinks, { href: "/how-it-works", label: "Si funksionon", icon: HelpCircle }].map(({ href, label, icon: Icon }) => (
+                    <Link key={href} href={href} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-[#5e4c3f] hover:bg-[#F7D8B5]/50">
+                      <Icon className="h-4 w-4 text-[#D96C2D]" />
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </details>
+
+            <BrandLogo className="lg:hidden" />
+
+            <form action="/auctions" className="relative hidden max-w-[620px] flex-1 md:block">
+              <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8a7565]" />
+              <input
+                name="search"
+                placeholder="Kerko produkte, kategori apo marka..."
+                className="brand-focus h-12 w-full rounded-xl border border-[#ead2bc] bg-white/80 pl-14 pr-4 text-sm font-semibold text-[#352B24] placeholder:text-[#a99584]"
+              />
+            </form>
+
+            <div className="ml-auto flex items-center gap-3">
+              <Link href="/winners" className="hidden items-center gap-2 text-sm font-bold text-[#5e4c3f] hover:text-[#D96C2D] sm:flex">
+                <Heart className="h-5 w-5" />
+                Lista ime
+              </Link>
+              <button className="hidden h-11 w-11 items-center justify-center rounded-full border border-[#f0d9c4] bg-white text-[#5e4c3f] transition hover:text-[#D96C2D] sm:flex" aria-label="Njoftime">
+                <Bell className="h-5 w-5" />
+              </button>
+
+              {!isLoggedIn ? (
+                <Link href="/login" className="rounded-full bg-[#352B24] px-5 py-3 text-sm font-black text-white transition hover:bg-[#D96C2D]">
+                  Kycu / Regjistrohu
                 </Link>
-              );
-            })}
-            <Link href="/login" className="ml-auto flex shrink-0 items-center gap-2 font-semibold text-blue-800 sm:hidden">
-              <LogIn className="h-4 w-4" />
-              Hyr
-            </Link>
-            <Link href="/register" className="hidden shrink-0 items-center gap-2 font-semibold text-blue-800 sm:flex lg:hidden">
-              <UserPlus className="h-4 w-4" />
-              Regjistrohu
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main>{children}</main>
-
-      <footer className="border-t border-slate-200 bg-[#082047] py-12 text-white">
-        <div className="mx-auto grid max-w-[1440px] gap-10 px-4 md:grid-cols-4">
-          <div>
-            <div className="text-3xl font-black tracking-[-0.03em]">AuctionSq</div>
-            <p className="mt-3 max-w-xs text-sm leading-6 text-blue-100">
-              Ankande online per produkte reale, te kontrolluara dhe te listuara nga ekipi yne.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-bold">Lidhje</h4>
-            <div className="mt-4 flex flex-col gap-2 text-sm text-blue-100">
-              <Link href="/auctions">Te gjitha produktet</Link>
-              <Link href="/ending-soon">Drejt perfundimit</Link>
-              <Link href="/winners">Fituesit</Link>
+              ) : (
+                <>
+                  {user?.is_admin ? (
+                    <Link href="/admin" className="hidden items-center gap-2 rounded-full border border-[#F7D8B5] bg-[#F7D8B5]/60 px-4 py-3 text-sm font-black text-[#D96C2D] transition hover:bg-[#F7D8B5] sm:flex">
+                      <ShieldCheck className="h-4 w-4" />
+                      Paneli Admin
+                    </Link>
+                  ) : (
+                    <details className="relative hidden sm:block">
+                      <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-[#f0d9c4] bg-white px-3 py-2 text-sm font-black text-[#5e4c3f] transition hover:text-[#D96C2D]">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#F7D8B5] text-xs font-black uppercase text-[#D96C2D]">
+                          {(user?.full_name || "U").slice(0, 2)}
+                        </span>
+                        <span>Llogaria</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </summary>
+                      <div className="absolute right-0 z-30 mt-2 w-72 overflow-hidden rounded-2xl border border-[#f0d9c4] bg-white shadow-xl">
+                        <div className="border-b border-[#f0d9c4] px-4 py-3">
+                          <p className="font-black text-[#352B24]">{user?.full_name || "Perdorues"}</p>
+                          <p className="truncate text-xs text-[#8a7565]">{user?.email || "N/A"}</p>
+                        </div>
+                        <div className="grid p-2 text-sm">
+                          <Link href="/profile" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-[#5e4c3f] transition hover:bg-[#FFF8F1]">
+                            <CircleUserRound className="h-4 w-4 text-[#D96C2D]" />
+                            Profili
+                          </Link>
+                          <Link href="/winners" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-[#5e4c3f] transition hover:bg-[#FFF8F1]">
+                            <Gavel className="h-4 w-4 text-[#D96C2D]" />
+                            Porosite e Mia
+                          </Link>
+                        </div>
+                      </div>
+                    </details>
+                  )}
+                  <form action={signOut}>
+                    <button type="submit" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#f0d9c4] bg-white text-[#5e4c3f] transition hover:text-[#D96C2D]" aria-label="Dil">
+                      <LogOut className="h-4 w-4" />
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
-          <div>
-            <h4 className="font-bold">Ndihme</h4>
-            <div className="mt-4 flex flex-col gap-2 text-sm text-blue-100">
-              <Link href="/how-it-works">Si funksionon</Link>
-              <Link href="/faq">FAQ</Link>
-              <Link href="/contact">Kontakt</Link>
+        </header>
+
+        <main>{children}</main>
+
+        <footer className="border-t border-[#f0d9c4] bg-[#fffdf8] py-10">
+          <div className="mx-auto grid max-w-[1500px] gap-8 px-4 md:grid-cols-4">
+            <div>
+              <BrandLogo />
+              <p className="mt-3 max-w-xs text-sm leading-6 text-[#6f5b4c]">
+                Ankande online per produkte reale, te kontrolluara dhe te menaxhuara nga ekipi yne.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-black text-[#352B24]">Lidhje</h4>
+              <div className="mt-4 flex flex-col gap-2 text-sm text-[#6f5b4c]">
+                <Link href="/auctions">Te gjitha produktet</Link>
+                <Link href="/ending-soon">Drejt perfundimit</Link>
+                <Link href="/winners">Fituesit</Link>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-black text-[#352B24]">Ndihme</h4>
+              <div className="mt-4 flex flex-col gap-2 text-sm text-[#6f5b4c]">
+                <Link href="/how-it-works">Si funksionon</Link>
+                <Link href="/faq">FAQ</Link>
+                <Link href="/contact">Kontakt</Link>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-black text-[#352B24]">Garancia NjeKlik</h4>
+              <p className="mt-4 text-sm leading-6 text-[#6f5b4c]">
+                Pa shites te trete. Produktet testohen, fotografohen dhe publikohen nga administratoret.
+              </p>
             </div>
           </div>
-          <div>
-            <h4 className="font-bold">Garancia jone</h4>
-            <p className="mt-4 text-sm leading-6 text-blue-100">
-              Pa shites te trete. Produktet testohen, fotografohen dhe menaxhohen nga administratoret.
-            </p>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }
+

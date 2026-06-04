@@ -71,3 +71,4 @@ export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) 
     </div>
   );
 }
+

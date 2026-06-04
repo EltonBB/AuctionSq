@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Link from "next/link";
 import { getCurrentUserProfile, getOrdersByUser } from "@/lib/db";
 import OrderAddressForm from "@/app/components/OrderAddressForm";
@@ -13,11 +13,11 @@ export default async function MyOrdersPage() {
 
   // Status translate map
   const statusLabels: Record<string, string> = {
-    pending_confirmation: "Në Pritje Konfirmimi",
+    pending_confirmation: "Ne Pritje Konfirmimi",
     confirmed: "Konfirmuar",
-    processing: "Në Proçesim",
-    out_for_delivery: "Nisur me Postë",
-    delivered: "Dorëzuar",
+    processing: "Ne Procesim",
+    out_for_delivery: "Nisur me Poste",
+    delivered: "Dorezuar",
     cancelled: "Anuluar"
   };
 
@@ -35,9 +35,9 @@ export default async function MyOrdersPage() {
     const steps = [
       { key: "pending_confirmation", label: "Konfirmimi" },
       { key: "confirmed", label: "Konfirmuar" },
-      { key: "processing", label: "Proçesim" },
+      { key: "processing", label: "Procesim" },
       { key: "out_for_delivery", label: "Posta" },
-      { key: "delivered", label: "Dorëzuar" }
+      { key: "delivered", label: "Dorezuar" }
     ];
 
     if (status === "cancelled") {
@@ -57,15 +57,15 @@ export default async function MyOrdersPage() {
     <div className="flex flex-col gap-8 text-left">
       <PollingRefresh intervalMs={15000} />
       <div>
-        <h1 className="text-2xl font-extrabold text-white">Porositë e Mia</h1>
-        <p className="text-slate-400 text-sm mt-1">Ndiqni progresin e dërgesave dhe konfirmoni adresat e dërgesave.</p>
+        <h1 className="text-2xl font-extrabold text-white">Porosite e Mia</h1>
+        <p className="text-slate-400 text-sm mt-1">Ndiqni progresin e dergesave dhe konfirmoni adresat e dergesave.</p>
       </div>
 
       {orders.length === 0 ? (
         <div className="text-center py-20 bg-slate-900/20 rounded-3xl border border-slate-900 flex flex-col items-center gap-3">
           <ShoppingBag className="w-16 h-16 text-slate-700" />
-          <h3 className="font-bold text-slate-400 text-lg">Nuk keni asnjë porosi ende</h3>
-          <p className="text-slate-500 text-sm">Merrni pjesë në ankande për të siguruar fitoret dhe porositë e para.</p>
+          <h3 className="font-bold text-slate-400 text-lg">Nuk keni asnje porosi ende</h3>
+          <p className="text-slate-500 text-sm">Merrni pjese ne ankande per te siguruar fitoret dhe porosite e para.</p>
           <Link href="/auctions" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs uppercase mt-2 transition-colors">
             Shko te Ankandet
           </Link>
@@ -84,7 +84,7 @@ export default async function MyOrdersPage() {
                 {/* Header split */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900 pb-5">
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-slate-550 text-3xs font-extrabold uppercase tracking-wider block">ID e Porosisë</span>
+                    <span className="text-slate-550 text-3xs font-extrabold uppercase tracking-wider block">ID e Porosise</span>
                     <span className="text-sm font-black text-white">{order.id.substring(0, 18).toUpperCase()}...</span>
                     <span className="text-3xs text-slate-500 flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
@@ -93,7 +93,7 @@ export default async function MyOrdersPage() {
                   </div>
                   <div className="flex items-center gap-3 self-start sm:self-center">
                     <div className="text-right">
-                      <span className="text-slate-500 text-3xs block uppercase">Shuma për të paguar</span>
+                      <span className="text-slate-500 text-3xs block uppercase">Shuma per te paguar</span>
                       <span className="text-lg font-black text-emerald-400">{order.final_price.toLocaleString()} Llek</span>
                     </div>
                     <span className={`px-3 py-1 rounded-lg text-2xs font-extrabold uppercase tracking-wider ${statusStyles[order.status]}`}>
@@ -135,7 +135,7 @@ export default async function MyOrdersPage() {
                       </span>
                       {order.status === "pending_confirmation" && (
                         <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/25 text-amber-400 text-3xs font-bold uppercase animate-pulse">
-                          Kërkohet Konfirmim Adrese
+                          Kerkohet Konfirmim Adrese
                         </span>
                       )}
                     </div>
@@ -150,7 +150,7 @@ export default async function MyOrdersPage() {
 
                     {!isAddressEditable && (
                       <span className="text-3xs text-slate-500 italic block mt-1">
-                        * Adresa nuk mund të ndryshohet pasi porosia ka kaluar në proçesim ose është dërguar.
+                        * Adresa nuk mund te ndryshohet pasi porosia ka kaluar ne procesim ose eshte derguar.
                       </span>
                     )}
                   </div>
@@ -186,3 +186,4 @@ export default async function MyOrdersPage() {
     </div>
   );
 }
+

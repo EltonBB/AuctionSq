@@ -51,12 +51,6 @@ export default async function HomePage() {
                 className="absolute inset-0 h-full w-full object-cover object-center transition duration-700 hover:scale-[1.025]"
               />
               <div className="absolute inset-y-0 left-0 hidden w-32 bg-gradient-to-r from-[#fff2e5] to-transparent lg:block" />
-              <div className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 gap-2 rounded-full bg-white/85 px-4 py-2 shadow-sm backdrop-blur sm:flex">
-                <span className="h-2 w-2 rounded-full bg-[#D96C2D]" />
-                <span className="h-2 w-2 rounded-full bg-[#ead2bc]" />
-                <span className="h-2 w-2 rounded-full bg-[#ead2bc]" />
-                <span className="h-2 w-2 rounded-full bg-[#ead2bc]" />
-              </div>
             </div>
           </div>
         </div>

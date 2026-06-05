@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, MapPin, X } from "lucide-react";
-import type { Auction, Order, Product, Profile } from "@/lib/db";
+import Link from "next/link";
+import { AlertCircle, CheckCircle2, Gavel, MapPin, TrendingDown, Trophy, X } from "lucide-react";
+import type { Auction, Bid, Order, Product, Profile } from "@/lib/db";
 import { updatePassword, updateProfile } from "@/app/actions/auth";
 import { formatEurFromAll } from "@/lib/currency";
 
@@ -21,6 +22,7 @@ function Notice({ state }: { state: any }) {
 type WorkspaceProps = {
   user: Profile;
   orders: (Order & { auction: Auction & { product: Product } })[];
+  bids: (Bid & { auction: Auction & { product: Product } })[];
 };
 
 const orderStatusLabels: Record<string, string> = {
@@ -32,7 +34,7 @@ const orderStatusLabels: Record<string, string> = {
   cancelled: "Anuluar",
 };
 
-export default function ProfileWorkspace({ user, orders }: WorkspaceProps) {
+export default function ProfileWorkspace({ user, orders, bids }: WorkspaceProps) {
   const [profileState, profileAction, profilePending] = useActionState(updateProfile, null);
   const [addressState, addressAction, addressPending] = useActionState(updateProfile, null);
   const [passwordState, passwordAction, passwordPending] = useActionState(updatePassword, null);
@@ -46,6 +48,16 @@ export default function ProfileWorkspace({ user, orders }: WorkspaceProps) {
   }, [user.full_name]);
 
   const isOwnerAdmin = !!user.is_admin;
+  const bidSummaries = useMemo(() => {
+    const byAuction = new Map<string, Bid & { auction: Auction & { product: Product } }>();
+    for (const bid of bids) {
+      const current = byAuction.get(bid.auction_id);
+      if (!current || bid.amount > current.amount || (bid.amount === current.amount && bid.created_at > current.created_at)) {
+        byAuction.set(bid.auction_id, bid);
+      }
+    }
+    return Array.from(byAuction.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [bids]);
   const canBid =
     isOwnerAdmin ||
     !!user.full_name &&
@@ -180,6 +192,77 @@ export default function ProfileWorkspace({ user, orders }: WorkspaceProps) {
                   <MapPin className="h-3.5 w-3.5" />
                   Menaxho adresat
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!isOwnerAdmin && (
+          <div className="mt-6 rounded-[28px] border border-[#f0d9c4] bg-white/86 p-6 shadow-[0_16px_44px_rgba(53,43,36,0.06)] md:p-7">
+            <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-[0.12em] text-[#D96C2D]">Ofertat e mia</h2>
+                <p className="mt-1 text-xs text-[#8a7565]">Shiko nese je ne krye apo je tejkaluar.</p>
+              </div>
+              <div className="grid gap-3">
+                {bidSummaries.length === 0 ? (
+                  <p className="rounded-2xl border border-[#f0d9c4] bg-[#FFF8F1] p-4 text-sm text-[#8a7565]">
+                    Nuk keni vendosur ende asnje oferte.
+                  </p>
+                ) : (
+                  bidSummaries.map((bid) => {
+                    const isWinning = bid.status === "active" && bid.amount >= bid.auction.current_price;
+                    const isEnded = bid.auction.status === "ended";
+                    const isWinner = isEnded && bid.auction.winner_id === user.id;
+                    const label = isWinner ? "Fituar" : isWinning ? "Ne krye" : "Tejkaluar";
+                    const Icon = isWinner || isWinning ? Trophy : TrendingDown;
+                    return (
+                      <Link
+                        key={`${bid.auction_id}-${bid.id}`}
+                        href={`/auctions/${bid.auction_id}`}
+                        className="group rounded-2xl border border-[#f0d9c4] bg-[#FFF8F1]/80 p-4 transition hover:-translate-y-0.5 hover:border-[#D96C2D]/55 hover:bg-white"
+                      >
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex min-w-0 gap-3">
+                            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#F7D8B5]/45">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={bid.auction.product?.images?.[0] || "/brand/home-feature-product.png"}
+                                alt=""
+                                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-black text-[#352B24]">{bid.auction.product?.title || "Produkt"}</p>
+                              <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
+                                <span className="rounded-full bg-white px-2.5 py-1 text-[#6f5b4c]">
+                                  Oferta jote: {formatEurFromAll(bid.amount)}
+                                </span>
+                                <span className="rounded-full bg-white px-2.5 py-1 text-[#6f5b4c]">
+                                  Aktuale: {formatEurFromAll(bid.auction.current_price)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <span
+                            className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black uppercase ${
+                              isWinner || isWinning ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                            }`}
+                          >
+                            <Icon className="h-3.5 w-3.5" />
+                            {label}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })
+                )}
+                {bidSummaries.length > 0 && (
+                  <Link href="/auctions" className="inline-flex w-fit items-center gap-2 rounded-xl border border-[#D96C2D]/35 px-4 py-2 text-xs font-black uppercase text-[#D96C2D] transition hover:bg-[#D96C2D] hover:text-white">
+                    <Gavel className="h-3.5 w-3.5" />
+                    Vazhdo ofertimin
+                  </Link>
+                )}
               </div>
             </div>
           </div>

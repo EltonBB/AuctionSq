@@ -23,7 +23,7 @@ export async function signIn(prevState: unknown, formData: FormData) {
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
-  redirect(profile?.is_admin ? "/admin" : "/profile");
+  redirect(profile?.is_admin ? "/admin" : "/dashboard");
 }
 
 export async function signUp(prevState: unknown, formData: FormData) {
@@ -77,22 +77,19 @@ export async function updateProfile(prevState: unknown, formData: FormData) {
 
   if (!user) return { success: false, error: "Unauthorized. Please log in." };
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      full_name: fullName,
-      phone_number: phoneNumber,
-      country,
-      city,
-      address,
-      postal_code: postalCode || null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
+  const { error } = await supabase.rpc("update_own_profile", {
+    p_full_name: fullName,
+    p_phone_number: phoneNumber,
+    p_country: country,
+    p_city: city,
+    p_address: address,
+    p_postal_code: postalCode || null,
+  });
 
   if (error) return { success: false, error: error.message };
 
   revalidatePath("/profile");
+  revalidatePath("/dashboard/profile");
   revalidatePath("/", "layout");
   return { success: true, message: "Profile successfully updated." };
 }

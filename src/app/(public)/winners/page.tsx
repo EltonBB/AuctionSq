@@ -35,7 +35,7 @@ export default async function WinnersPage() {
               <Award className="h-3.5 w-3.5" />
               Fituesit
             </p>
-            <h1 className="mt-4 text-4xl font-black tracking-[-0.04em] text-[#352B24] sm:text-6xl">
+          <h1 className="mt-4 text-4xl font-black text-[#352B24] sm:text-6xl">
               Historia e fitoreve dhe porosive te mbyllura.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6f5b4c]">

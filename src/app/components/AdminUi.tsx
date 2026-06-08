@@ -27,7 +27,7 @@ export function AdminSidebarNav({
   const pathname = usePathname();
 
   return (
-    <nav className="grid gap-1">
+    <nav className="grid max-w-full grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-1">
       {links.map((link) => {
         const Icon = iconMap[link.icon];
         const active = pathname === link.href || (link.href !== "/admin" && pathname.startsWith(link.href));
@@ -35,7 +35,7 @@ export function AdminSidebarNav({
           <Link
             key={link.href}
             href={link.href}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition ${
+            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition sm:px-4 ${
               active ? "bg-[#D96C2D] text-white shadow-[0_10px_24px_rgba(217,108,45,0.2)]" : "text-[#6f5b4c] hover:bg-[#F7D8B5]/45 hover:text-[#D96C2D]"
             }`}
           >

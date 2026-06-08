@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getAuctionById, getAuctions, getBidsForAuction, getCurrentUserProfile } from "@/lib/db";
 import { formatEurFromAll } from "@/lib/currency";
 import BiddingForm from "@/app/components/BiddingForm";
+import CountdownText from "@/app/components/CountdownText";
 import PollingRefresh from "@/app/components/PollingRefresh";
 import { BrandAuctionCard } from "@/app/components/BrandUi";
 import { AlertTriangle, Award, ChevronRight, Heart, RotateCcw, ShieldCheck, Truck, UserCheck } from "lucide-react";
@@ -14,14 +15,6 @@ interface AuctionDetailPageProps {
   params: Promise<{
     id: string;
   }>;
-}
-
-function formatTime(endTime: string) {
-  const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
-  const hours = Math.floor(diff / 3_600_000);
-  const minutes = Math.floor((diff % 3_600_000) / 60_000);
-  const seconds = Math.floor((diff % 60_000) / 1000);
-  return `${hours}h ${minutes}m ${seconds}s`;
 }
 
 function maskName(name: string) {
@@ -39,6 +32,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
 
   const bids = await getBidsForAuction(auctionId);
   const activeBids = bids.filter((bid) => bid.status === "active");
+  const leaderBidId = activeBids[0]?.id;
   const user = await getCurrentUserProfile();
   const isOwnerAdmin = !!user?.is_admin;
   const isLoggedIn = user && user.id !== "usr-guest";
@@ -114,7 +108,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
                     {isEnded ? "Mbyllur" : "Aktiv"}
                   </span>
                 </div>
-                <h1 className="text-3xl font-black leading-tight tracking-[-0.03em] text-[#352B24]">
+                <h1 className="text-3xl font-black leading-tight text-[#352B24]">
                   {auc.product?.title}
                 </h1>
               </div>
@@ -133,7 +127,9 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
               <div className="grid grid-cols-2 border-b border-[#f0d9c4] bg-[#352B24] text-white">
                 <div className="p-5">
                   <div className="text-xs font-bold uppercase text-[#F7D8B5]">Koha e mbetur</div>
-                  <div className="mt-2 text-lg font-black">{formatTime(auc.end_time)}</div>
+                  <div className="mt-2 text-lg font-black">
+                    <CountdownText endTime={auc.end_time} showSeconds />
+                  </div>
                 </div>
                 <div className="border-l border-white/10 p-5 text-right">
                   <div className="text-xs font-bold uppercase text-[#F7D8B5]">Oferta</div>
@@ -181,7 +177,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
 
         <section className="mt-10 grid gap-8 xl:grid-cols-[1fr_420px]">
           <div className="rounded-[24px] border border-[#f0d9c4] bg-white/84 p-6">
-            <h2 className="text-2xl font-black tracking-[-0.02em] text-[#352B24]">Përshkrimi</h2>
+            <h2 className="text-2xl font-black text-[#352B24]">Përshkrimi</h2>
             <p className="mt-4 whitespace-pre-line text-sm leading-7 text-[#6f5b4c]">{auc.product?.description}</p>
             {auc.product?.testing_notes && (
               <div className="mt-6 rounded-2xl border border-[#F7D8B5] bg-[#FFF8F1] p-5">
@@ -195,15 +191,15 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
           </div>
 
           <div className="rounded-[24px] border border-[#f0d9c4] bg-white/84 p-6">
-            <h2 className="text-xl font-black tracking-[-0.02em] text-[#352B24]">Historiku i ofertave</h2>
+            <h2 className="text-xl font-black text-[#352B24]">Historiku i ofertave</h2>
             {bids.length === 0 ? (
               <p className="mt-6 rounded-2xl bg-[#FFF8F1] p-8 text-center text-sm text-[#8a7565]">
                 Nuk ka ende oferta. Bëhu i pari që oferton.
               </p>
             ) : (
               <div className="mt-5 divide-y divide-[#f0d9c4]">
-                {bids.map((bid, index) => {
-                  const isLeader = bid.status === "active" && index === 0;
+                {bids.map((bid) => {
+                  const isLeader = bid.id === leaderBidId;
                   return (
                     <div key={bid.id} className="flex items-center justify-between gap-4 py-4">
                       <div>
@@ -232,7 +228,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
         {relatedAuctions.length > 0 && (
           <section className="mt-10">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-2xl font-black tracking-[-0.02em] text-[#352B24]">Ankande të tjera</h2>
+              <h2 className="text-2xl font-black text-[#352B24]">Ankande të tjera</h2>
               <Link href="/auctions" className="text-sm font-black text-[#D96C2D]">Shiko të gjitha</Link>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">

@@ -37,7 +37,12 @@ export default function BiddingForm({
   const [bidValueEur, setBidValueEur] = useState<number>(defaultMinBidEur);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     setBidValueEur(defaultMinBidEur);
@@ -68,6 +73,16 @@ export default function BiddingForm({
       setTimeout(() => setSuccess(null), 5000);
     });
   };
+
+  if (!isMounted) {
+    return (
+      <div className="rounded-2xl border border-white/15 bg-white/10 p-6 text-left shadow-lg">
+        <div className="h-4 w-32 rounded bg-white/15" />
+        <div className="mt-4 h-12 rounded-xl border border-white/15 bg-[#2a211b]" />
+        <div className="mt-4 h-12 rounded-xl bg-white/15" />
+      </div>
+    );
+  }
 
   if (isLoggedIn && isAdmin) {
     return (

@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { Heart } from "lucide-react";
+import CountdownText from "@/app/components/CountdownText";
 import { formatEurFromAll } from "@/lib/currency";
 import type { Auction, Category, Product } from "@/lib/db";
 
@@ -10,22 +11,15 @@ export type AuctionWithProduct = Auction & {
 
 export function BrandLogo({ className = "", compact = false }: { className?: string; compact?: boolean }) {
   return (
-    <Link href="/" className={`inline-flex items-center gap-2 ${className}`} aria-label="NjeKlik">
+    <Link href="/" className={`inline-flex items-center gap-2 ${className}`} aria-label="AuctionSq">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={compact ? "/brand/njeklik-mark-cropped.png" : "/brand/njeklik-wordmark-cropped.png"}
-        alt="NjeKlik"
-        className={compact ? "h-10 w-10 rounded-xl object-cover" : "h-12 w-auto object-contain mix-blend-multiply"}
+        src={compact ? "/brand/auctionsq-mark-transparent.png" : "/brand/auctionsq-wordmark-transparent.png"}
+        alt="AuctionSq"
+        className={compact ? "h-10 w-10 rounded-xl object-contain" : "h-12 w-auto object-contain"}
       />
     </Link>
   );
-}
-
-export function formatAuctionTime(endTime: string) {
-  const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
-  const hours = Math.floor(diff / 3_600_000);
-  const minutes = Math.floor((diff % 3_600_000) / 60_000);
-  return `${hours}h ${minutes}m`;
 }
 
 export function BrandAuctionCard({ auction, compact = false }: { auction: AuctionWithProduct; compact?: boolean }) {
@@ -61,7 +55,9 @@ export function BrandAuctionCard({ auction, compact = false }: { auction: Auctio
             <div className="text-[11px] font-semibold text-[#8a7565]">Oferta aktuale</div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-black text-[#352B24]">{formatAuctionTime(auction.end_time)}</div>
+            <div className="text-sm font-black text-[#352B24]">
+              <CountdownText endTime={auction.end_time} />
+            </div>
             <div className="text-[11px] font-semibold text-[#8a7565]">Koha e mbetur</div>
           </div>
         </div>

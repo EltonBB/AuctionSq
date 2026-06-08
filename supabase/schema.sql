@@ -125,7 +125,7 @@ BEGIN
     NEW.updated_at = now();
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE plpgsql SET search_path = public;
 
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON public.products FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -159,6 +159,72 @@ RETURNS BOOLEAN AS $$
       AND is_admin = true
   );
 $$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
+
+CREATE OR REPLACE FUNCTION public.prevent_profile_role_self_mutation()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF auth.uid() = OLD.id AND NOT public.current_user_is_admin() THEN
+        IF NEW.is_admin IS DISTINCT FROM OLD.is_admin
+           OR NEW.is_blocked IS DISTINCT FROM OLD.is_blocked THEN
+            RAISE EXCEPTION 'Profile role fields cannot be changed by the account owner.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE TRIGGER protect_profile_role_self_mutation
+    BEFORE UPDATE ON public.profiles
+    FOR EACH ROW
+    EXECUTE FUNCTION public.prevent_profile_role_self_mutation();
+
+CREATE OR REPLACE FUNCTION public.update_own_profile(
+    p_full_name TEXT,
+    p_phone_number TEXT,
+    p_country TEXT,
+    p_city TEXT,
+    p_address TEXT,
+    p_postal_code TEXT DEFAULT NULL
+)
+RETURNS public.profiles AS $$
+DECLARE
+    v_profile public.profiles;
+    v_country TEXT;
+BEGIN
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Unauthorized. Please log in.';
+    END IF;
+
+    v_country := COALESCE(NULLIF(trim(p_country), ''), 'Albania');
+
+    IF NULLIF(trim(p_full_name), '') IS NULL
+       OR NULLIF(trim(p_phone_number), '') IS NULL
+       OR NULLIF(trim(v_country), '') IS NULL
+       OR NULLIF(trim(p_city), '') IS NULL
+       OR NULLIF(trim(p_address), '') IS NULL THEN
+        RAISE EXCEPTION 'All profile and delivery fields are required.';
+    END IF;
+
+    UPDATE public.profiles
+    SET
+        full_name = trim(p_full_name),
+        phone_number = trim(p_phone_number),
+        country = v_country,
+        city = trim(p_city),
+        address = trim(p_address),
+        postal_code = NULLIF(trim(p_postal_code), ''),
+        updated_at = now()
+    WHERE id = auth.uid()
+    RETURNING * INTO v_profile;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'User profile not found.';
+    END IF;
+
+    RETURN v_profile;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- =====================================================================
 -- 9. TRANSACTIONAL BIDDING FUNCTION (SAFE FROM RACE CONDITIONS)
@@ -285,6 +351,18 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE UNIQUE INDEX IF NOT EXISTS orders_one_per_auction_idx
 ON public.orders (auction_id);
 
+CREATE UNIQUE INDEX IF NOT EXISTS auctions_one_live_per_product_idx
+ON public.auctions (product_id)
+WHERE status IN ('active', 'scheduled');
+
+CREATE INDEX IF NOT EXISTS auctions_winner_id_idx ON public.auctions (winner_id);
+CREATE INDEX IF NOT EXISTS auctions_winning_bid_id_idx ON public.auctions (winning_bid_id);
+CREATE INDEX IF NOT EXISTS audit_logs_performed_by_idx ON public.audit_logs (performed_by);
+CREATE INDEX IF NOT EXISTS bids_auction_id_idx ON public.bids (auction_id);
+CREATE INDEX IF NOT EXISTS bids_user_id_idx ON public.bids (user_id);
+CREATE INDEX IF NOT EXISTS orders_winner_id_idx ON public.orders (winner_id);
+CREATE INDEX IF NOT EXISTS products_category_id_idx ON public.products (category_id);
+
 CREATE OR REPLACE FUNCTION public.close_expired_auctions()
 RETURNS TABLE (
     auction_id UUID,
@@ -376,6 +454,67 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public;
 
+CREATE OR REPLACE FUNCTION public.confirm_order_delivery(
+    p_order_id UUID,
+    p_full_name TEXT,
+    p_phone_number TEXT,
+    p_country TEXT,
+    p_city TEXT,
+    p_address TEXT
+)
+RETURNS public.orders AS $$
+DECLARE
+    v_order public.orders;
+    v_country TEXT;
+BEGIN
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Ju lutemi identifikohuni.';
+    END IF;
+
+    v_country := COALESCE(NULLIF(trim(p_country), ''), 'Albania');
+
+    IF NULLIF(trim(p_full_name), '') IS NULL
+       OR NULLIF(trim(p_phone_number), '') IS NULL
+       OR NULLIF(trim(v_country), '') IS NULL
+       OR NULLIF(trim(p_city), '') IS NULL
+       OR NULLIF(trim(p_address), '') IS NULL THEN
+        RAISE EXCEPTION 'Te gjitha fushat e adreses jane te detyrueshme.';
+    END IF;
+
+    SELECT *
+    INTO v_order
+    FROM public.orders
+    WHERE id = p_order_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Porosia nuk u gjet.';
+    END IF;
+
+    IF v_order.winner_id <> auth.uid() THEN
+        RAISE EXCEPTION 'Nuk jeni i autorizuar.';
+    END IF;
+
+    IF v_order.status NOT IN ('pending_confirmation', 'confirmed') THEN
+        RAISE EXCEPTION 'Nuk mund te ndryshohet adresa ne kete faze.';
+    END IF;
+
+    UPDATE public.orders
+    SET
+        full_name = trim(p_full_name),
+        phone_number = trim(p_phone_number),
+        country = v_country,
+        city = trim(p_city),
+        address = trim(p_address),
+        status = CASE WHEN status = 'pending_confirmation' THEN 'confirmed' ELSE status END,
+        updated_at = now()
+    WHERE id = p_order_id
+    RETURNING * INTO v_order;
+
+    RETURN v_order;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- =====================================================================
 -- 11. ROW-LEVEL SECURITY (RLS) POLICIES
 -- =====================================================================
@@ -393,81 +532,128 @@ ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read-only access to categories" ON public.categories
     FOR SELECT TO public USING (true);
 
-CREATE POLICY "Allow admin write access to categories" ON public.categories
-    FOR ALL TO authenticated USING (public.current_user_is_admin())
-    WITH CHECK (public.current_user_is_admin());
+CREATE POLICY "Allow admin insert categories" ON public.categories
+    FOR INSERT TO authenticated
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin update categories" ON public.categories
+    FOR UPDATE TO authenticated
+    USING ((SELECT public.current_user_is_admin()))
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin delete categories" ON public.categories
+    FOR DELETE TO authenticated
+    USING ((SELECT public.current_user_is_admin()));
 
 -- Profile Policies
 CREATE POLICY "Allow users to read own profile or admins" ON public.profiles
     FOR SELECT TO authenticated USING (
-        auth.uid() = id OR public.current_user_is_admin()
+        (SELECT auth.uid()) = id OR (SELECT public.current_user_is_admin())
     );
 
-CREATE POLICY "Allow users to update their own profiles" ON public.profiles
-    FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+CREATE POLICY "Allow admins insert profiles" ON public.profiles
+    FOR INSERT TO authenticated
+    WITH CHECK ((SELECT public.current_user_is_admin()));
 
-CREATE POLICY "Allow admins full access to profiles" ON public.profiles
-    FOR ALL TO authenticated USING (public.current_user_is_admin())
-    WITH CHECK (public.current_user_is_admin());
+CREATE POLICY "Allow admins update profiles" ON public.profiles
+    FOR UPDATE TO authenticated
+    USING ((SELECT public.current_user_is_admin()))
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admins delete profiles" ON public.profiles
+    FOR DELETE TO authenticated
+    USING ((SELECT public.current_user_is_admin()));
 
 -- Product Policies
-CREATE POLICY "Allow public read access to products" ON public.products
-    FOR SELECT TO public USING (status = 'active' OR public.current_user_is_admin());
+CREATE POLICY "Allow anon read active products" ON public.products
+    FOR SELECT TO anon
+    USING (status = 'active');
 
-CREATE POLICY "Allow admin full access to products" ON public.products
-    FOR ALL TO authenticated USING (public.current_user_is_admin())
-    WITH CHECK (public.current_user_is_admin());
+CREATE POLICY "Allow authenticated read products" ON public.products
+    FOR SELECT TO authenticated
+    USING (status = 'active' OR (SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin insert products" ON public.products
+    FOR INSERT TO authenticated
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin update products" ON public.products
+    FOR UPDATE TO authenticated
+    USING ((SELECT public.current_user_is_admin()))
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin delete products" ON public.products
+    FOR DELETE TO authenticated
+    USING ((SELECT public.current_user_is_admin()));
 
 -- Auction Policies
 CREATE POLICY "Allow public read access to auctions" ON public.auctions
-    FOR SELECT TO public USING (true);
+    FOR SELECT TO anon
+    USING (status IN ('active', 'ended'));
 
-CREATE POLICY "Allow admin full access to auctions" ON public.auctions
-    FOR ALL TO authenticated USING (public.current_user_is_admin())
-    WITH CHECK (public.current_user_is_admin());
+CREATE POLICY "Allow authenticated read auctions" ON public.auctions
+    FOR SELECT TO authenticated
+    USING (status IN ('active', 'ended') OR (SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin insert auctions" ON public.auctions
+    FOR INSERT TO authenticated
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin update auctions" ON public.auctions
+    FOR UPDATE TO authenticated
+    USING ((SELECT public.current_user_is_admin()))
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin delete auctions" ON public.auctions
+    FOR DELETE TO authenticated
+    USING ((SELECT public.current_user_is_admin()));
 
 -- Bid Policies
 CREATE POLICY "Allow users to read own bids or admins" ON public.bids
     FOR SELECT TO authenticated USING (
-        auth.uid() = user_id OR public.current_user_is_admin()
+        (SELECT auth.uid()) = user_id OR (SELECT public.current_user_is_admin())
     );
 
-CREATE POLICY "Allow authenticated users to place bids" ON public.bids
-    FOR INSERT TO authenticated WITH CHECK (
-        auth.uid() = user_id AND 
-        EXISTS (
-            SELECT 1 FROM public.profiles 
-            WHERE id = auth.uid() AND is_blocked = false
-        )
-    );
+CREATE POLICY "Allow admin insert bids" ON public.bids
+    FOR INSERT TO authenticated
+    WITH CHECK ((SELECT public.current_user_is_admin()));
 
-CREATE POLICY "Allow admin to manage bids" ON public.bids
-    FOR ALL TO authenticated USING (public.current_user_is_admin())
-    WITH CHECK (public.current_user_is_admin());
+CREATE POLICY "Allow admin update bids" ON public.bids
+    FOR UPDATE TO authenticated
+    USING ((SELECT public.current_user_is_admin()))
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admin delete bids" ON public.bids
+    FOR DELETE TO authenticated
+    USING ((SELECT public.current_user_is_admin()));
 
 -- Order Policies
 CREATE POLICY "Allow users to see their own orders" ON public.orders
     FOR SELECT TO authenticated USING (
-        auth.uid() = winner_id OR public.current_user_is_admin()
+        (SELECT auth.uid()) = winner_id OR (SELECT public.current_user_is_admin())
     );
 
-CREATE POLICY "Allow users to confirm their own order delivery details" ON public.orders
-    FOR UPDATE TO authenticated USING (
-        auth.uid() = winner_id AND status = 'pending_confirmation'
-    ) WITH CHECK (
-        auth.uid() = winner_id AND status IN ('pending_confirmation', 'confirmed')
-    );
+CREATE POLICY "Allow admins insert orders" ON public.orders
+    FOR INSERT TO authenticated
+    WITH CHECK ((SELECT public.current_user_is_admin()));
 
-CREATE POLICY "Allow admins full access to orders" ON public.orders
-    FOR ALL TO authenticated USING (public.current_user_is_admin())
-    WITH CHECK (public.current_user_is_admin());
+CREATE POLICY "Allow admins update orders" ON public.orders
+    FOR UPDATE TO authenticated
+    USING ((SELECT public.current_user_is_admin()))
+    WITH CHECK ((SELECT public.current_user_is_admin()));
+
+CREATE POLICY "Allow admins delete orders" ON public.orders
+    FOR DELETE TO authenticated
+    USING ((SELECT public.current_user_is_admin()));
 
 -- Audit Log Policies
 CREATE POLICY "Allow admins to read audit logs" ON public.audit_logs
-    FOR SELECT TO authenticated USING (public.current_user_is_admin());
+    FOR SELECT TO authenticated
+    USING ((SELECT public.current_user_is_admin()));
 
 CREATE POLICY "Allow systems or admins to write audit logs" ON public.audit_logs
-    FOR INSERT TO authenticated WITH CHECK (public.current_user_is_admin());
+    FOR INSERT TO authenticated
+    WITH CHECK ((SELECT public.current_user_is_admin()));
 
 -- =====================================================================
 -- 12. RPC GRANTS AND STORAGE POLICIES
@@ -479,14 +665,33 @@ REVOKE ALL ON FUNCTION public.place_bid(UUID, NUMERIC) FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.place_bid(UUID, NUMERIC) TO authenticated;
 
 REVOKE ALL ON FUNCTION public.current_user_is_admin() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO anon;
+REVOKE ALL ON FUNCTION public.current_user_is_admin() FROM anon;
+REVOKE ALL ON FUNCTION public.current_user_is_admin() FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.current_user_is_admin() TO service_role;
+
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM anon;
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM authenticated;
+
+REVOKE ALL ON FUNCTION public.prevent_profile_role_self_mutation() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.prevent_profile_role_self_mutation() FROM anon;
+REVOKE ALL ON FUNCTION public.prevent_profile_role_self_mutation() FROM authenticated;
+
+REVOKE ALL ON FUNCTION public.update_own_profile(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.update_own_profile(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) FROM anon;
+REVOKE ALL ON FUNCTION public.update_own_profile(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.update_own_profile(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) TO authenticated;
 
 REVOKE ALL ON FUNCTION public.close_expired_auctions() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.close_expired_auctions() FROM anon;
 REVOKE ALL ON FUNCTION public.close_expired_auctions() FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.close_expired_auctions() TO service_role;
+
+REVOKE ALL ON FUNCTION public.confirm_order_delivery(UUID, TEXT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.confirm_order_delivery(UUID, TEXT, TEXT, TEXT, TEXT, TEXT) FROM anon;
+REVOKE ALL ON FUNCTION public.confirm_order_delivery(UUID, TEXT, TEXT, TEXT, TEXT, TEXT) FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.confirm_order_delivery(UUID, TEXT, TEXT, TEXT, TEXT, TEXT) TO authenticated;
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
@@ -502,31 +707,26 @@ SET
     file_size_limit = EXCLUDED.file_size_limit,
     allowed_mime_types = EXCLUDED.allowed_mime_types;
 
-DROP POLICY IF EXISTS "Public read product images" ON storage.objects;
-CREATE POLICY "Public read product images" ON storage.objects
-    FOR SELECT TO public
-    USING (bucket_id = 'product-images');
-
 DROP POLICY IF EXISTS "Admins upload product images" ON storage.objects;
 CREATE POLICY "Admins upload product images" ON storage.objects
     FOR INSERT TO authenticated
     WITH CHECK (
-        bucket_id = 'product-images' AND public.current_user_is_admin()
+        bucket_id = 'product-images' AND (SELECT public.current_user_is_admin())
     );
 
 DROP POLICY IF EXISTS "Admins update product images" ON storage.objects;
 CREATE POLICY "Admins update product images" ON storage.objects
     FOR UPDATE TO authenticated
     USING (
-        bucket_id = 'product-images' AND public.current_user_is_admin()
+        bucket_id = 'product-images' AND (SELECT public.current_user_is_admin())
     )
     WITH CHECK (
-        bucket_id = 'product-images' AND public.current_user_is_admin()
+        bucket_id = 'product-images' AND (SELECT public.current_user_is_admin())
     );
 
 DROP POLICY IF EXISTS "Admins delete product images" ON storage.objects;
 CREATE POLICY "Admins delete product images" ON storage.objects
     FOR DELETE TO authenticated
     USING (
-        bucket_id = 'product-images' AND public.current_user_is_admin()
+        bucket_id = 'product-images' AND (SELECT public.current_user_is_admin())
     );

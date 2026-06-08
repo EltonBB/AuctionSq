@@ -72,7 +72,7 @@ export default function ProfileWorkspace({ user, orders, bids }: WorkspaceProps)
         <div className="relative overflow-hidden rounded-[28px] border border-[#f0d9c4] bg-white/86 p-6 shadow-[0_16px_44px_rgba(53,43,36,0.06)] md:p-8">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#D96C2D] via-[#E6A52F] to-[#D96C2D]" />
           <div className="grid gap-2">
-            <h1 className="text-3xl font-black tracking-[-0.02em] text-[#352B24]">Profili</h1>
+          <h1 className="text-3xl font-black text-[#352B24]">Profili</h1>
             <p className="text-sm text-[#6f5b4c]">
               {isOwnerAdmin
                 ? "Llogari administratori. Seksionet e ofertimit per klientet nuk aplikohen."
@@ -321,7 +321,7 @@ export default function ProfileWorkspace({ user, orders, bids }: WorkspaceProps)
             <div className="mb-5 h-1 w-28 rounded-full bg-gradient-to-r from-[#D96C2D] via-[#E6A52F] to-[#D96C2D]" />
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-[30px] font-black leading-tight tracking-[-0.02em] text-[#352B24]">Shto Adresen e Dergeses</h3>
+            <h3 className="text-3xl font-black leading-tight text-[#352B24]">Shto Adresen e Dergeses</h3>
                 <p className="mt-1 text-sm text-[#6f5b4c]">Ruaj adresen per proces te shpejte ofertimi dhe porosie.</p>
               </div>
               <button

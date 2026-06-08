@@ -144,6 +144,7 @@ export default async function MyOrdersPage() {
                       orderId={order.id}
                       currentFullName={order.full_name}
                       currentPhone={order.phone_number}
+                      currentCountry={order.country}
                       currentCity={order.city}
                       currentAddress={order.address}
                     />

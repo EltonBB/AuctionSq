@@ -14,17 +14,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "NjeKlik | Ankande te kontrolluara online",
-    template: "%s | NjeKlik",
+    default: "AuctionSq | Ankande te kontrolluara online",
+    template: "%s | AuctionSq",
   },
-  description: "NjeKlik eshte platforme ankandesh per produkte te kontrolluara, ofertim transparent dhe dergese te qarte.",
-  metadataBase: new URL("https://njeklik.com"),
-  keywords: ["online auction", "ankande online", "albania auctions", "bid and win", "NjeKlik"],
+  description: "AuctionSq eshte platforme ankandesh per produkte te kontrolluara, ofertim transparent dhe dergese te qarte.",
+  metadataBase: new URL("https://auctionsq.com"),
+  keywords: ["online auction", "ankande online", "albania auctions", "bid and win", "AuctionSq"],
   openGraph: {
-    title: "NjeKlik | Ankande te kontrolluara online",
+    title: "AuctionSq | Ankande te kontrolluara online",
     description: "Shfleto produkte te verifikuara, oferto me siguri dhe ndiq Cdo fitore nga nje platforme e paster.",
-    url: "https://njeklik.com",
-    siteName: "NjeKlik",
+    url: "https://auctionsq.com",
+    siteName: "AuctionSq",
     locale: "sq_AL",
     type: "website",
   },

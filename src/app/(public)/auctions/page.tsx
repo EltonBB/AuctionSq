@@ -44,7 +44,7 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
         <div className="mx-auto max-w-[1500px] px-4 py-10">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-4xl font-black tracking-[-0.04em] text-[#352B24] md:text-6xl">
+              <h1 className="text-4xl font-black text-[#352B24] md:text-6xl">
                 Te gjitha produktet
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-7 text-[#6f5b4c]">

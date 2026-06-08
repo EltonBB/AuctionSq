@@ -54,11 +54,11 @@ export async function updateSession(request: NextRequest) {
   const url = request.nextUrl.clone();
 
   const isAdminRoute = url.pathname.startsWith("/admin");
-  const isLegacyDashboardRoute = url.pathname.startsWith("/dashboard");
+  const isDashboardRoute = url.pathname.startsWith("/dashboard");
   const isProfileRoute = url.pathname.startsWith("/profile");
 
   // 1. Protect user/admin account routes from unauthenticated users
-  if ((isLegacyDashboardRoute || isAdminRoute || isProfileRoute) && !user) {
+  if ((isDashboardRoute || isAdminRoute || isProfileRoute) && !user) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
@@ -75,19 +75,13 @@ export async function updateSession(request: NextRequest) {
 
   // 2. Redirect logged-in users away from /login and /register
   if (user && (url.pathname.startsWith("/login") || url.pathname.startsWith("/register"))) {
-    url.pathname = isAdmin ? "/admin" : "/profile";
+    url.pathname = isAdmin ? "/admin" : "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  // 3. Remove client panel routes. Keep admin panel only.
-  if (user && isLegacyDashboardRoute) {
-    url.pathname = isAdmin ? "/admin" : "/profile";
-    return NextResponse.redirect(url);
-  }
-
-  // 4. Prevent non-admin users from accessing /admin paths
+  // 3. Prevent non-admin users from accessing /admin paths
   if (user && isAdminRoute && !isAdmin) {
-    url.pathname = "/profile";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

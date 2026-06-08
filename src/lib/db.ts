@@ -162,7 +162,11 @@ export async function getCategories(): Promise<Category[]> {
 export async function getProducts(): Promise<Product[]> {
   assertSupabaseConfigured();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("products")
+    .select(productListColumns)
+    .order("created_at", { ascending: false })
+    .limit(100);
   if (error) throw new Error(error.message);
   return (data || []) as Product[];
 }
@@ -170,7 +174,7 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductById(id: string): Promise<Product | null> {
   assertSupabaseConfigured();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
+  const { data, error } = await supabase.from("products").select(productListColumns).eq("id", id).single();
   if (error) return null;
   return data as Product;
 }
@@ -178,17 +182,28 @@ export async function getProductById(id: string): Promise<Product | null> {
 type AuctionWithProductRow = Auction & { product: Product | null };
 export type AuctionWithRelations = Auction & { product: Product; category: Category | null };
 
+const profileListColumns =
+  "id, full_name, phone_number, country, city, address, postal_code, is_admin, is_blocked, created_at, updated_at";
+const productListColumns =
+  "id, title, description, category_id, condition, images, testing_notes, status, created_at, updated_at";
+const auctionListColumns =
+  "id, product_id, starting_price, current_price, min_increment, start_time, end_time, status, winner_id, winning_bid_id, created_at, updated_at";
+const bidListColumns = "id, auction_id, user_id, amount, status, cancelled_reason, created_at";
+const orderListColumns =
+  "id, auction_id, winner_id, final_price, full_name, phone_number, country, city, address, status, created_at, updated_at";
+
 export async function getAuctions(): Promise<AuctionWithRelations[]> {
   assertSupabaseConfigured();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("auctions")
-    .select("*, product:products(*)")
-    .order("end_time", { ascending: true });
+    .select(`${auctionListColumns}, product:products(${productListColumns})`)
+    .order("end_time", { ascending: true })
+    .limit(100);
   if (error) throw new Error(error.message);
 
   const categories = await getCategories();
-  return ((data || []) as AuctionWithProductRow[])
+  return ((data || []) as unknown as AuctionWithProductRow[])
     .filter((auction) => !!auction.product)
     .map((auction) => ({
       ...auction,
@@ -202,12 +217,12 @@ export async function getAuctionById(id: string): Promise<AuctionWithRelations |
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("auctions")
-    .select("*, product:products(*)")
+    .select(`${auctionListColumns}, product:products(${productListColumns})`)
     .eq("id", id)
     .single();
   if (error || !data) return null;
 
-  const auction = data as AuctionWithProductRow;
+  const auction = data as unknown as AuctionWithProductRow;
   if (!auction.product) return null;
 
   const categories = await getCategories();
@@ -223,12 +238,50 @@ export async function getBidsForAuction(auctionId: string): Promise<(Bid & { use
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("bids")
-    .select("*, user:profiles(*)")
+    .select(`${bidListColumns}, user:profiles(id, full_name)`)
     .eq("auction_id", auctionId)
     .order("amount", { ascending: false })
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .limit(100);
   if (error) throw new Error(error.message);
-  return (data || []) as (Bid & { user: Profile })[];
+  return (data || []) as unknown as (Bid & { user: Profile })[];
+}
+
+export async function getAdminBids(): Promise<(Bid & { user: Profile; auction: Auction & { product: Product } })[]> {
+  assertSupabaseConfigured();
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("bids")
+    .select(
+      `${bidListColumns}, user:profiles(id, full_name), auction:auctions!bids_auction_id_fkey(${auctionListColumns}, product:products(id, title))`
+    )
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw new Error(error.message);
+  return (data || []) as unknown as (Bid & { user: Profile; auction: Auction & { product: Product } })[];
+}
+
+export async function getAdminBidCount(): Promise<number> {
+  assertSupabaseConfigured();
+  const supabase = createAdminClient();
+  const { count, error } = await supabase.from("bids").select("id", { count: "exact", head: true });
+  if (error) throw new Error(error.message);
+  return count || 0;
+}
+
+export async function getAdminActiveBids(): Promise<(Bid & { user: Profile; auction: Auction & { product: Product } })[]> {
+  assertSupabaseConfigured();
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("bids")
+    .select(
+      `${bidListColumns}, user:profiles(id, full_name), auction:auctions!bids_auction_id_fkey(${auctionListColumns}, product:products(id, title))`
+    )
+    .eq("status", "active")
+    .order("amount", { ascending: false })
+    .limit(500);
+  if (error) throw new Error(error.message);
+  return (data || []) as unknown as (Bid & { user: Profile; auction: Auction & { product: Product } })[];
 }
 
 export async function getBidsByUser(userId: string): Promise<(Bid & { auction: Auction & { product: Product } })[]> {
@@ -236,11 +289,14 @@ export async function getBidsByUser(userId: string): Promise<(Bid & { auction: A
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("bids")
-    .select("*, auction:auctions!bids_auction_id_fkey(*, product:products(*))")
+    .select(
+      `${bidListColumns}, auction:auctions!bids_auction_id_fkey(${auctionListColumns}, product:products(id, title))`
+    )
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(200);
   if (error) throw new Error(error.message);
-  return (data || []) as (Bid & { auction: Auction & { product: Product } })[];
+  return (data || []) as unknown as (Bid & { auction: Auction & { product: Product } })[];
 }
 
 export async function getOrders(): Promise<(Order & { auction: Auction & { product: Product }; winner: Profile })[]> {
@@ -248,10 +304,13 @@ export async function getOrders(): Promise<(Order & { auction: Auction & { produ
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
-    .select("*, auction:auctions!orders_auction_id_fkey(*, product:products(*)), winner:profiles(*)")
-    .order("created_at", { ascending: false });
+    .select(
+      `${orderListColumns}, auction:auctions!orders_auction_id_fkey(${auctionListColumns}, product:products(id, title, images)), winner:profiles(id, full_name)`
+    )
+    .order("created_at", { ascending: false })
+    .limit(200);
   if (error) throw new Error(error.message);
-  return (data || []) as (Order & { auction: Auction & { product: Product }; winner: Profile })[];
+  return (data || []) as unknown as (Order & { auction: Auction & { product: Product }; winner: Profile })[];
 }
 
 export async function getOrdersByUser(userId: string): Promise<(Order & { auction: Auction & { product: Product } })[]> {
@@ -259,17 +318,20 @@ export async function getOrdersByUser(userId: string): Promise<(Order & { auctio
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
-    .select("*, auction:auctions!orders_auction_id_fkey(*, product:products(*))")
+    .select(
+      `${orderListColumns}, auction:auctions!orders_auction_id_fkey(${auctionListColumns}, product:products(id, title, images))`
+    )
     .eq("winner_id", userId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
   if (error) throw new Error(error.message);
-  return (data || []) as (Order & { auction: Auction & { product: Product } })[];
+  return (data || []) as unknown as (Order & { auction: Auction & { product: Product } })[];
 }
 
 export async function getProfiles(): Promise<Profile[]> {
   assertSupabaseConfigured();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("*").order("created_at");
+  const { data, error } = await supabase.from("profiles").select(profileListColumns).order("created_at").limit(500);
   if (error) throw new Error(error.message);
   return (data || []) as Profile[];
 }
@@ -279,9 +341,10 @@ export async function getCustomerProfiles(): Promise<Profile[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select(profileListColumns)
     .eq("is_admin", false)
-    .order("created_at");
+    .order("created_at")
+    .limit(500);
   if (error) throw new Error(error.message);
   return (data || []) as Profile[];
 }
@@ -299,8 +362,9 @@ export async function getAuditLogs(): Promise<(AuditLog & { performer: Profile |
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("audit_logs")
-    .select("*, performer:profiles(*)")
-    .order("created_at", { ascending: false });
+    .select("id, action, performed_by, target_id, details, created_at, performer:profiles(id, full_name)")
+    .order("created_at", { ascending: false })
+    .limit(200);
   if (error) throw new Error(error.message);
-  return (data || []) as (AuditLog & { performer: Profile | null })[];
+  return (data || []) as unknown as (AuditLog & { performer: Profile | null })[];
 }

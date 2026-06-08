@@ -1,0 +1,70 @@
+import { readFileSync } from "node:fs";
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+const schema = readFileSync(new URL("../supabase/schema.sql", import.meta.url), "utf8");
+const hardening = readFileSync(
+  new URL("../supabase/migrations/20260607_must_fix_rls_hardening.sql", import.meta.url),
+  "utf8"
+);
+const auctionIntegrity = readFileSync(
+  new URL("../supabase/migrations/20260607_high_priority_auction_integrity.sql", import.meta.url),
+  "utf8"
+);
+const adminActions = readFileSync(new URL("../src/app/actions/admin.ts", import.meta.url), "utf8");
+
+const combined = `${schema}\n${hardening}\n${auctionIntegrity}`;
+
+test("profiles cannot be self-updated through a broad table policy", () => {
+  assert.doesNotMatch(
+    combined,
+    /CREATE\s+POLICY\s+"Allow users to update their own profiles"[\s\S]*?ON\s+public\.profiles/i
+  );
+  assert.match(combined, /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+public\.update_own_profile\s*\(/i);
+  assert.match(combined, /DROP\s+POLICY\s+IF\s+EXISTS\s+"Allow users to update their own profiles"\s+ON\s+public\.profiles/i);
+});
+
+test("authenticated users cannot insert bids directly", () => {
+  assert.doesNotMatch(
+    combined,
+    /CREATE\s+POLICY\s+"Allow authenticated users to place bids"[\s\S]*?FOR\s+INSERT\s+TO\s+authenticated/i
+  );
+  assert.match(combined, /DROP\s+POLICY\s+IF\s+EXISTS\s+"Allow authenticated users to place bids"\s+ON\s+public\.bids/i);
+  assert.match(combined, /GRANT\s+EXECUTE\s+ON\s+FUNCTION\s+public\.place_bid\(UUID,\s*NUMERIC\)\s+TO\s+authenticated/i);
+});
+
+test("orders are confirmed through a narrow RPC instead of direct user updates", () => {
+  assert.doesNotMatch(
+    combined,
+    /CREATE\s+POLICY\s+"Allow users to confirm their own order delivery details"[\s\S]*?ON\s+public\.orders/i
+  );
+  assert.match(combined, /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+public\.confirm_order_delivery\s*\(/i);
+  assert.match(
+    combined,
+    /DROP\s+POLICY\s+IF\s+EXISTS\s+"Allow users to confirm their own order delivery details"\s+ON\s+public\.orders/i
+  );
+});
+
+test("only one live auction can exist for a product", () => {
+  assert.match(
+    combined,
+    /CREATE\s+UNIQUE\s+INDEX\s+IF\s+NOT\s+EXISTS\s+auctions_one_live_per_product_idx[\s\S]*?ON\s+public\.auctions\s*\(\s*product_id\s*\)[\s\S]*?WHERE\s+status\s+IN\s*\(\s*'active'\s*,\s*'scheduled'\s*\)/i
+  );
+});
+
+test("public auction reads do not expose every auction status", () => {
+  assert.doesNotMatch(
+    combined,
+    /CREATE\s+POLICY\s+"Allow public read access to auctions"[\s\S]*?FOR\s+SELECT\s+TO\s+public\s+USING\s*\(\s*true\s*\)/i
+  );
+  assert.match(
+    combined,
+    /CREATE\s+POLICY\s+"Allow public read access to auctions"[\s\S]*?status\s+IN\s*\(\s*'active'\s*,\s*'ended'\s*\)/i
+  );
+});
+
+test("admin bid moderation is scoped to live auctions", () => {
+  assert.match(adminActions, /Only live auction bids can be cancelled/i);
+  assert.match(adminActions, /liveAuctionIds/i);
+  assert.match(adminActions, /\.in\("status",\s*\["active",\s*"scheduled"\]\)/);
+});

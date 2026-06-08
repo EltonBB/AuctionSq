@@ -22,7 +22,7 @@ export default function LoginPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F7D8B5] bg-[#F7D8B5] text-[#D96C2D]">
             <KeyRound className="h-6 w-6" />
           </div>
-          <h2 className="text-xl font-black uppercase tracking-wide text-[#352B24]">Hyni ne NjeKlik</h2>
+          <h2 className="text-xl font-black uppercase tracking-wide text-[#352B24]">Hyni ne AuctionSq</h2>
           <p className="text-xs leading-5 text-[#6f5b4c]">Vendosni email-in dhe fjalekalimin per te hyre ne llogarine tuaj.</p>
         </div>
 

@@ -2,7 +2,110 @@
 
 ## Current Status
 
-AuctionSq is now a connected pre-production auction platform with a polished public site direction, Supabase-backed data, user account pages, and an admin control center. The app builds successfully and the local preview responds at `http://localhost:3000/`.
+AuctionSq is a connected pre-production auction platform deployed at `https://auctionsq.vercel.app`. The core security hardening work for profile updates, bid writes, order delivery confirmation, live-auction uniqueness, public auction exposure, bid moderation scope, and bounded list reads has been implemented, deployed, and verified locally and against the live Supabase project `ewuvavurygndpgarrdfw`.
+
+Baseline release-readiness check on 2026-06-08:
+- `node --test tests\*.test.mjs` passed: 18/18 tests.
+- `npm run lint` passed with no ESLint warnings or errors.
+- `npm run build` passed.
+- `npm audit --json` reported 0 vulnerabilities.
+
+Active release-completion process:
+1. Supabase advisor gate: passed via Supabase CLI, with documented residuals.
+2. Transparent AuctionSq logo assets: passed.
+3. Mobile responsiveness and UX pass: passed.
+4. Production admin CRUD validation with temporary data: passed.
+5. Two-user auction lifecycle validation: passed.
+6. Performance/logical review: passed.
+7. Final review, deployment, and production browser validation: passed.
+
+Supabase advisor gate on 2026-06-08:
+- Initial security advisor MCP call failed with permission error `-32600`.
+- Initial performance advisor MCP call failed with permission error `-32600`.
+- Initial local environment had no `supabase` CLI in PATH.
+- A later final retry through MCP still failed with the same `-32600` permission error for both advisor types.
+- Later CLI access was restored with `npx supabase login` and `npx supabase link --project-ref ewuvavurygndpgarrdfw`.
+- Correct remote command is `npx supabase db advisors --linked`; without `--linked`, the CLI tries local Postgres on `127.0.0.1:54322`.
+- Applied advisor hardening migrations directly with `npx supabase db query --linked --file ...` because remote migration history is not aligned with local migration files.
+- Fixed real advisor findings:
+  - mutable search path on `update_updated_at_column`.
+  - broad public listing policy on `storage.objects` for `product-images`.
+  - direct execution of internal trigger/maintenance security-definer functions.
+  - missing indexes on FK columns for auctions, audit logs, bids, orders, and products.
+  - RLS `auth.uid()` initplan warnings.
+  - duplicate permissive policy warnings after splitting anon/authenticated read policies.
+- Final production E2E passed after RLS changes, including admin CRUD, bidding, finalization, orders, and audit logs.
+- Cleaned up all advisor-validation QA data and users.
+- Remaining Supabase advisor residuals:
+  - authenticated security-definer warnings for intentional RPC endpoints: `place_bid`, `update_own_profile`, `confirm_order_delivery`, plus `current_user_is_admin` used by authenticated admin RLS policies.
+  - Auth leaked-password protection is disabled and must be enabled in Supabase Dashboard Auth settings.
+  - new FK indexes are reported as unused until production traffic uses them; these indexes were added specifically to satisfy FK performance guidance.
+
+Transparent logo pass on 2026-06-08:
+- Created `public/brand/auctionsq-mark-transparent.png`.
+- Created `public/brand/auctionsq-wordmark-transparent.png`.
+- Updated `BrandLogo` to use the transparent PNG files and removed the blend-mode workaround.
+- Verified both generated PNGs are `Format32bppArgb` and contain transparent sampled pixels.
+- Re-ran `node --test tests\*.test.mjs` and `npm run lint`; both passed.
+
+Mobile UX foundation pass on 2026-06-08:
+- Public mobile header now uses the compact transparent mark and a shorter login label.
+- Admin mobile header now uses compact branding and icon-first controls.
+- Admin and dashboard navigation now render as visible mobile chip grids instead of clipped horizontal scrollers.
+- Main admin/dashboard content containers now use `min-w-0`; page-level horizontal overflow is clipped while table/filter internals keep their own scroll behavior.
+- Removed negative tracking utilities from key public/profile headings.
+- Playwright screenshots captured under `output/playwright/mobile-ux/`.
+- Rendered checks covered public pages plus authenticated dashboard/admin routes at 390px and 1440px.
+- Re-ran `node --test tests\*.test.mjs`, `npm run lint`, and `npm run build`; all passed.
+
+Production admin/lifecycle validation on 2026-06-08:
+- Created temporary production admin/user accounts and clearly named `Codex QA` data.
+- Browser-validated admin login, category creation, product creation with image upload, auction creation, bid cancellation with reason, user blocking, order status update, and audit-log visibility on `https://auctionsq.vercel.app`.
+- Browser-validated two-user auction lifecycle:
+  - incomplete profile was blocked from bidding.
+  - profile completion unlocked bidding.
+  - user one placed a bid.
+  - user two outbid user one.
+  - blocked user could not continue bidding.
+  - expired auction finalization created a winner order for user two.
+  - winner could view the order in the dashboard.
+- Validated unsold-auction relist and exact relisted-auction cancellation through the admin UI.
+- Cleaned up temporary production data:
+  - remaining `Codex QA Product%` products: 0.
+  - remaining `codex-qa-%` categories: 0.
+  - temporary auth users deleted.
+
+Performance/logical review on 2026-06-08:
+- Confirmed no remaining negative tracking utilities in `src`.
+- Confirmed no stale `NjeKlik`/`NjëKlik` app references remain in `src`, `public`, or `supabase`.
+- Tightened Supabase list projections for products, auctions, bids, orders, profiles, and audit logs so admin/dashboard screens fetch only fields they render.
+- Kept existing row limits on broad list reads; no unbounded admin table fetches were found in the reviewed launch paths.
+- Restarted the local dev server and smoke-tested public `/auctions` plus authenticated dashboard/admin routes at 390px and 1440px.
+- Cleaned up the temporary auth users created for the local smoke pass.
+- Re-ran `node --test tests\*.test.mjs`, `npm run lint`, and `npm run build`; all passed.
+
+Final review/deployment validation on 2026-06-08:
+- Final local gates passed:
+  - `node --test tests\*.test.mjs`: 18/18 tests.
+  - `npm run lint`: no warnings or errors.
+  - `npm run build`: passed.
+  - `npm audit --json`: 0 vulnerabilities.
+  - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.
+- Deployed production with `npx vercel deploy --prod --yes`.
+- Vercel production alias updated to `https://auctionsq.vercel.app`.
+- Production E2E after deployment passed:
+  - admin login, category/product/image/auction creation.
+  - incomplete profile bid block, profile completion, two-user outbid.
+  - suspicious bid cancellation with reason.
+  - blocked user bid prevention.
+  - auction finalization, winner order creation, winner order view, admin order status update, audit-log visibility.
+  - unsold-auction relist and relisted-auction cancellation.
+- Cleaned up final production QA data:
+  - temporary orders, bids, auctions, products, categories, storage object, and auth users removed.
+  - remaining `Codex QA Product%` products: 0.
+  - remaining `codex-qa-%` categories: 0.
+- Production public mobile/desktop checks passed after cleanup for home, auctions, categories, how-it-works, FAQ, and contact.
+- Final static review found no stale NjeKlik references, no remaining negative tracking utilities, and no unexpected direct bid/order/profile writes in reviewed app paths.
 
 ## Completed Work
 
@@ -22,8 +125,8 @@ AuctionSq is now a connected pre-production auction platform with a polished pub
   - `/admin/categories`
   - `/admin/audit-logs`
   - `/admin/settings`
-- Connected admin pages to existing actions for product creation, auction creation, auction cancellation/relisting, bid cancellation, order status updates, user blocking, category creation, audit review, and expired auction closing.
-- Added an admin authorization check before the manual expired-auction closer can run.
+- Connected admin pages to product creation/upload, product update, auction creation, auction cancellation/relisting, bid cancellation, order status updates, user blocking, category creation, audit review, and expired-auction closing.
+- Added admin authorization before the manual expired-auction closer can run.
 - Updated the main category structure to:
   - Teknologji
   - Gaming
@@ -38,29 +141,40 @@ AuctionSq is now a connected pre-production auction platform with a polished pub
   - 9 categories
   - 9 products
   - 9 auctions
-- Verified representative public routes return HTTP 200:
-  - `/`
-  - `/auctions`
-  - `/categories`
-  - `/login`
-- Verified production build with `npm run build`.
+- Applied and verified live hardening migrations:
+  - `update_own_profile` exists and is executable by authenticated users.
+  - `confirm_order_delivery` exists and is executable by authenticated users.
+  - direct authenticated bid insert policy is removed.
+  - `auctions_one_live_per_product_idx` exists.
+  - duplicate active/scheduled auction groups: 0.
+- Ran real authenticated Supabase attack-path tests with temporary users/data:
+  - direct profile role update blocked.
+  - profile RPC allowed.
+  - direct bid insert blocked.
+  - `place_bid` RPC allowed.
+  - direct order update blocked.
+  - order delivery RPC allowed.
+  - duplicate live auction blocked.
+- Deployed the verified app to Vercel production at `https://auctionsq.vercel.app`.
+- Browser-validated production with Playwright:
+  - public home and auction detail return 200.
+  - no visible/accessibility `NjeKlik` branding remains.
+  - logged-out bidding requires login.
+  - normal user login redirects to `/dashboard`.
+  - normal user is blocked from `/admin`.
+  - normal user can place a bid.
+  - admin login redirects to `/admin`.
+  - no browser console errors in the validated flow.
+- Fixed production hydration warnings found during browser validation:
+  - countdowns calculate after client mount.
+  - home auction grid is server-rendered.
+  - polling refresh no longer runs during initial hydration.
+  - bid form renders a stable placeholder before client mount.
 
-## Still Needs Review
+## Remaining Release Work
 
-- Visual review of spacing, copy, Albanian wording, product imagery, and exact AuctionSq brand tone.
-- Admin pages are functional and organized, but edit flows are still mostly list/create/action based rather than full dedicated add/edit detail screens.
-- Product image upload storage is not yet a polished upload UI; current admin product creation accepts image URLs.
-- Auth flows should be tested with real Supabase users, including admin role assignment and password reset emails.
-- Live bid behavior should be reviewed with multiple accounts before launch.
-
-## What Should Be Tested Next
-
-1. Register a new user and confirm the profile completion requirement before bidding.
-2. Log in as an admin user and test product creation, auction creation, bid moderation, order status updates, category creation, and audit logs.
-3. Place bids on active auctions with two users and verify current price, bid count, and dashboard states.
-4. Run the expired-auction closer and verify winner/order creation.
-5. Test mobile layouts for home, auctions, auction detail, dashboard, and admin tables.
-6. Decide whether product image upload should use Supabase Storage before deployment.
+- Enable Supabase Auth leaked-password protection in the dashboard.
+- Replace the uploaded source logo artwork with final AuctionSq-native brand artwork when available; current transparent PNGs are generated from the uploaded source files.
 
 ## Important Decisions
 
@@ -68,4 +182,5 @@ AuctionSq is now a connected pre-production auction platform with a polished pub
 - Only admins can create products and auctions.
 - Users must be logged in and have complete delivery details before bidding.
 - Supabase is the source of truth for live data; local memory data remains a fallback for sandbox/dev behavior.
-- Vercel setup is intentionally left for later, per user instruction.
+- Temporary production data is approved for release validation and must be clearly named and cleaned up where safe.
+- Uploaded logo files are the source for transparent AuctionSq logo assets.

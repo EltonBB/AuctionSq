@@ -2,14 +2,13 @@
 import Link from "next/link";
 import { cancelBid } from "@/app/actions/admin";
 import { ConfirmSubmitButton } from "@/app/components/AdminUi";
-import { getAuctions, getBidsForAuction } from "@/lib/db";
+import { getAdminBids } from "@/lib/db";
 import { formatEurFromAll } from "@/lib/currency";
 
 export const revalidate = 0;
 
 export default async function AdminBidsPage() {
-  const auctions = await getAuctions();
-  const bids = (await Promise.all(auctions.map((auction) => getBidsForAuction(auction.id).then((items) => items.map((bid) => ({ ...bid, auction })))))).flat();
+  const bids = await getAdminBids();
   async function cancel(formData: FormData) {
     "use server";
     await cancelBid(String(formData.get("bidId") || ""), String(formData.get("reason") || ""));

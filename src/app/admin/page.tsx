@@ -1,37 +1,40 @@
 ﻿import React from "react";
 import Link from "next/link";
-import { getAuditLogs, getAuctions, getBidsForAuction, getOrders, getProducts, getProfiles } from "@/lib/db";
+import { getAdminActiveBids, getAdminBidCount, getAuditLogs, getAuctions, getOrders, getProducts, getProfiles } from "@/lib/db";
 import { formatEurFromAll } from "@/lib/currency";
 import { ArrowRight, Award, Boxes, Gavel, ShoppingBag, Users, type LucideIcon } from "lucide-react";
 
 export const revalidate = 0;
 
+type AdminActiveBid = Awaited<ReturnType<typeof getAdminActiveBids>>[number];
+
 export default async function AdminOverviewPage() {
-  const [products, auctions, orders, users, logs] = await Promise.all([
+  const [products, auctions, orders, users, logs, bids, bidsCount] = await Promise.all([
     getProducts(),
     getAuctions(),
     getOrders(),
     getProfiles(),
     getAuditLogs(),
+    getAdminActiveBids(),
+    getAdminBidCount(),
   ]);
-  const auctionBidGroups = await Promise.all(
-    auctions.map(async (auction) => ({
-      auction,
-      bids: await getBidsForAuction(auction.id),
-    }))
-  );
-  const bidsCount = auctionBidGroups.flatMap((group) => group.bids).length;
   const activeAuctions = auctions.filter((auction) => auction.status === "active").length;
-  const highestActiveBids = auctionBidGroups
-    .filter(({ auction }) => auction.status === "active" || auction.status === "scheduled")
-    .map(({ auction, bids }) => ({
-      auction,
-      bid: bids.find((bid) => bid.status === "active"),
-      bidCount: bids.filter((bid) => bid.status === "active").length,
-    }))
-    .filter((item): item is typeof item & { bid: NonNullable<typeof item.bid> } => Boolean(item.bid))
-    .sort((a, b) => b.bid.amount - a.bid.amount)
-    .slice(0, 6);
+  const bidCountsByAuctionId = new Map<string, number>();
+  const highestActiveBids: { auction: AdminActiveBid["auction"]; bid: AdminActiveBid; bidCount: number }[] = [];
+
+  for (const bid of bids) {
+    if (!["active", "scheduled"].includes(bid.auction.status)) continue;
+    bidCountsByAuctionId.set(bid.auction_id, (bidCountsByAuctionId.get(bid.auction_id) || 0) + 1);
+    if (!highestActiveBids.some((item) => item.auction.id === bid.auction_id)) {
+      highestActiveBids.push({ auction: bid.auction, bid, bidCount: 0 });
+    }
+  }
+
+  for (const item of highestActiveBids) {
+    item.bidCount = bidCountsByAuctionId.get(item.auction.id) || 0;
+  }
+
+  highestActiveBids.splice(6);
   const openOrders = orders.filter((order) => !["delivered", "cancelled"].includes(order.status)).length;
   const recentWinners = orders.slice(0, 5);
   const statCards: [string, number, LucideIcon, string][] = [
@@ -46,7 +49,7 @@ export default async function AdminOverviewPage() {
     <div className="grid gap-6">
       <div className="rounded-2xl bg-[#fff3e6] p-6 text-[#352B24] border border-[#f0d9c4]">
         <p className="text-sm font-bold uppercase text-[#D96C2D]">Qendra e kontrollit</p>
-        <h1 className="mt-2 text-3xl font-black">Operacionet e NjeKlik</h1>
+        <h1 className="mt-2 text-3xl font-black">Operacionet e AuctionSq</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6f5b4c]">
           Ankandet e skaduara mbyllen automatikisht. Fituesit dhe porosite krijohen automatikisht ne sistem.
         </p>

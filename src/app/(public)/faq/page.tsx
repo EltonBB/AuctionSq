@@ -13,7 +13,7 @@ export default function FAQPage() {
       a: "Cdo ankand ka hap minimal te ofertes. Oferta e re duhet te jete te pakten sa cmimi aktual plus ate hap minimal.",
     },
     {
-      q: "A ka shites te trete ne NjeKlik?",
+      q: "A ka shites te trete ne AuctionSq?",
       a: "Jo. Produktet sigurohen, kontrollohen dhe publikohen nga administratoret e platformes, qe pershkrimi dhe gjendja te jene te qarta.",
     },
     {
@@ -33,7 +33,7 @@ export default function FAQPage() {
           <MessageSquare className="h-4 w-4" />
           Ndihme & Pyetje
         </span>
-        <h1 className="mt-4 text-4xl font-black tracking-[-0.04em] text-[#352B24] sm:text-6xl">Pyetjet e shpeshta</h1>
+          <h1 className="mt-4 text-4xl font-black text-[#352B24] sm:text-6xl">Pyetjet e shpeshta</h1>
         <p className="mt-4 text-sm leading-7 text-[#6f5b4c]">Pergjigje te shpejta per ofertimin, sigurine dhe dergesat.</p>
       </div>
 

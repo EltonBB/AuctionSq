@@ -17,11 +17,11 @@ export default async function CategoriesPage() {
               <Layers3 className="h-3.5 w-3.5" />
               Kategorite
             </p>
-            <h1 className="mt-4 max-w-2xl text-4xl font-black leading-tight tracking-[-0.04em] text-[#352B24] sm:text-6xl">
+          <h1 className="mt-4 max-w-2xl text-4xl font-black leading-tight text-[#352B24] sm:text-6xl">
               Zgjidh kategorine dhe futu direkt ne ankande reale.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6f5b4c]">
-              Cdo kategori permban produkte te kontrolluara nga stafi i NjeKlik, me foto, detaje teknike dhe histori ofertash.
+              Cdo kategori permban produkte te kontrolluara nga stafi i AuctionSq, me foto, detaje teknike dhe histori ofertash.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -56,7 +56,7 @@ export default async function CategoriesPage() {
               <div className="w-fit rounded-xl bg-[#F7D8B5] p-3 text-[#D96C2D]">
                 <FolderHeart className="h-5 w-5" />
               </div>
-              <h2 className="mt-4 text-2xl font-black tracking-[-0.02em] text-[#352B24] group-hover:text-[#D96C2D]">
+                  <h2 className="mt-4 text-2xl font-black text-[#352B24] group-hover:text-[#D96C2D]">
                 {category.name}
               </h2>
               <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#6f5b4c]">{category.description}</p>

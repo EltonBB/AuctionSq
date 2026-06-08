@@ -15,7 +15,7 @@ export default function HowItWorksPage() {
     <div className="mx-auto max-w-[1500px] px-4 py-10">
       <section className="mx-auto max-w-3xl text-center">
         <span className="text-xs font-black uppercase tracking-widest text-[#D96C2D]">Procedura</span>
-        <h1 className="mt-4 text-4xl font-black tracking-[-0.04em] text-[#352B24] sm:text-6xl">Si funksionon NjeKlik?</h1>
+          <h1 className="mt-4 text-4xl font-black text-[#352B24] sm:text-6xl">Si funksionon AuctionSq?</h1>
         <p className="mt-4 text-sm leading-7 text-[#6f5b4c]">
           Nje proces i thjeshte: shfleto produktet, vendos oferten, fito ankandin dhe merr produktin me dergese te sigurt.
         </p>
@@ -37,7 +37,7 @@ export default function HowItWorksPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-center text-3xl font-black tracking-[-0.03em] text-[#352B24]">Procesi ne 5 hapa</h2>
+        <h2 className="text-center text-3xl font-black text-[#352B24]">Procesi ne 5 hapa</h2>
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-5">
           {steps.map((item) => {
             const Icon = item.icon;
@@ -56,7 +56,7 @@ export default function HowItWorksPage() {
       </section>
 
       <section className="mx-auto mt-10 flex max-w-4xl flex-col items-center rounded-[28px] border border-[#f0d9c4] bg-[#fff3e6] p-8 text-center">
-        <h2 className="text-3xl font-black tracking-[-0.03em] text-[#352B24]">Gati per te filluar ofertimin?</h2>
+          <h2 className="text-3xl font-black text-[#352B24]">Gati per te filluar ofertimin?</h2>
         <p className="mt-3 max-w-md text-sm leading-6 text-[#6f5b4c]">Regjistrohu sot dhe eksploro produktet e kontrolluara nga administratoret.</p>
         <Link href="/register" className="mt-6 rounded-xl bg-[#D96C2D] px-8 py-3 text-sm font-black text-white">
           Krijo llogarine

@@ -116,7 +116,7 @@ export default async function PublicLayout({ children }: { children: React.React
               </div>
             </details>
 
-            <BrandLogo className="lg:hidden" />
+            <BrandLogo compact className="lg:hidden" />
 
             <form action="/auctions" className="relative hidden max-w-[620px] flex-1 md:block">
               <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8a7565]" />
@@ -137,8 +137,9 @@ export default async function PublicLayout({ children }: { children: React.React
               </button>
 
               {!isLoggedIn ? (
-                <Link href="/login" className="rounded-full bg-[#352B24] px-5 py-3 text-sm font-black text-white transition hover:bg-[#D96C2D]">
-                  Kycu / Regjistrohu
+                <Link href="/login" className="rounded-full bg-[#352B24] px-4 py-3 text-xs font-black text-white transition hover:bg-[#D96C2D] sm:px-5 sm:text-sm">
+                  <span className="sm:hidden">Kycu</span>
+                  <span className="hidden sm:inline">Kycu / Regjistrohu</span>
                 </Link>
               ) : (
                 <>
@@ -162,11 +163,11 @@ export default async function PublicLayout({ children }: { children: React.React
                           <p className="truncate text-xs text-[#8a7565]">{user?.email || "N/A"}</p>
                         </div>
                         <div className="grid p-2 text-sm">
-                          <Link href="/profile" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-[#5e4c3f] transition hover:bg-[#FFF8F1]">
+                          <Link href="/dashboard/profile" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-[#5e4c3f] transition hover:bg-[#FFF8F1]">
                             <CircleUserRound className="h-4 w-4 text-[#D96C2D]" />
                             Profili
                           </Link>
-                          <Link href="/winners" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-[#5e4c3f] transition hover:bg-[#FFF8F1]">
+                          <Link href="/dashboard/orders" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-bold text-[#5e4c3f] transition hover:bg-[#FFF8F1]">
                             <Gavel className="h-4 w-4 text-[#D96C2D]" />
                             Porosite e Mia
                           </Link>
@@ -212,7 +213,7 @@ export default async function PublicLayout({ children }: { children: React.React
               </div>
             </div>
             <div>
-              <h4 className="font-black text-[#352B24]">Garancia NjeKlik</h4>
+              <h4 className="font-black text-[#352B24]">Garancia AuctionSq</h4>
               <p className="mt-4 text-sm leading-6 text-[#6f5b4c]">
                 Pa shites te trete. Produktet testohen, fotografohen dhe publikohen nga administratoret.
               </p>

@@ -17,7 +17,6 @@ export default function PollingRefresh({ intervalMs = 15000 }: PollingRefreshPro
       }
     };
 
-    void refresh();
     const interval = window.setInterval(refresh, intervalMs);
     return () => window.clearInterval(interval);
   }, [intervalMs, router]);

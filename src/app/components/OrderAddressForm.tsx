@@ -8,6 +8,7 @@ interface OrderAddressFormProps {
   orderId: string;
   currentFullName: string;
   currentPhone: string;
+  currentCountry?: string;
   currentCity: string;
   currentAddress: string;
 }
@@ -16,6 +17,7 @@ export default function OrderAddressForm({
   orderId,
   currentFullName,
   currentPhone,
+  currentCountry = "Albania",
   currentCity,
   currentAddress
 }: OrderAddressFormProps) {
@@ -35,7 +37,7 @@ export default function OrderAddressForm({
     setSuccess(null);
 
     startTransition(async () => {
-      const res = await updateOrderAddress(orderId, fullName, phone, city, address);
+      const res = await updateOrderAddress(orderId, fullName, phone, currentCountry, city, address);
       if (res.success) {
         setSuccess(res.message || "Adresa u perditesua!");
         setIsEditing(false);

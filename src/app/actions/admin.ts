@@ -34,12 +34,16 @@ async function writeAuditLog(
   targetId: string | null,
   details: unknown
 ) {
-  await supabase.from("audit_logs").insert({
+  const { error } = await supabase.from("audit_logs").insert({
     action,
     performed_by: performedBy,
     target_id: targetId,
     details: details || {},
   });
+
+  if (error) {
+    throw new Error(`Audit log write failed: ${error.message}`);
+  }
 }
 
 function getPublicStorageUrl(path: string) {
@@ -53,9 +57,10 @@ function sanitizeFileName(fileName: string) {
 }
 
 async function uploadProductImages(files: File[]) {
-  if (files.length === 0) return [];
+  if (files.length === 0) return { urls: [], paths: [] };
   const adminClient = createAdminClient();
   const uploadedUrls: string[] = [];
+  const uploadedPaths: string[] = [];
 
   for (const file of files) {
     if (!file.type.startsWith("image/")) {
@@ -76,9 +81,16 @@ async function uploadProductImages(files: File[]) {
     }
 
     uploadedUrls.push(getPublicStorageUrl(path));
+    uploadedPaths.push(path);
   }
 
-  return uploadedUrls;
+  return { urls: uploadedUrls, paths: uploadedPaths };
+}
+
+async function cleanupUploadedProductImages(paths: string[]) {
+  if (paths.length === 0) return;
+  const adminClient = createAdminClient();
+  await adminClient.storage.from(PRODUCT_IMAGE_BUCKET).remove(paths);
 }
 
 export async function createCategory(name: string, slug: string, description: string) {
@@ -137,7 +149,9 @@ export async function createProduct(prevState: unknown, formData: FormData) {
       return { success: false, error: "A product with this title already exists." };
     }
 
-    const uploadedImageUrls = await uploadProductImages(validImageFiles);
+    const uploadedProductImages = await uploadProductImages(validImageFiles);
+    const uploadedImageUrls = uploadedProductImages.urls;
+    const uploadedImagePaths = uploadedProductImages.paths;
 
     const { data: product, error } = await supabase
       .from("products")
@@ -152,7 +166,10 @@ export async function createProduct(prevState: unknown, formData: FormData) {
       .select()
       .single();
 
-    if (error) return { success: false, error: error.message };
+    if (error) {
+      await cleanupUploadedProductImages(uploadedImagePaths);
+      return { success: false, error: error.message };
+    }
 
     await writeAuditLog(supabase, "product_create", user.id, product.id, {
       title,
@@ -203,8 +220,11 @@ export async function updateProduct(productId: string, formData: FormData) {
       finalImages = (currentProduct?.images || []) as string[];
     }
 
+    let uploadedImagePaths: string[] = [];
     if (validImageFiles.length > 0) {
-      finalImages = [...finalImages, ...(await uploadProductImages(validImageFiles))];
+      const uploadedProductImages = await uploadProductImages(validImageFiles);
+      finalImages = [...finalImages, ...uploadedProductImages.urls];
+      uploadedImagePaths = uploadedProductImages.paths;
     }
 
     const { error } = await supabase
@@ -220,7 +240,10 @@ export async function updateProduct(productId: string, formData: FormData) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", productId);
-    if (error) return { success: false, error: error.message };
+    if (error) {
+      await cleanupUploadedProductImages(uploadedImagePaths);
+      return { success: false, error: error.message };
+    }
 
     await writeAuditLog(supabase, "product_edit", user.id, productId, { title, condition, status });
     revalidatePath("/admin/products");
@@ -442,6 +465,17 @@ export async function cancelBid(bidId: string, reason: string) {
     if (fetchError || !bid) return { success: false, error: "Bid not found." };
     if (bid.status === "cancelled") return { success: false, error: "Bid is already cancelled." };
 
+    const { data: auction, error: auctionFetchError } = await supabase
+      .from("auctions")
+      .select("id, status, starting_price")
+      .eq("id", bid.auction_id)
+      .maybeSingle();
+    if (auctionFetchError) return { success: false, error: auctionFetchError.message };
+    if (!auction) return { success: false, error: "Auction not found." };
+    if (!["active", "scheduled"].includes(auction.status)) {
+      return { success: false, error: "Only live auction bids can be cancelled. Ended auction results are locked." };
+    }
+
     const { error: updateBidError } = await supabase
       .from("bids")
       .update({ status: "cancelled", cancelled_reason: reason })
@@ -462,8 +496,7 @@ export async function cancelBid(bidId: string, reason: string) {
     if (remainingBids && remainingBids.length > 0) {
       newCurrentPrice = remainingBids[0].amount;
     } else {
-      const { data: auction } = await supabase.from("auctions").select("starting_price").eq("id", bid.auction_id).single();
-      newCurrentPrice = auction?.starting_price || 0;
+      newCurrentPrice = auction.starting_price || 0;
     }
 
     const { error: updateAuctionError } = await supabase
@@ -566,11 +599,29 @@ export async function toggleUserBlock(userId: string, isBlocked: boolean) {
     if (error) return { success: false, error: error.message };
 
     if (isBlocked) {
+      const { data: liveAuctions, error: liveAuctionsError } = await supabase
+        .from("auctions")
+        .select("id")
+        .in("status", ["active", "scheduled"]);
+      if (liveAuctionsError) return { success: false, error: liveAuctionsError.message };
+
+      const liveAuctionIds = (liveAuctions || []).map((auction) => auction.id);
+      if (liveAuctionIds.length === 0) {
+        await writeAuditLog(supabase, "user_restrict", user.id, userId, { isBlocked, cancelledLiveBids: 0 });
+        revalidatePath("/admin/users");
+        revalidatePath("/admin/bids");
+        return {
+          success: true,
+          message: "User restricted successfully.",
+        };
+      }
+
       const { data: userBids } = await supabase
         .from("bids")
         .select("id, auction_id")
         .eq("user_id", userId)
-        .eq("status", "active");
+        .eq("status", "active")
+        .in("auction_id", liveAuctionIds);
 
       for (const userBid of userBids || []) {
         await supabase.from("bids").update({ status: "cancelled", cancelled_reason: "User account suspended" }).eq("id", userBid.id);
@@ -634,6 +685,7 @@ export async function updateOrderAddress(
   orderId: string,
   fullName: string,
   phoneNumber: string,
+  country: string,
   city: string,
   address: string
 ) {
@@ -644,7 +696,9 @@ export async function updateOrderAddress(
     } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Ju lutemi identifikohuni." };
 
-    if (!fullName || !phoneNumber || !city || !address) {
+    const finalCountry = country || "Albania";
+
+    if (!fullName || !phoneNumber || !finalCountry || !city || !address) {
       return { success: false, error: "Te gjitha fushat e adreses jane te detyrueshme." };
     }
 
@@ -660,17 +714,14 @@ export async function updateOrderAddress(
       return { success: false, error: "Nuk mund te ndryshohet adresa ne kete faze." };
     }
 
-    const { error } = await supabase
-      .from("orders")
-      .update({
-        full_name: fullName,
-        phone_number: phoneNumber,
-        city,
-        address,
-        status: order.status === "pending_confirmation" ? "confirmed" : order.status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", orderId);
+    const { error } = await supabase.rpc("confirm_order_delivery", {
+      p_order_id: orderId,
+      p_full_name: fullName,
+      p_phone_number: phoneNumber,
+      p_country: finalCountry,
+      p_city: city,
+      p_address: address,
+    });
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/profile");

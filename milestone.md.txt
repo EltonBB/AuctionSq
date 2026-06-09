@@ -13,6 +13,9 @@ Active task on 2026-06-09:
   - inactive product auction rules are enforced server-side for both new auctions and relists.
   - completed product stats now show small sold and cancelled order counts.
   - `/admin/products` redirects to `/admin/auctions`.
+  - removed the redundant `Produktet` link from the admin sidebar.
+  - product rows use a cleaner two-column action layout, without redundant active/inactive badges.
+  - safe product deletion is exposed from the combined page for products without auction or order history.
 - Hid deactivated products from public auction surfaces:
   - home auction grid.
   - auctions listing.

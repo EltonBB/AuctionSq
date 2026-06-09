@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ProductCreateForm } from "@/app/components/AdminForms";
-import { cancelAuction, createAuction, relistAuction, setProductStatus } from "@/app/actions/admin";
+import { cancelAuction, createAuction, deleteProduct, relistAuction, setProductStatus } from "@/app/actions/admin";
 import { ConfirmSubmitButton } from "@/app/components/AdminUi";
 import AutoRelistToggleForm from "@/app/components/AutoRelistToggleForm";
 import { getAuctions, getCategories, getOrders, getProducts } from "@/lib/db";
@@ -60,6 +60,7 @@ export default async function AdminAuctionsPage({
       processingOrders,
       soldCount,
       cancelledCount,
+      hasAuctionHistory: productAuctions.length > 0,
       isListed: !!liveAuction,
       isProcessing: processingOrders.length > 0,
     };
@@ -104,6 +105,11 @@ export default async function AdminAuctionsPage({
     );
   }
 
+  async function removeProduct(formData: FormData) {
+    "use server";
+    await deleteProduct(String(formData.get("productId") || ""));
+  }
+
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <section className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
@@ -137,22 +143,20 @@ export default async function AdminAuctionsPage({
               Nuk ka produkte ne kete filter.
             </p>
           ) : (
-            filteredRows.map(({ product, liveAuction, lastAuction, processingOrders, soldCount, cancelledCount }) => {
+            filteredRows.map(({ product, liveAuction, lastAuction, processingOrders, soldCount, cancelledCount, hasAuctionHistory }) => {
               const categoryName = categories.find((category) => category.id === product.category_id)?.name || "Pa kategori";
+              const canDelete = !hasAuctionHistory && processingOrders.length === 0 && soldCount === 0 && cancelledCount === 0;
               return (
-                <article key={product.id} className="rounded-xl border border-[#f0d9c4] p-4">
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-                    <div className="flex min-w-0 gap-3">
+                <article key={product.id} className="rounded-xl border border-[#f0d9c4] bg-white/70 p-4">
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_360px]">
+                    <div className="flex min-w-0 gap-4">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={product.images?.[0]} alt="" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+                      <img src={product.images?.[0]} alt="" className="h-20 w-20 shrink-0 rounded-xl bg-[#FFF8F1] object-cover" />
                       <div className="min-w-0">
                         <h2 className="text-base font-black text-[#352B24]">{product.title}</h2>
                         <p className="mt-1 line-clamp-2 text-sm text-[#6f5b4c]">{product.description || "Pa pershkrim."}</p>
                         <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
                           <span className="rounded-md bg-[#FFF8F1] px-2 py-1">{categoryName}</span>
-                          <span className={`rounded-md px-2 py-1 ${product.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
-                            {product.status === "active" ? "aktiv" : "joaktiv"}
-                          </span>
                           {liveAuction ? (
                             <span className="rounded-md bg-[#FFF8F1] px-2 py-1 text-[#D96C2D]">
                               I listuar: {formatEurFromAll(liveAuction.current_price)}
@@ -172,7 +176,7 @@ export default async function AdminAuctionsPage({
                       </div>
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="grid gap-3 rounded-xl border border-[#f0d9c4] bg-[#fffaf5] p-3">
                       {liveAuction ? (
                         <>
                           <AutoRelistToggleForm auctionId={liveAuction.id} enabled={!!liveAuction.auto_relist} />
@@ -187,46 +191,61 @@ export default async function AdminAuctionsPage({
                           </form>
                         </>
                       ) : product.status === "active" && processingOrders.length === 0 && !lastAuction ? (
-                        <form action={createProductAuction} className="grid gap-2 rounded-lg bg-[#FFF8F1] p-2">
+                        <form action={createProductAuction} className="grid gap-2">
                           <input type="hidden" name="productId" value={product.id} />
-                          <input name="startingPrice" type="number" min="1" step="0.01" placeholder="Oferta minimale EUR" className="rounded-md border border-[#f0d9c4] px-2 py-2 text-xs" />
-                          <input name="minIncrement" type="number" min="1" step="0.01" defaultValue="1" className="rounded-md border border-[#f0d9c4] px-2 py-2 text-xs" />
-                          <label className="flex items-center gap-2 text-xs font-bold text-[#6f5b4c]">
-                            <input type="checkbox" name="autoRelist" value="true" className="h-4 w-4 accent-[#D96C2D]" />
-                            Auto 24h
-                          </label>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                            <input name="startingPrice" type="number" min="1" step="0.01" placeholder="Oferta minimale EUR" className="rounded-lg border border-[#f0d9c4] bg-white px-3 py-2 text-xs" />
+                            <input name="minIncrement" type="number" min="1" step="0.01" defaultValue="1" className="rounded-lg border border-[#f0d9c4] bg-white px-3 py-2 text-xs" />
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
                             {QUICK_HOURS.map((hours) => (
-                              <button key={hours} name="durationHours" value={hours} className="rounded-md bg-[#D96C2D] px-3 py-2 text-xs font-black text-white hover:bg-[#bf5520]">
+                              <button key={hours} name="durationHours" value={hours} className="rounded-lg bg-[#D96C2D] px-3 py-2 text-xs font-black text-white hover:bg-[#bf5520]">
                                 {hours}h
                               </button>
                             ))}
+                            <label className="ml-auto flex items-center gap-2 rounded-lg border border-[#f0d9c4] bg-white px-3 py-2 text-xs font-bold text-[#6f5b4c]">
+                              <input type="checkbox" name="autoRelist" value="true" className="h-4 w-4 accent-[#D96C2D]" />
+                              Auto 24h
+                            </label>
                           </div>
                         </form>
                       ) : null}
                       {lastAuction && !liveAuction && product.status === "active" && processingOrders.length === 0 ? (
-                        <form action={relist} className="grid gap-2 rounded-lg bg-white p-2">
+                        <form action={relist} className="grid gap-2">
                           <input type="hidden" name="auctionId" value={lastAuction.id} />
-                          <input name="startingPrice" type="number" min="1" step="0.01" defaultValue={allToEur(lastAuction.current_price || lastAuction.starting_price).toFixed(2)} className="rounded-md border border-[#f0d9c4] px-2 py-2 text-xs" />
+                          <input name="startingPrice" type="number" min="1" step="0.01" defaultValue={allToEur(lastAuction.current_price || lastAuction.starting_price).toFixed(2)} className="rounded-lg border border-[#f0d9c4] bg-white px-3 py-2 text-xs" />
                           <div className="flex flex-wrap gap-2">
                             {QUICK_HOURS.map((hours) => (
-                              <button key={hours} name="durationHours" value={hours} className="rounded-md border border-[#D96C2D]/35 px-3 py-2 text-xs font-black text-[#D96C2D] hover:bg-[#D96C2D] hover:text-white">
+                              <button key={hours} name="durationHours" value={hours} className="rounded-lg border border-[#D96C2D]/35 bg-white px-3 py-2 text-xs font-black text-[#D96C2D] hover:bg-[#D96C2D] hover:text-white">
                                 Relist {hours}h
                               </button>
                             ))}
                           </div>
                         </form>
                       ) : null}
-                      <form action={setStatus}>
-                        <input type="hidden" name="productId" value={product.id} />
-                        <input type="hidden" name="status" value={product.status === "active" ? "inactive" : "active"} />
-                        <ConfirmSubmitButton
-                          className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-black text-[#5e4c3f] hover:bg-[#FFF8F1]"
-                          confirmMessage={product.status === "active" ? "Caktivizo kete produkt?" : "Aktivizo kete produkt?"}
-                        >
-                          {product.status === "active" ? "Caktivizo" : "Aktivizo"}
-                        </ConfirmSubmitButton>
-                      </form>
+                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                        <form action={setStatus}>
+                          <input type="hidden" name="productId" value={product.id} />
+                          <input type="hidden" name="status" value={product.status === "active" ? "inactive" : "active"} />
+                          <ConfirmSubmitButton
+                            className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-[#5e4c3f] hover:bg-[#FFF8F1]"
+                            confirmMessage={product.status === "active" ? "Caktivizo kete produkt?" : "Aktivizo kete produkt?"}
+                          >
+                            {product.status === "active" ? "Caktivizo" : "Aktivizo"}
+                          </ConfirmSubmitButton>
+                        </form>
+                        {canDelete ? (
+                          <form action={removeProduct}>
+                            <input type="hidden" name="productId" value={product.id} />
+                            <ConfirmSubmitButton
+                              className="inline-flex w-full items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                              confirmMessage="Fshij kete produkt? Ky veprim nuk mund te kthehet mbrapa."
+                            >
+                              Fshij
+                            </ConfirmSubmitButton>
+                          </form>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 </article>

@@ -96,6 +96,7 @@ test("admin auctions page is the combined product and auction workspace", () => 
   assert.match(adminAuctionsPage, /filter=\$\{filter\.key\}/);
   assert.match(adminAuctionsPage, /createAuction/);
   assert.match(adminAuctionsPage, /setProductStatus/);
+  assert.match(adminAuctionsPage, /deleteProduct/);
   assert.doesNotMatch(adminAuctionsPage, /AuctionCreateForm/);
 });
 

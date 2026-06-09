@@ -10,7 +10,6 @@ export const revalidate = 0;
 
 const links: { href: string; label: string; icon: AdminSidebarIconKey }[] = [
   { href: "/admin", label: "Permbledhje", icon: "overview" },
-  { href: "/admin/products", label: "Produktet", icon: "products" },
   { href: "/admin/auctions", label: "Ankandet", icon: "auctions" },
   { href: "/admin/bids", label: "Ofertat", icon: "bids" },
   { href: "/admin/orders", label: "Porosite", icon: "orders" },

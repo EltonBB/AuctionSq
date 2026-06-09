@@ -27,6 +27,7 @@ Active task on 2026-06-09:
   - left sidebar is sticky on desktop and no longer scrolls away leaving an empty rail.
   - desktop sidebar rail is wider so nav items align and breathe better.
   - admin sidebar CTA now links to the combined products/auctions workflow.
+  - auctions listing uses the same two-column mobile product grid as the homepage.
 - Fixed admin relist/delete rules:
   - delivered and cancelled orders no longer block relisting; only open order statuses block it.
   - product delete is permanently available and removes linked auctions, bids, orders, and product image files.
@@ -54,7 +55,7 @@ Active task on 2026-06-09:
   - completed/non-live auction bids can be deleted from admin bids.
   - customer accounts can be deleted only when they are not admin, have no open orders, and have no active bids in live auctions.
 - Latest local checks passed:
-  - `node --test tests\*.test.mjs`: 26/26 tests.
+  - `node --test tests\*.test.mjs`: 27/27 tests.
   - `npm run lint`: passed.
   - `npm run build`: passed.
   - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.

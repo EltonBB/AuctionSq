@@ -123,7 +123,7 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
             </Link>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {filteredAuctions.map((auction) => (
               <BrandAuctionCard key={auction.id} auction={auction} />
             ))}

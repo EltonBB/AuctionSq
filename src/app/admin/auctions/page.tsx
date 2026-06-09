@@ -10,7 +10,7 @@ import { allToEur, formatEurFromAll } from "@/lib/currency";
 export const revalidate = 0;
 
 const QUICK_HOURS = [24, 48, 72];
-const RELIST_LOCKED_ORDER_STATUSES = ["pending_confirmation", "confirmed", "processing", "out_for_delivery", "delivered"];
+const RELIST_LOCKED_ORDER_STATUSES = ["pending_confirmation", "confirmed", "processing", "out_for_delivery"];
 const PRODUCT_FILTERS = [
   { key: "unlisted", label: "Te palistuara" },
   { key: "listed", label: "Te listuara" },
@@ -63,7 +63,6 @@ export default async function AdminAuctionsPage({
       processingOrders,
       soldCount,
       cancelledCount,
-      hasAuctionHistory: productAuctions.length > 0,
       isListed: !!liveAuction,
       isProcessing: processingOrders.length > 0,
     };
@@ -146,9 +145,8 @@ export default async function AdminAuctionsPage({
               Nuk ka produkte ne kete filter.
             </p>
           ) : (
-            filteredRows.map(({ product, liveAuction, lastAuction, lastAuctionOrder, processingOrders, soldCount, cancelledCount, hasAuctionHistory }) => {
+            filteredRows.map(({ product, liveAuction, lastAuction, lastAuctionOrder, processingOrders, soldCount, cancelledCount }) => {
               const categoryName = categories.find((category) => category.id === product.category_id)?.name || "Pa kategori";
-              const canDelete = !hasAuctionHistory && processingOrders.length === 0 && soldCount === 0 && cancelledCount === 0;
               const relistLockedByOrder = !!lastAuctionOrder && RELIST_LOCKED_ORDER_STATUSES.includes(lastAuctionOrder.status);
               const canRelist = !!lastAuction && !liveAuction && product.status === "active" && processingOrders.length === 0 && !relistLockedByOrder;
               const relistBlockReason =
@@ -161,16 +159,6 @@ export default async function AdminAuctionsPage({
                       : relistLockedByOrder
                         ? "Ky produkt ka porosi te fituar. Rilistimi hapet vetem nese porosia anulohet."
                         : null;
-              const deleteBlockReason =
-                canDelete
-                  ? null
-                  : liveAuction
-                    ? "Fshirja bllokohet sepse produkti ka ankand aktiv."
-                    : hasAuctionHistory
-                      ? "Fshirja bllokohet sepse produkti ka histori ankandesh."
-                      : processingOrders.length > 0
-                        ? "Fshirja bllokohet sepse ka porosi ne proces."
-                        : "Fshirja bllokohet sepse produkti ka histori porosish.";
               return (
                 <article key={product.id} className="rounded-xl border border-[#f0d9c4] bg-white/70 p-4">
                   <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -264,26 +252,15 @@ export default async function AdminAuctionsPage({
                             {product.status === "active" ? "Caktivizo" : "Aktivizo"}
                           </ConfirmSubmitButton>
                         </form>
-                        {canDelete ? (
-                          <form action={removeProduct}>
-                            <input type="hidden" name="productId" value={product.id} />
-                            <ConfirmSubmitButton
-                              className="inline-flex w-full items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
-                              confirmMessage="Fshij kete produkt? Ky veprim nuk mund te kthehet mbrapa."
-                            >
-                              Fshij
-                            </ConfirmSubmitButton>
-                          </form>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled
-                            title={deleteBlockReason || undefined}
-                            className="inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400"
+                        <form action={removeProduct}>
+                          <input type="hidden" name="productId" value={product.id} />
+                          <ConfirmSubmitButton
+                            className="inline-flex w-full items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                            confirmMessage="Fshij kete produkt dhe te gjitha ankandet, ofertat dhe porosite e lidhura me te? Ky veprim nuk mund te kthehet mbrapa."
                           >
                             Fshij
-                          </button>
-                        )}
+                          </ConfirmSubmitButton>
+                        </form>
                       </div>
                     </div>
                   </div>

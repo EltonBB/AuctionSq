@@ -37,11 +37,11 @@ export default async function PublicLayout({ children }: { children: React.React
   ];
 
   return (
-    <div className="brand-surface min-h-screen text-[#352B24] lg:grid lg:grid-cols-[248px_1fr]">
-      <aside className="sticky top-0 hidden h-screen border-r border-[#f0d9c4] bg-[#fffdf8]/90 px-5 py-6 backdrop-blur lg:relative lg:block">
+    <div className="brand-surface min-h-screen text-[#352B24] lg:grid lg:grid-cols-[284px_minmax(0,1fr)] xl:grid-cols-[304px_minmax(0,1fr)]">
+      <aside className="top-0 z-40 hidden h-screen self-start border-r border-[#f0d9c4] bg-[#fffdf8]/90 px-6 py-6 backdrop-blur lg:sticky lg:block xl:px-7">
         <BrandLogo className="px-1" />
         <Link
-          href={user?.is_admin ? "/admin/products" : "/auctions"}
+          href={user?.is_admin ? "/admin/auctions" : "/auctions"}
           className="mt-7 flex items-center justify-center gap-2 rounded-xl bg-[#D96C2D] px-4 py-3 text-sm font-black text-white shadow-[0_12px_24px_rgba(217,108,45,0.22)] transition hover:bg-[#bf5520]"
         >
           <Gavel className="h-4 w-4" />
@@ -84,7 +84,7 @@ export default async function PublicLayout({ children }: { children: React.React
           </Link>
         </div>
 
-        <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-[#f3d7b8] bg-[#fff0dc] p-4 shadow-[0_16px_32px_rgba(217,108,45,0.12)]">
+        <div className="absolute bottom-5 left-6 right-6 rounded-2xl border border-[#f3d7b8] bg-[#fff0dc] p-4 shadow-[0_16px_32px_rgba(217,108,45,0.12)] xl:left-7 xl:right-7">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/gold-bidder-medal.png" alt="" className="h-14 w-14 object-contain" />

@@ -23,6 +23,13 @@ Active task on 2026-06-09:
   - ending-soon listing.
   - category counts.
   - auction detail pages now 404 if the related product is inactive.
+- Improved desktop public layout:
+  - left sidebar is sticky on desktop and no longer scrolls away leaving an empty rail.
+  - desktop sidebar rail is wider so nav items align and breathe better.
+  - admin sidebar CTA now links to the combined products/auctions workflow.
+- Fixed admin relist/delete rules:
+  - delivered and cancelled orders no longer block relisting; only open order statuses block it.
+  - product delete is permanently available and removes linked auctions, bids, orders, and product image files.
 - Implemented client-requested mobile/home adjustments from the Albanian PDF:
   - smaller hero with old hero image removed.
   - active products appear before the "Si funksionon" section.

@@ -56,6 +56,13 @@ function sanitizeFileName(fileName: string) {
   return fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
 }
 
+function getProductImageStoragePath(url: string) {
+  const marker = `/${PRODUCT_IMAGE_BUCKET}/`;
+  const markerIndex = url.indexOf(marker);
+  if (markerIndex === -1) return null;
+  return decodeURIComponent(url.slice(markerIndex + marker.length));
+}
+
 async function uploadProductImages(files: File[]) {
   if (files.length === 0) return { urls: [], paths: [] };
   const adminClient = createAdminClient();
@@ -401,7 +408,7 @@ export async function relistAuction(auctionId: string, durationHours: number, st
       .maybeSingle();
     if (existingOrderError) return { success: false, error: existingOrderError.message };
 
-    const lockedStatuses = ["pending_confirmation", "confirmed", "processing", "out_for_delivery", "delivered"];
+    const lockedStatuses = ["pending_confirmation", "confirmed", "processing", "out_for_delivery"];
     if (existingOrder && lockedStatuses.includes(existingOrder.status)) {
       return { success: false, error: "Ky produkt eshte i fituar dhe ne proces porosie. Relist lejohet vetem pasi porosia anulohet." };
     }
@@ -989,7 +996,7 @@ export async function deleteProduct(productId: string) {
     const { user, supabase } = await checkAdminAuth();
     const { data: product, error: productError } = await supabase
       .from("products")
-      .select("id, title")
+      .select("id, title, images")
       .eq("id", productId)
       .maybeSingle();
     if (productError) return { success: false, error: productError.message };
@@ -1001,30 +1008,39 @@ export async function deleteProduct(productId: string) {
       .eq("product_id", productId);
     if (auctionsError) return { success: false, error: auctionsError.message };
 
-    const hasActiveAuction = (auctionsForProduct || []).some((auction) =>
-      ["active", "scheduled"].includes(auction.status)
-    );
-    if (hasActiveAuction) {
-      return { success: false, error: "Cannot delete product with active or scheduled auctions." };
-    }
-
     if ((auctionsForProduct || []).length > 0) {
       const auctionIds = auctionsForProduct!.map((auction) => auction.id);
-      const { data: existingOrders, error: ordersError } = await supabase
-        .from("orders")
-        .select("id")
-        .in("auction_id", auctionIds)
-        .limit(1);
-      if (ordersError) return { success: false, error: ordersError.message };
-      if ((existingOrders || []).length > 0) {
-        return { success: false, error: "Cannot delete product that already has winner orders." };
-      }
+
+      const { error: clearWinnerError } = await supabase
+        .from("auctions")
+        .update({ winner_id: null, winning_bid_id: null, updated_at: new Date().toISOString() })
+        .in("id", auctionIds);
+      if (clearWinnerError) return { success: false, error: clearWinnerError.message };
+
+      const { error: ordersDeleteError } = await supabase.from("orders").delete().in("auction_id", auctionIds);
+      if (ordersDeleteError) return { success: false, error: ordersDeleteError.message };
+
+      const { error: bidsDeleteError } = await supabase.from("bids").delete().in("auction_id", auctionIds);
+      if (bidsDeleteError) return { success: false, error: bidsDeleteError.message };
+
+      const { error: auctionsDeleteError } = await supabase.from("auctions").delete().in("id", auctionIds);
+      if (auctionsDeleteError) return { success: false, error: auctionsDeleteError.message };
     }
 
     const { error } = await supabase.from("products").delete().eq("id", productId);
     if (error) return { success: false, error: error.message };
 
-    await writeAuditLog(supabase, "product_delete", user.id, productId, { title: product.title });
+    const imagePaths = (Array.isArray(product.images) ? product.images : [])
+      .map((imageUrl) => getProductImageStoragePath(String(imageUrl)))
+      .filter((path): path is string => !!path);
+    if (imagePaths.length > 0) {
+      await createAdminClient().storage.from(PRODUCT_IMAGE_BUCKET).remove(imagePaths);
+    }
+
+    await writeAuditLog(supabase, "product_delete", user.id, productId, {
+      title: product.title,
+      removedAuctionCount: (auctionsForProduct || []).length,
+    });
     revalidatePath("/admin/products");
     revalidatePath("/admin/auctions");
     revalidatePath("/auctions");

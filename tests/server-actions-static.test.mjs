@@ -105,3 +105,17 @@ test("product activation rules are enforced server-side for auction workflows", 
   assert.match(adminActions, /relistAuction[\s\S]*?product:products\(status\)[\s\S]*?product\.status\s*!==\s*"active"[\s\S]*?Only active products can be relisted/);
   assert.match(adminActions, /setProductStatus[\s\S]*?revalidatePath\("\/admin\/auctions"\)/);
 });
+
+test("delivered orders do not block relist and product delete cascades related records", () => {
+  const relistAuctionMatch = adminActions.match(/export\s+async\s+function\s+relistAuction[\s\S]*?export\s+async\s+function\s+cancelBid/);
+  assert.ok(relistAuctionMatch, "relistAuction should exist before cancelBid");
+  assert.match(relistAuctionMatch[0], /const lockedStatuses = \["pending_confirmation", "confirmed", "processing", "out_for_delivery"\]/);
+  assert.doesNotMatch(relistAuctionMatch[0], /lockedStatuses = \[[^\]]*"delivered"/);
+
+  const deleteProductMatch = adminActions.match(/export\s+async\s+function\s+deleteProduct[\s\S]*?export\s+async\s+function\s+submitSetProductStatus/);
+  assert.ok(deleteProductMatch, "deleteProduct should exist before submitSetProductStatus");
+  assert.match(deleteProductMatch[0], /\.from\("orders"\)\.delete\(\)\.in\("auction_id", auctionIds\)/);
+  assert.match(deleteProductMatch[0], /\.from\("bids"\)\.delete\(\)\.in\("auction_id", auctionIds\)/);
+  assert.match(deleteProductMatch[0], /\.from\("auctions"\)\.delete\(\)\.in\("id", auctionIds\)/);
+  assert.match(adminAuctionsPage, /confirmMessage="Fshij kete produkt dhe te gjitha ankandet, ofertat dhe porosite e lidhura me te\?/);
+});

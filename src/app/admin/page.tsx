@@ -49,7 +49,7 @@ export default async function AdminOverviewPage() {
     <div className="grid gap-6">
       <div className="rounded-2xl bg-[#fff3e6] p-6 text-[#352B24] border border-[#f0d9c4]">
         <p className="text-sm font-bold uppercase text-[#D96C2D]">Qendra e kontrollit</p>
-        <h1 className="mt-2 text-3xl font-black">Operacionet e AuctionSq</h1>
+        <h1 className="mt-2 text-3xl font-black">Operacionet e NjeKlik</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6f5b4c]">
           Ankandet e skaduara mbyllen automatikisht. Fituesit dhe porosite krijohen automatikisht ne sistem.
         </p>

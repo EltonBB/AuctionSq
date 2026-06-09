@@ -263,6 +263,7 @@ export async function createAuction(prevState: unknown, formData: FormData) {
     const startingPriceEur = Number(formData.get("startingPrice"));
     const minIncrementEur = Number(formData.get("minIncrement") || "1");
     const durationHours = Number(formData.get("durationHours") || "24");
+    const autoRelist = formData.get("autoRelist") === "true";
     const startingPrice = eurToAll(startingPriceEur);
     const minIncrement = eurToAll(minIncrementEur);
 
@@ -312,6 +313,7 @@ export async function createAuction(prevState: unknown, formData: FormData) {
         start_time: startTime,
         end_time: endTime,
         status,
+        auto_relist: autoRelist,
       })
       .select()
       .single();
@@ -324,6 +326,7 @@ export async function createAuction(prevState: unknown, formData: FormData) {
       startTime,
       endTime,
       durationHours,
+      autoRelist,
     });
     revalidatePath("/admin/auctions");
     revalidatePath("/auctions");
@@ -381,7 +384,7 @@ export async function relistAuction(auctionId: string, durationHours: number, st
     const status = "active";
     const { data: baseAuction, error: baseAuctionError } = await supabase
       .from("auctions")
-      .select("id, product_id, status, winner_id")
+      .select("id, product_id, status, winner_id, auto_relist")
       .eq("id", auctionId)
       .maybeSingle();
     if (baseAuctionError) return { success: false, error: baseAuctionError.message };
@@ -419,6 +422,7 @@ export async function relistAuction(auctionId: string, durationHours: number, st
         start_time: startTime,
         end_time: endTime,
         status,
+        auto_relist: !!baseAuction.auto_relist,
       })
       .select()
       .single();
@@ -439,6 +443,7 @@ export async function relistAuction(auctionId: string, durationHours: number, st
       startTime,
       endTime,
       durationHours,
+      autoRelist: !!baseAuction.auto_relist,
     });
     revalidatePath("/admin/auctions");
     revalidatePath("/auctions");
@@ -519,6 +524,59 @@ export async function cancelBid(bidId: string, reason: string) {
   }
 }
 
+export async function deleteCompletedBid(bidId: string) {
+  try {
+    const { user, supabase } = await checkAdminAuth();
+    const { data: bid, error: bidError } = await supabase
+      .from("bids")
+      .select("id, auction_id, user_id, amount, status")
+      .eq("id", bidId)
+      .maybeSingle();
+    if (bidError) return { success: false, error: bidError.message };
+    if (!bid) return { success: false, error: "Bid not found." };
+
+    const { data: auction, error: auctionError } = await supabase
+      .from("auctions")
+      .select("id, status")
+      .eq("id", bid.auction_id)
+      .maybeSingle();
+    if (auctionError) return { success: false, error: auctionError.message };
+    if (!auction) return { success: false, error: "Auction not found." };
+
+    const auctionStatus = auction.status;
+    if (["active", "scheduled"].includes(auctionStatus || "")) {
+      return { success: false, error: "Active auction bids must be cancelled, not deleted." };
+    }
+
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .select("id, status")
+      .eq("auction_id", bid.auction_id)
+      .maybeSingle();
+    if (orderError) return { success: false, error: orderError.message };
+    if (order && !["delivered", "cancelled"].includes(order.status)) {
+      return { success: false, error: "Order is still in process. Complete or cancel it before deleting related offers." };
+    }
+
+    const { error } = await supabase.from("bids").delete().eq("id", bidId);
+    if (error) return { success: false, error: error.message };
+
+    await writeAuditLog(supabase, "bid_delete_completed", user.id, bidId, {
+      auctionId: bid.auction_id,
+      bidUserId: bid.user_id,
+      amount: bid.amount,
+      previousStatus: bid.status,
+      auctionStatus,
+      orderStatus: order?.status || null,
+    });
+    revalidatePath("/admin/bids");
+    revalidatePath("/admin/auctions");
+    return { success: true, message: "Completed auction bid removed." };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function updateOrderStatus(orderId: string, status: string) {
   try {
     const { user, supabase } = await checkAdminAuth();
@@ -551,13 +609,6 @@ export async function updateOrderStatus(orderId: string, status: string) {
       .maybeSingle();
 
     if (auctionForOrder?.product_id) {
-      if (status === "delivered") {
-        await supabase
-          .from("products")
-          .update({ status: "inactive", updated_at: new Date().toISOString() })
-          .eq("id", auctionForOrder.product_id);
-      }
-
       if (status === "cancelled") {
         await supabase
           .from("products")
@@ -574,6 +625,41 @@ export async function updateOrderStatus(orderId: string, status: string) {
     revalidatePath("/");
     revalidatePath("/profile");
     return { success: true, message: `Order status updated to ${status.replaceAll("_", " ")}.` };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function toggleAuctionAutoRelist(auctionId: string, enabled: boolean) {
+  try {
+    const { user, supabase } = await checkAdminAuth();
+    const { data: auction, error: auctionError } = await supabase
+      .from("auctions")
+      .select("id, status, auto_relist, product_id")
+      .eq("id", auctionId)
+      .maybeSingle();
+    if (auctionError) return { success: false, error: auctionError.message };
+    if (!auction) return { success: false, error: "Auction not found." };
+    if (auction.auto_relist === enabled) {
+      return { success: true, message: enabled ? "Auto relist is already on." : "Auto relist is already off." };
+    }
+
+    const { error } = await supabase
+      .from("auctions")
+      .update({ auto_relist: enabled, updated_at: new Date().toISOString() })
+      .eq("id", auctionId);
+    if (error) return { success: false, error: error.message };
+
+    await writeAuditLog(supabase, "auction_auto_relist_change", user.id, auctionId, {
+      productId: auction.product_id,
+      enabled,
+      previousStatus: auction.status,
+    });
+    revalidatePath("/admin/auctions");
+    revalidatePath("/auctions");
+    revalidatePath(`/auctions/${auctionId}`);
+    revalidatePath("/");
+    return { success: true, message: enabled ? "Auto relist enabled." : "Auto relist disabled." };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
@@ -656,6 +742,70 @@ export async function toggleUserBlock(userId: string, isBlocked: boolean) {
       success: true,
       message: isBlocked ? "User restricted successfully." : "User restrictions removed.",
     };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function deleteCustomerAccount(userId: string) {
+  try {
+    const { user, supabase } = await checkAdminAuth();
+    if (userId === user.id) return { success: false, error: "You cannot delete your own admin account." };
+
+    const { data: targetProfile, error: targetProfileError } = await supabase
+      .from("profiles")
+      .select("id, full_name, is_admin")
+      .eq("id", userId)
+      .maybeSingle();
+    if (targetProfileError) return { success: false, error: targetProfileError.message };
+    if (!targetProfile) return { success: false, error: "User not found." };
+    if (targetProfile.is_admin) return { success: false, error: "Admin accounts cannot be deleted here." };
+
+    const { data: openOrders, error: openOrdersError } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("winner_id", userId)
+      .not("status", "in", "(delivered,cancelled)")
+      .limit(1);
+    if (openOrdersError) return { success: false, error: openOrdersError.message };
+    if ((openOrders || []).length > 0) {
+      return { success: false, error: "Customer has an order still in process. Complete or cancel it first." };
+    }
+
+    const { data: liveAuctions, error: liveAuctionsError } = await supabase
+      .from("auctions")
+      .select("id")
+      .in("status", ["active", "scheduled"]);
+    if (liveAuctionsError) return { success: false, error: liveAuctionsError.message };
+
+    const liveAuctionIds = (liveAuctions || []).map((auction) => auction.id);
+    if (liveAuctionIds.length > 0) {
+      const { data: activeBids, error: activeBidsError } = await supabase
+        .from("bids")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .in("auction_id", liveAuctionIds)
+        .limit(1);
+      if (activeBidsError) return { success: false, error: activeBidsError.message };
+      if ((activeBids || []).length > 0) {
+        return { success: false, error: "Customer still has active bids in live auctions. Cancel those bids first." };
+      }
+    }
+
+    await writeAuditLog(supabase, "customer_account_delete", user.id, userId, {
+      fullName: targetProfile.full_name,
+    });
+
+    const adminClient = createAdminClient();
+    const { error } = await adminClient.auth.admin.deleteUser(userId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/bids");
+    revalidatePath("/admin/orders");
+    revalidatePath("/admin/audit-logs");
+    return { success: true, message: "Customer account and completed history removed." };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
@@ -761,6 +911,10 @@ export async function performCancelBid(formData: FormData) {
   return cancelBid(String(formData.get("bidId") || ""), String(formData.get("reason") || ""));
 }
 
+export async function submitDeleteCompletedBid(_: unknown, formData: FormData) {
+  return deleteCompletedBid(String(formData.get("bidId") || ""));
+}
+
 export async function submitUpdateOrderStatus(_: unknown, formData: FormData) {
   return updateOrderStatus(String(formData.get("orderId") || ""), String(formData.get("status") || ""));
 }
@@ -768,8 +922,19 @@ export async function performUpdateOrderStatus(formData: FormData) {
   return updateOrderStatus(String(formData.get("orderId") || ""), String(formData.get("status") || ""));
 }
 
+export async function submitToggleAuctionAutoRelist(_: unknown, formData: FormData) {
+  return toggleAuctionAutoRelist(
+    String(formData.get("auctionId") || ""),
+    String(formData.get("enabled") || "false") === "true"
+  );
+}
+
 export async function submitToggleUserBlock(_: unknown, formData: FormData) {
   return toggleUserBlock(String(formData.get("userId") || ""), String(formData.get("blocked")) === "true");
+}
+
+export async function submitDeleteCustomerAccount(_: unknown, formData: FormData) {
+  return deleteCustomerAccount(String(formData.get("userId") || ""));
 }
 
 export async function submitCreateCategory(_: unknown, formData: FormData) {

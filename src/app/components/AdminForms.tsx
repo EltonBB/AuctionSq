@@ -92,6 +92,15 @@ export function AuctionCreateForm({ products }: { products: Product[] }) {
           Kohezgjatja e ankandit (ore)
           <input name="durationHours" required type="number" min="1" max="168" defaultValue="24" placeholder="24" className={input} />
         </label>
+        <label className="flex items-start gap-3 rounded-xl border border-[#ead2bc] bg-[#FFF8F1] p-3 text-xs font-bold text-[#6f5b4c]">
+          <input type="checkbox" name="autoRelist" value="true" className="mt-0.5 h-4 w-4 accent-[#D96C2D]" />
+          <span>
+            Rilistim automatik 24h nese nuk ka oferta
+            <span className="mt-1 block font-semibold text-[#8a7565]">
+              Kur ankandi mbyllet pa oferta, sistemi krijon automatikisht ankand te ri 24 oreshe.
+            </span>
+          </span>
+        </label>
       </div>
       <button disabled={isPending || !hasProducts} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#D96C2D] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-[#bf5520] disabled:opacity-60">
         <Gavel className="h-4 w-4" />

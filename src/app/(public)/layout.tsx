@@ -213,7 +213,7 @@ export default async function PublicLayout({ children }: { children: React.React
               </div>
             </div>
             <div>
-              <h4 className="font-black text-[#352B24]">Garancia AuctionSq</h4>
+              <h4 className="font-black text-[#352B24]">Garancia NjeKlik</h4>
               <p className="mt-4 text-sm leading-6 text-[#6f5b4c]">
                 Pa shites te trete. Produktet testohen, fotografohen dhe publikohen nga administratoret.
               </p>

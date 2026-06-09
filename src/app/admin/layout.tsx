@@ -33,7 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D96C2D] text-white">
                 <ShieldCheck className="h-5 w-5" />
               </span>
-              <span className="hidden sm:inline">AuctionSq Admin</span>
+              <span className="hidden sm:inline">NjeKlik Admin</span>
             </Link>
           </div>
           <div className="flex items-center gap-3">

@@ -13,7 +13,7 @@ export default function FAQPage() {
       a: "Cdo ankand ka hap minimal te ofertes. Oferta e re duhet te jete te pakten sa cmimi aktual plus ate hap minimal.",
     },
     {
-      q: "A ka shites te trete ne AuctionSq?",
+      q: "A ka shites te trete ne NjeKlik?",
       a: "Jo. Produktet sigurohen, kontrollohen dhe publikohen nga administratoret e platformes, qe pershkrimi dhe gjendja te jene te qarta.",
     },
     {

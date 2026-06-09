@@ -46,6 +46,7 @@ export interface Auction {
   start_time: string;
   end_time: string;
   status: "scheduled" | "active" | "ended" | "cancelled" | "relisted";
+  auto_relist: boolean;
   winner_id: string | null;
   winning_bid_id: string | null;
   created_at: string;
@@ -187,7 +188,7 @@ const profileListColumns =
 const productListColumns =
   "id, title, description, category_id, condition, images, testing_notes, status, created_at, updated_at";
 const auctionListColumns =
-  "id, product_id, starting_price, current_price, min_increment, start_time, end_time, status, winner_id, winning_bid_id, created_at, updated_at";
+  "id, product_id, starting_price, current_price, min_increment, start_time, end_time, status, auto_relist, winner_id, winning_bid_id, created_at, updated_at";
 const bidListColumns = "id, auction_id, user_id, amount, status, cancelled_reason, created_at";
 const orderListColumns =
   "id, auction_id, winner_id, final_price, full_name, phone_number, country, city, address, status, created_at, updated_at";

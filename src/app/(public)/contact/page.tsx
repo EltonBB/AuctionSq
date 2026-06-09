@@ -21,7 +21,7 @@ export default function ContactPage() {
             <h3 className="border-b border-[#f0d9c4] pb-3 text-lg font-black text-[#352B24]">Informacione kontakti</h3>
             {[
               [Phone, "Numri i telefonit", "+355 69 123 4567", "E hene - E shtune, 09:00 - 18:00"],
-              [Mail, "Adresa email", "support@auctionsq.com", "Pergjigje brenda 24 oreve"],
+              [Mail, "Adresa email", "support@njeklik.com", "Pergjigje brenda 24 oreve"],
               [MapPin, "Lokacioni yne", "Tirane, Shqiperi", "Sherbim ne te gjithe vendin"],
             ].map(([Icon, title, value, note]) => (
               <div key={String(title)} className="flex items-start gap-4">

@@ -21,7 +21,7 @@ export default async function CategoriesPage() {
               Zgjidh kategorine dhe futu direkt ne ankande reale.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6f5b4c]">
-              Cdo kategori permban produkte te kontrolluara nga stafi i AuctionSq, me foto, detaje teknike dhe histori ofertash.
+              Cdo kategori permban produkte te kontrolluara nga stafi i NjeKlik, me foto, detaje teknike dhe histori ofertash.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

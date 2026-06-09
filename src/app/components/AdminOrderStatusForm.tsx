@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateOrderStatus } from "@/app/actions/admin";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -13,14 +14,29 @@ export default function AdminOrderStatusForm({
   orderId: string;
   currentStatus: string;
 }) {
+  const router = useRouter();
+  const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [state, action, pending] = useActionState(async (_: unknown, formData: FormData) => {
     return updateOrderStatus(String(formData.get("orderId") || ""), String(formData.get("status") || ""));
   }, null);
 
+  useEffect(() => {
+    setSelectedStatus(currentStatus);
+  }, [currentStatus]);
+
+  useEffect(() => {
+    if (state?.success) router.refresh();
+  }, [router, state?.success]);
+
   return (
     <form action={action} className="grid gap-2">
       <input type="hidden" name="orderId" value={orderId} />
-      <select name="status" defaultValue={currentStatus} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
+      <select
+        name="status"
+        value={selectedStatus}
+        onChange={(event) => setSelectedStatus(event.target.value)}
+        className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+      >
         {statuses.map((status) => (
           <option key={status} value={status}>
             {status.replaceAll("_", " ")}

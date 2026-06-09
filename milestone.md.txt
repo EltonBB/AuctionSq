@@ -2,7 +2,37 @@
 
 ## Current Status
 
-AuctionSq is a connected pre-production auction platform deployed at `https://auctionsq.vercel.app`. The core security hardening work for profile updates, bid writes, order delivery confirmation, live-auction uniqueness, public auction exposure, bid moderation scope, and bounded list reads has been implemented, deployed, and verified locally and against the live Supabase project `ewuvavurygndpgarrdfw`.
+NjeKlik is a connected pre-production auction platform currently deployed at `https://auctionsq.vercel.app`. The core security hardening work for profile updates, bid writes, order delivery confirmation, live-auction uniqueness, public auction exposure, bid moderation scope, and bounded list reads has been implemented, deployed, and verified locally and against the live Supabase project `ewuvavurygndpgarrdfw`.
+
+Active task on 2026-06-09:
+- Implemented client-requested mobile/home adjustments from the Albanian PDF:
+  - smaller hero with old hero image removed.
+  - active products appear before the "Si funksionon" section.
+  - delivery info added: Kosove 3 EUR / 1-2 business days; Shqiperi 5 EUR / 4-5 business days.
+  - active product cards use a two-column mobile grid where data exists.
+- Corrected brand direction back to NjeKlik after user clarification.
+  - `BrandLogo` now uses NjeKlik logo assets directly.
+  - Generated transparent-background variants from the provided NjeKlik logo files:
+    - `public/brand/njeklik-mark-transparent.png`
+    - `public/brand/njeklik-wordmark-transparent.png`
+  - Removed visible `AuctionSq` references from `src`.
+- Fixed admin order status UX:
+  - status select refreshes the server-rendered view after successful update.
+  - delivered orders no longer force products to inactive.
+  - delivered/cancelled orders are hidden from the active admin orders page.
+- Added auction auto-relist:
+  - `auctions.auto_relist` boolean added.
+  - admin create/toggle UI added per auction.
+  - expired no-bid auctions with auto-relist enabled create a new 24h auction server-side.
+  - linked Supabase project migration applied with `npx supabase db query --linked --file ...`.
+- Added admin cleanup controls:
+  - completed/non-live auction bids can be deleted from admin bids.
+  - customer accounts can be deleted only when they are not admin, have no open orders, and have no active bids in live auctions.
+- Latest local checks passed:
+  - `node --test tests\*.test.mjs`: 23/23 tests.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.
 
 Baseline release-readiness check on 2026-06-08:
 - `node --test tests\*.test.mjs` passed: 18/18 tests.
@@ -12,7 +42,7 @@ Baseline release-readiness check on 2026-06-08:
 
 Active release-completion process:
 1. Supabase advisor gate: passed via Supabase CLI, with documented residuals.
-2. Transparent AuctionSq logo assets: passed.
+2. Transparent NjeKlik logo assets: passed.
 3. Mobile responsiveness and UX pass: passed.
 4. Production admin CRUD validation with temporary data: passed.
 5. Two-user auction lifecycle validation: passed.
@@ -109,7 +139,7 @@ Final review/deployment validation on 2026-06-08:
 
 ## Completed Work
 
-- Rebranded the app metadata, public header/footer, dashboard header, auth pages, FAQ, how-it-works, and contact details from the copied Oferto direction to AuctionSq.
+- Rebranded the app metadata, public header/footer, dashboard header, auth pages, FAQ, how-it-works, and contact details from the copied Oferto direction to NjeKlik.
 - Added missing user dashboard routes:
   - `/dashboard/profile`
   - `/dashboard/addresses`
@@ -174,13 +204,13 @@ Final review/deployment validation on 2026-06-08:
 ## Remaining Release Work
 
 - Enable Supabase Auth leaked-password protection in the dashboard.
-- Replace the uploaded source logo artwork with final AuctionSq-native brand artwork when available; current transparent PNGs are generated from the uploaded source files.
+- Keep using the client-provided NjeKlik logo artwork; current transparent PNGs are generated from the uploaded/source NjeKlik files.
 
 ## Important Decisions
 
-- AuctionSq remains an admin-controlled auction platform, not a marketplace.
+- NjeKlik remains an admin-controlled auction platform, not a marketplace.
 - Only admins can create products and auctions.
 - Users must be logged in and have complete delivery details before bidding.
 - Supabase is the source of truth for live data; local memory data remains a fallback for sandbox/dev behavior.
 - Temporary production data is approved for release validation and must be clearly named and cleaned up where safe.
-- Uploaded logo files are the source for transparent AuctionSq logo assets.
+- Uploaded logo files are the source for transparent NjeKlik logo assets.

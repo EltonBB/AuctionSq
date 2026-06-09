@@ -61,6 +61,7 @@ CREATE TABLE public.auctions (
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL CHECK (end_time > start_time),
     status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'active', 'ended', 'cancelled', 'relisted')),
+    auto_relist BOOLEAN NOT NULL DEFAULT false,
     winner_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     winning_bid_id UUID, -- Will be set when auction ends
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -381,14 +382,18 @@ DECLARE
     v_city TEXT;
     v_address TEXT;
     v_new_order_id UUID;
+    v_new_auction_id UUID;
 BEGIN
     FOR r IN
-        SELECT a.id, a.starting_price
+        SELECT a.id, a.product_id, a.starting_price, a.min_increment, a.auto_relist
         FROM public.auctions a
         WHERE a.status IN ('active', 'scheduled')
           AND now() >= a.end_time
         FOR UPDATE SKIP LOCKED
     LOOP
+        v_new_order_id := NULL;
+        v_new_auction_id := NULL;
+
         SELECT b.id, b.user_id, b.amount
         INTO v_highest_bid_id, v_highest_bid_user_id, v_highest_bid_amount
         FROM public.bids b
@@ -442,13 +447,45 @@ BEGIN
             order_id := v_new_order_id;
             RETURN NEXT;
         ELSE
-            UPDATE public.auctions
-            SET status = 'ended',
-                winner_id = NULL,
-                winning_bid_id = NULL,
-                current_price = starting_price,
-                updated_at = now()
-            WHERE id = r.id;
+            IF r.auto_relist THEN
+                UPDATE public.auctions
+                SET status = 'relisted',
+                    winner_id = NULL,
+                    winning_bid_id = NULL,
+                    current_price = starting_price,
+                    updated_at = now()
+                WHERE id = r.id;
+
+                INSERT INTO public.auctions (
+                    product_id,
+                    starting_price,
+                    current_price,
+                    min_increment,
+                    start_time,
+                    end_time,
+                    status,
+                    auto_relist
+                )
+                VALUES (
+                    r.product_id,
+                    r.starting_price,
+                    r.starting_price,
+                    r.min_increment,
+                    now(),
+                    now() + interval '24 hours',
+                    'active',
+                    true
+                )
+                RETURNING id INTO v_new_auction_id;
+            ELSE
+                UPDATE public.auctions
+                SET status = 'ended',
+                    winner_id = NULL,
+                    winning_bid_id = NULL,
+                    current_price = starting_price,
+                    updated_at = now()
+                WHERE id = r.id;
+            END IF;
         END IF;
     END LOOP;
 END;

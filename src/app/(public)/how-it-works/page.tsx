@@ -15,7 +15,7 @@ export default function HowItWorksPage() {
     <div className="mx-auto max-w-[1500px] px-4 py-10">
       <section className="mx-auto max-w-3xl text-center">
         <span className="text-xs font-black uppercase tracking-widest text-[#D96C2D]">Procedura</span>
-          <h1 className="mt-4 text-4xl font-black text-[#352B24] sm:text-6xl">Si funksionon AuctionSq?</h1>
+          <h1 className="mt-4 text-4xl font-black text-[#352B24] sm:text-6xl">Si funksionon NjeKlik?</h1>
         <p className="mt-4 text-sm leading-7 text-[#6f5b4c]">
           Nje proces i thjeshte: shfleto produktet, vendos oferten, fito ankandin dhe merr produktin me dergese te sigurt.
         </p>

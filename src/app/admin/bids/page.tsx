@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import Link from "next/link";
-import { cancelBid } from "@/app/actions/admin";
+import { cancelBid, deleteCompletedBid } from "@/app/actions/admin";
 import { ConfirmSubmitButton } from "@/app/components/AdminUi";
 import { getAdminBids } from "@/lib/db";
 import { formatEurFromAll } from "@/lib/currency";
@@ -12,6 +12,10 @@ export default async function AdminBidsPage() {
   async function cancel(formData: FormData) {
     "use server";
     await cancelBid(String(formData.get("bidId") || ""), String(formData.get("reason") || ""));
+  }
+  async function remove(formData: FormData) {
+    "use server";
+    await deleteCompletedBid(String(formData.get("bidId") || ""));
   }
 
   return (
@@ -41,7 +45,7 @@ export default async function AdminBidsPage() {
                 <td><span className={`rounded-md px-2 py-1 text-xs font-bold ${bid.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>{bid.status}</span></td>
                 <td className="text-[#8a7565]">{new Date(bid.created_at).toLocaleString()}</td>
                 <td>
-                  {bid.status === "active" ? (
+                  {["active", "scheduled"].includes(bid.auction.status) && bid.status === "active" ? (
                     <form action={cancel} className="flex gap-2">
                       <input type="hidden" name="bidId" value={bid.id} />
                       <input name="reason" placeholder="Arsyeja e anulimit" className="w-44 rounded-lg border border-[#f0d9c4] px-3 py-2 text-xs" />
@@ -53,7 +57,18 @@ export default async function AdminBidsPage() {
                       </ConfirmSubmitButton>
                     </form>
                   ) : (
-                    <span className="text-xs text-[#8a7565]">{bid.cancelled_reason || "Anuluar"}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[#8a7565]">{bid.cancelled_reason || "Auction completed"}</span>
+                      <form action={remove}>
+                        <input type="hidden" name="bidId" value={bid.id} />
+                        <ConfirmSubmitButton
+                          className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                          confirmMessage="Fshi kete oferte nga historiku?"
+                        >
+                          Fshi
+                        </ConfirmSubmitButton>
+                      </form>
+                    </div>
                   )}
                 </td>
               </tr>

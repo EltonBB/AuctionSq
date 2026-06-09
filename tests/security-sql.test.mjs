@@ -68,3 +68,10 @@ test("admin bid moderation is scoped to live auctions", () => {
   assert.match(adminActions, /liveAuctionIds/i);
   assert.match(adminActions, /\.in\("status",\s*\["active",\s*"scheduled"\]\)/);
 });
+
+test("auto relist is server-side and only applies to no-bid expired auctions", () => {
+  assert.match(schema, /auto_relist\s+BOOLEAN\s+NOT\s+NULL\s+DEFAULT\s+false/i);
+  assert.match(schema, /SELECT\s+a\.id,\s*a\.product_id,\s*a\.starting_price,\s*a\.min_increment,\s*a\.auto_relist/i);
+  assert.match(schema, /IF\s+r\.auto_relist\s+THEN[\s\S]*?status\s*=\s*'relisted'[\s\S]*?now\(\)\s*\+\s*interval\s+'24 hours'[\s\S]*?'active'[\s\S]*?true/i);
+  assert.match(schema, /IF\s+FOUND\s+THEN[\s\S]*?INSERT\s+INTO\s+public\.orders/);
+});

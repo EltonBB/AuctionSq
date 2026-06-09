@@ -7,7 +7,7 @@ import AdminOrderStatusForm from "@/app/components/AdminOrderStatusForm";
 export const revalidate = 0;
 
 export default async function AdminOrdersPage() {
-  const orders = await getOrders();
+  const orders = (await getOrders()).filter((order) => !["delivered", "cancelled"].includes(order.status));
 
   return (
     <section className="rounded-2xl border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
@@ -19,7 +19,7 @@ export default async function AdminOrdersPage() {
       <div className="grid gap-4">
         {orders.length === 0 ? (
           <p className="rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-4 text-sm text-[#8a7565]">
-            Nuk ka porosi per momentin.
+            Nuk ka porosi ne proces per momentin.
           </p>
         ) : (
           orders.map((order) => (

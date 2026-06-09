@@ -40,12 +40,12 @@ test("user dashboard routes are reachable for non-admin users", () => {
   assert.doesNotMatch(dashboardLayout, /redirect\("\/profile"\)/);
 });
 
-test("app metadata and admin shell use AuctionSq branding", () => {
+test("app metadata and admin shell use NjeKlik branding", () => {
   for (const [file, source] of readSourceFiles("../src")) {
-    assert.doesNotMatch(source, /NjeKlik|njeklik\.com/, file);
+    assert.doesNotMatch(source, /AuctionSq|auctionsq\.com/, file);
   }
-  assert.match(rootLayout, /AuctionSq/);
-  assert.match(adminLayout, /AuctionSq Admin/);
+  assert.match(rootLayout, /NjeKlik/);
+  assert.match(adminLayout, /NjeKlik Admin/);
 });
 
 test("auction bid leader is computed from active bids, not raw bid index", () => {

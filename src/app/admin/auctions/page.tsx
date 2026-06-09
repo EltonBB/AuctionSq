@@ -2,6 +2,7 @@ import React from "react";
 import { AuctionCreateForm } from "@/app/components/AdminForms";
 import { cancelAuction, relistAuction } from "@/app/actions/admin";
 import { ConfirmSubmitButton } from "@/app/components/AdminUi";
+import AutoRelistToggleForm from "@/app/components/AutoRelistToggleForm";
 import { getAuctions, getOrders, getProducts } from "@/lib/db";
 import { allToEur, formatEurFromAll } from "@/lib/currency";
 
@@ -19,6 +20,7 @@ export default async function AdminAuctionsPage() {
   const soldAuctions = previous.filter((auction) => auction.status === "ended" && !!ordersByAuctionId.get(auction.id));
   const unsoldAuctions = previous.filter((auction) => auction.status === "ended" && !ordersByAuctionId.get(auction.id));
   const cancelledAuctions = previous.filter((auction) => auction.status === "cancelled");
+  const relistedAuctions = previous.filter((auction) => auction.status === "relisted");
 
   async function cancel(formData: FormData) {
     "use server";
@@ -59,15 +61,18 @@ export default async function AdminAuctionsPage() {
                       <span className="rounded-md bg-[#FFF8F1] px-2 py-1">Hapi minimal {formatEurFromAll(auction.min_increment)}</span>
                     </div>
                   </div>
-                  <form action={cancel}>
-                    <input type="hidden" name="auctionId" value={auction.id} />
-                    <ConfirmSubmitButton
-                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
-                      confirmMessage="Anulo kete ankand?"
-                    >
-                      Anulo ankandin
-                    </ConfirmSubmitButton>
-                  </form>
+                  <div className="grid gap-2 sm:grid-cols-[140px_auto] sm:items-center">
+                    <AutoRelistToggleForm auctionId={auction.id} enabled={!!auction.auto_relist} />
+                    <form action={cancel}>
+                      <input type="hidden" name="auctionId" value={auction.id} />
+                      <ConfirmSubmitButton
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                        confirmMessage="Anulo kete ankand?"
+                      >
+                        Anulo ankandin
+                      </ConfirmSubmitButton>
+                    </form>
+                  </div>
                 </div>
               </article>
             ))
@@ -91,23 +96,27 @@ export default async function AdminAuctionsPage() {
                     <p className="text-sm text-[#8a7565]">Cmimi final: {formatEurFromAll(order?.final_price || auction.current_price)}</p>
                     <p className="text-sm text-[#8a7565]">Statusi i porosise: {String(order?.status || "").replaceAll("_", " ")}</p>
                   </div>
-                  <form action={relist} className="grid gap-2 rounded-lg bg-[#FFF8F1] p-2 sm:grid-cols-[120px_auto] sm:items-center">
-                    <input type="hidden" name="auctionId" value={auction.id} />
-                    <input name="startingPrice" type="number" min="1" step="0.01" defaultValue={allToEur(auction.current_price).toFixed(2)} className="rounded-md border border-[#f0d9c4] px-2 py-2 text-xs" disabled={!canRelist} />
-                    <div className="flex flex-wrap gap-2">
-                      {QUICK_HOURS.map((hours) => (
-                        <button key={hours} name="durationHours" value={hours} disabled={!canRelist} className="rounded-md bg-[#D96C2D] px-3 py-2 text-xs font-black text-white hover:bg-[#bf5520] disabled:cursor-not-allowed disabled:opacity-40">
-                          {hours}h
-                        </button>
-                      ))}
+                  {canRelist ? (
+                    <div className="grid gap-2">
+                      <AutoRelistToggleForm auctionId={auction.id} enabled={!!auction.auto_relist} />
+                      <form action={relist} className="grid gap-2 rounded-lg bg-[#FFF8F1] p-2 sm:grid-cols-[120px_auto] sm:items-center">
+                        <input type="hidden" name="auctionId" value={auction.id} />
+                        <input name="startingPrice" type="number" min="1" step="0.01" defaultValue={allToEur(auction.current_price).toFixed(2)} className="rounded-md border border-[#f0d9c4] px-2 py-2 text-xs" />
+                        <div className="flex flex-wrap gap-2">
+                          {QUICK_HOURS.map((hours) => (
+                            <button key={hours} name="durationHours" value={hours} className="rounded-md bg-[#D96C2D] px-3 py-2 text-xs font-black text-white hover:bg-[#bf5520]">
+                              {hours}h
+                            </button>
+                          ))}
+                        </div>
+                      </form>
                     </div>
-                  </form>
+                  ) : (
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+                      Produkti eshte shitur. Rilistimi hapet vetem nese porosia anulohet.
+                    </div>
+                  )}
                 </div>
-                {!canRelist && (
-                  <p className="mt-3 text-xs font-semibold text-amber-700">
-                    Relist bllokohet derisa kjo porosi te anulohet.
-                  </p>
-                )}
               </article>
             )})
           )}
@@ -126,17 +135,20 @@ export default async function AdminAuctionsPage() {
                     <p className="text-sm text-[#8a7565]">Nuk ka pasur asnje oferte aktive deri ne perfundim.</p>
                     <p className="text-sm text-[#8a7565]">Cmimi fillestar: {formatEurFromAll(auction.starting_price)}</p>
                   </div>
-                  <form action={relist} className="grid gap-2 rounded-lg bg-[#FFF8F1] p-2 sm:grid-cols-[120px_auto] sm:items-center">
-                    <input type="hidden" name="auctionId" value={auction.id} />
-                    <input name="startingPrice" type="number" min="1" step="0.01" defaultValue={allToEur(auction.starting_price).toFixed(2)} className="rounded-md border border-[#f0d9c4] px-2 py-2 text-xs" />
-                    <div className="flex flex-wrap gap-2">
-                      {QUICK_HOURS.map((hours) => (
-                        <button key={hours} name="durationHours" value={hours} className="rounded-md bg-[#D96C2D] px-3 py-2 text-xs font-black text-white hover:bg-[#bf5520]">
-                          {hours}h
-                        </button>
-                      ))}
-                    </div>
-                  </form>
+                  <div className="grid gap-2">
+                    <AutoRelistToggleForm auctionId={auction.id} enabled={!!auction.auto_relist} />
+                    <form action={relist} className="grid gap-2 rounded-lg bg-[#FFF8F1] p-2 sm:grid-cols-[120px_auto] sm:items-center">
+                      <input type="hidden" name="auctionId" value={auction.id} />
+                      <input name="startingPrice" type="number" min="1" step="0.01" defaultValue={allToEur(auction.starting_price).toFixed(2)} className="rounded-md border border-[#f0d9c4] px-2 py-2 text-xs" />
+                      <div className="flex flex-wrap gap-2">
+                        {QUICK_HOURS.map((hours) => (
+                          <button key={hours} name="durationHours" value={hours} className="rounded-md bg-[#D96C2D] px-3 py-2 text-xs font-black text-white hover:bg-[#bf5520]">
+                            {hours}h
+                          </button>
+                        ))}
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </article>
             ))
@@ -150,8 +162,33 @@ export default async function AdminAuctionsPage() {
           ) : (
             cancelledAuctions.map((auction) => (
               <article key={auction.id} className="rounded-xl border border-[#f0d9c4] p-4">
-                <p className="text-base font-black">{auction.product?.title}</p>
-                <p className="text-sm text-[#8a7565]">Ankandi u anulua nga administratori.</p>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="text-base font-black">{auction.product?.title}</p>
+                    <p className="text-sm text-[#8a7565]">Ankandi u anulua nga administratori.</p>
+                  </div>
+                  <AutoRelistToggleForm auctionId={auction.id} enabled={!!auction.auto_relist} />
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+
+        <h2 className="mb-3 mt-8 text-sm font-black uppercase text-[#8a7565]">Te rilistuara</h2>
+        <div className="grid gap-3">
+          {relistedAuctions.length === 0 ? (
+            <p className="rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-4 text-sm text-[#8a7565]">Nuk ka ankande te rilistuara.</p>
+          ) : (
+            relistedAuctions.map((auction) => (
+              <article key={auction.id} className="rounded-xl border border-[#f0d9c4] p-4">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="text-base font-black">{auction.product?.title}</p>
+                    <p className="text-sm text-[#8a7565]">Ky ankand eshte arkivuar sepse produkti u rilistua.</p>
+                    <p className="text-sm text-[#8a7565]">Cmimi fillestar: {formatEurFromAll(auction.starting_price)}</p>
+                  </div>
+                  <AutoRelistToggleForm auctionId={auction.id} enabled={!!auction.auto_relist} />
+                </div>
               </article>
             ))
           )}

@@ -1,16 +1,21 @@
 ﻿"use client";
 
-import { submitToggleUserBlock } from "@/app/actions/admin";
+import { submitDeleteCustomerAccount, submitToggleUserBlock } from "@/app/actions/admin";
 import type { Profile } from "@/lib/db";
 import { useActionState } from "react";
 import { AdminFormNotice, ConfirmSubmitButton } from "@/app/components/AdminUi";
 
 export function AdminUsersTable({ users }: { users: Profile[] }) {
   const [state, action] = useActionState(submitToggleUserBlock, null);
+  const [deleteState, deleteAction] = useActionState(submitDeleteCustomerAccount, null);
 
   return (
     <div className="overflow-x-auto">
       <AdminFormNotice message={state?.success ? state.message : null} error={state?.success ? null : state?.error} />
+      <AdminFormNotice
+        message={deleteState?.success ? deleteState.message : null}
+        error={deleteState?.success ? null : deleteState?.error}
+      />
       <table className="mt-3 w-full min-w-[860px] text-left text-sm">
         <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
           <tr>
@@ -45,6 +50,7 @@ export function AdminUsersTable({ users }: { users: Profile[] }) {
                   </span>
                 </td>
                 <td>
+                  <div className="flex flex-wrap gap-2">
                   <form action={action}>
                     <input type="hidden" name="userId" value={user.id} />
                     <input type="hidden" name="blocked" value={String(!user.is_blocked)} />
@@ -59,6 +65,16 @@ export function AdminUsersTable({ users }: { users: Profile[] }) {
                       {user.is_blocked ? "Zhblloko" : "Blloko"}
                     </ConfirmSubmitButton>
                   </form>
+                  <form action={deleteAction}>
+                    <input type="hidden" name="userId" value={user.id} />
+                    <ConfirmSubmitButton
+                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                      confirmMessage="Fshi kete klient? Lejohet vetem kur nuk ka porosi/oferta aktive."
+                    >
+                      Fshi
+                    </ConfirmSubmitButton>
+                  </form>
+                  </div>
                 </td>
               </tr>
             );

@@ -10,6 +10,7 @@ import { allToEur, formatEurFromAll } from "@/lib/currency";
 export const revalidate = 0;
 
 const QUICK_HOURS = [24, 48, 72];
+const RELIST_LOCKED_ORDER_STATUSES = ["pending_confirmation", "confirmed", "processing", "out_for_delivery", "delivered"];
 const PRODUCT_FILTERS = [
   { key: "unlisted", label: "Te palistuara" },
   { key: "listed", label: "Te listuara" },
@@ -52,11 +53,13 @@ export default async function AdminAuctionsPage({
     const soldCount = productOrders.filter((order) => order.status === "delivered").length;
     const cancelledCount = productOrders.filter((order) => order.status === "cancelled").length;
     const lastAuction = productAuctions.find((auction) => ["ended", "cancelled", "relisted"].includes(auction.status));
+    const lastAuctionOrder = lastAuction ? productOrders.find((order) => order.auction_id === lastAuction.id) : null;
 
     return {
       product,
       liveAuction,
       lastAuction,
+      lastAuctionOrder,
       processingOrders,
       soldCount,
       cancelledCount,
@@ -143,9 +146,31 @@ export default async function AdminAuctionsPage({
               Nuk ka produkte ne kete filter.
             </p>
           ) : (
-            filteredRows.map(({ product, liveAuction, lastAuction, processingOrders, soldCount, cancelledCount, hasAuctionHistory }) => {
+            filteredRows.map(({ product, liveAuction, lastAuction, lastAuctionOrder, processingOrders, soldCount, cancelledCount, hasAuctionHistory }) => {
               const categoryName = categories.find((category) => category.id === product.category_id)?.name || "Pa kategori";
               const canDelete = !hasAuctionHistory && processingOrders.length === 0 && soldCount === 0 && cancelledCount === 0;
+              const relistLockedByOrder = !!lastAuctionOrder && RELIST_LOCKED_ORDER_STATUSES.includes(lastAuctionOrder.status);
+              const canRelist = !!lastAuction && !liveAuction && product.status === "active" && processingOrders.length === 0 && !relistLockedByOrder;
+              const relistBlockReason =
+                liveAuction
+                  ? null
+                  : product.status !== "active"
+                    ? "Aktivizo produktin per ta listuar ose rilistuar."
+                    : processingOrders.length > 0
+                      ? "Rilistimi hapet pasi porosia ne proces te mbyllet ose anulohet."
+                      : relistLockedByOrder
+                        ? "Ky produkt ka porosi te fituar. Rilistimi hapet vetem nese porosia anulohet."
+                        : null;
+              const deleteBlockReason =
+                canDelete
+                  ? null
+                  : liveAuction
+                    ? "Fshirja bllokohet sepse produkti ka ankand aktiv."
+                    : hasAuctionHistory
+                      ? "Fshirja bllokohet sepse produkti ka histori ankandesh."
+                      : processingOrders.length > 0
+                        ? "Fshirja bllokohet sepse ka porosi ne proces."
+                        : "Fshirja bllokohet sepse produkti ka histori porosish.";
               return (
                 <article key={product.id} className="rounded-xl border border-[#f0d9c4] bg-white/70 p-4">
                   <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -210,7 +235,7 @@ export default async function AdminAuctionsPage({
                           </div>
                         </form>
                       ) : null}
-                      {lastAuction && !liveAuction && product.status === "active" && processingOrders.length === 0 ? (
+                      {canRelist ? (
                         <form action={relist} className="grid gap-2">
                           <input type="hidden" name="auctionId" value={lastAuction.id} />
                           <input name="startingPrice" type="number" min="1" step="0.01" defaultValue={allToEur(lastAuction.current_price || lastAuction.starting_price).toFixed(2)} className="rounded-lg border border-[#f0d9c4] bg-white px-3 py-2 text-xs" />
@@ -222,6 +247,11 @@ export default async function AdminAuctionsPage({
                             ))}
                           </div>
                         </form>
+                      ) : null}
+                      {relistBlockReason ? (
+                        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+                          {relistBlockReason}
+                        </p>
                       ) : null}
                       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                         <form action={setStatus}>
@@ -244,7 +274,16 @@ export default async function AdminAuctionsPage({
                               Fshij
                             </ConfirmSubmitButton>
                           </form>
-                        ) : null}
+                        ) : (
+                          <button
+                            type="button"
+                            disabled
+                            title={deleteBlockReason || undefined}
+                            className="inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400"
+                          >
+                            Fshij
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

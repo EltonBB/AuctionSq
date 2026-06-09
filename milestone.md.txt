@@ -16,6 +16,7 @@ Active task on 2026-06-09:
   - removed the redundant `Produktet` link from the admin sidebar.
   - product rows use a cleaner two-column action layout, without redundant active/inactive badges.
   - safe product deletion is exposed from the combined page for products without auction or order history.
+  - blocked delete/relist actions now show clear admin-facing reasons instead of disappearing silently.
 - Hid deactivated products from public auction surfaces:
   - home auction grid.
   - auctions listing.

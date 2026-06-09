@@ -5,6 +5,20 @@
 NjeKlik is a connected pre-production auction platform currently deployed at `https://auctionsq.vercel.app`. The core security hardening work for profile updates, bid writes, order delivery confirmation, live-auction uniqueness, public auction exposure, bid moderation scope, and bounded list reads has been implemented, deployed, and verified locally and against the live Supabase project `ewuvavurygndpgarrdfw`.
 
 Active task on 2026-06-09:
+- Consolidated admin products and auctions into one workflow page:
+  - `/admin/auctions` now shows product inventory with filters for unlisted, listed, and processing.
+  - the right-side card creates products directly on the same page.
+  - each active unlisted product can be listed into a 24h/48h/72h auction with minimum bid, minimum increment, and auto-relist.
+  - products can be activated/deactivated from the same list; inactive products cannot be listed into auctions.
+  - inactive product auction rules are enforced server-side for both new auctions and relists.
+  - completed product stats now show small sold and cancelled order counts.
+  - `/admin/products` redirects to `/admin/auctions`.
+- Hid deactivated products from public auction surfaces:
+  - home auction grid.
+  - auctions listing.
+  - ending-soon listing.
+  - category counts.
+  - auction detail pages now 404 if the related product is inactive.
 - Implemented client-requested mobile/home adjustments from the Albanian PDF:
   - smaller hero with old hero image removed.
   - active products appear before the "Si funksionon" section.
@@ -29,7 +43,7 @@ Active task on 2026-06-09:
   - completed/non-live auction bids can be deleted from admin bids.
   - customer accounts can be deleted only when they are not admin, have no open orders, and have no active bids in live auctions.
 - Latest local checks passed:
-  - `node --test tests\*.test.mjs`: 23/23 tests.
+  - `node --test tests\*.test.mjs`: 26/26 tests.
   - `npm run lint`: passed.
   - `npm run build`: passed.
   - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.

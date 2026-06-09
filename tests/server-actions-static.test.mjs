@@ -6,6 +6,8 @@ const adminActions = readFileSync(new URL("../src/app/actions/admin.ts", import.
 const db = readFileSync(new URL("../src/lib/db.ts", import.meta.url), "utf8");
 const adminBidsPage = readFileSync(new URL("../src/app/admin/bids/page.tsx", import.meta.url), "utf8");
 const adminOrdersPage = readFileSync(new URL("../src/app/admin/orders/page.tsx", import.meta.url), "utf8");
+const adminAuctionsPage = readFileSync(new URL("../src/app/admin/auctions/page.tsx", import.meta.url), "utf8");
+const adminProductsPage = readFileSync(new URL("../src/app/admin/products/page.tsx", import.meta.url), "utf8");
 const adminUsersTable = readFileSync(new URL("../src/app/components/AdminUsersTable.tsx", import.meta.url), "utf8");
 const adminOverviewPage = readFileSync(new URL("../src/app/admin/page.tsx", import.meta.url), "utf8");
 
@@ -85,4 +87,20 @@ test("admin cleanup deletes are guarded and exposed in the right admin pages", (
   assert.match(adminActions, /Order is still in process\. Complete or cancel it before deleting related offers/);
   assert.match(adminBidsPage, /deleteCompletedBid/);
   assert.match(adminUsersTable, /submitDeleteCustomerAccount/);
+});
+
+test("admin auctions page is the combined product and auction workspace", () => {
+  assert.match(adminProductsPage, /redirect\("\/admin\/auctions"\)/);
+  assert.match(adminAuctionsPage, /ProductCreateForm/);
+  assert.match(adminAuctionsPage, /PRODUCT_FILTERS/);
+  assert.match(adminAuctionsPage, /filter=\$\{filter\.key\}/);
+  assert.match(adminAuctionsPage, /createAuction/);
+  assert.match(adminAuctionsPage, /setProductStatus/);
+  assert.doesNotMatch(adminAuctionsPage, /AuctionCreateForm/);
+});
+
+test("product activation rules are enforced server-side for auction workflows", () => {
+  assert.match(adminActions, /createAuction[\s\S]*?product\.status\s*!==\s*"active"[\s\S]*?Only active and available products can be auctioned/);
+  assert.match(adminActions, /relistAuction[\s\S]*?product:products\(status\)[\s\S]*?product\.status\s*!==\s*"active"[\s\S]*?Only active products can be relisted/);
+  assert.match(adminActions, /setProductStatus[\s\S]*?revalidatePath\("\/admin\/auctions"\)/);
 });

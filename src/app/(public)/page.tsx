@@ -17,7 +17,9 @@ const processItems: { icon: LucideIcon; title: string; copy: string }[] = [
 
 export default async function HomePage() {
   const allAuctions = await getAuctions();
-  const activeAuctions = allAuctions.filter((auction) => auction.status === "active").slice(0, 20);
+  const activeAuctions = allAuctions
+    .filter((auction) => auction.status === "active" && auction.product?.status === "active")
+    .slice(0, 20);
   const featuredAuctions = activeAuctions.slice(0, 8);
 
   return (

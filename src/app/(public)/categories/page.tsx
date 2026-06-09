@@ -6,7 +6,7 @@ export const revalidate = 0;
 
 export default async function CategoriesPage() {
   const [categories, auctions] = await Promise.all([getCategories(), getAuctions()]);
-  const activeAuctions = auctions.filter((auction) => auction.status === "active");
+  const activeAuctions = auctions.filter((auction) => auction.status === "active" && auction.product?.status === "active");
 
   return (
     <div className="mx-auto max-w-[1500px] px-4 py-10">

@@ -20,7 +20,7 @@ export default async function AuctionsPage({ searchParams }: AuctionsPageProps) 
   const searchQuery = resolvedParams.search || "";
 
   const [allAuctions, categories] = await Promise.all([getAuctions(), getCategories()]);
-  let filteredAuctions = allAuctions.filter((auction) => auction.status === "active");
+  let filteredAuctions = allAuctions.filter((auction) => auction.status === "active" && auction.product?.status === "active");
 
   if (activeCategorySlug) {
     const matchedCategory = categories.find((category) => category.slug === activeCategorySlug);

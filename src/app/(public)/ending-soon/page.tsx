@@ -10,7 +10,7 @@ export const revalidate = 0;
 export default async function EndingSoonPage() {
   const auctions = await getAuctions();
   const endingSoon = auctions
-    .filter((auction) => auction.status === "active")
+    .filter((auction) => auction.status === "active" && auction.product?.status === "active")
     .sort((a, b) => new Date(a.end_time).getTime() - new Date(b.end_time).getTime());
 
   return (

@@ -11,6 +11,9 @@ const pollingRefresh = readFileSync(new URL("../src/app/components/PollingRefres
 const authActions = readFileSync(new URL("../src/app/actions/auth.ts", import.meta.url), "utf8");
 const authCallback = readFileSync(new URL("../src/app/auth/callback/route.ts", import.meta.url), "utf8");
 const auctionDetail = readFileSync(new URL("../src/app/(public)/auctions/[id]/page.tsx", import.meta.url), "utf8");
+const auctionsPage = readFileSync(new URL("../src/app/(public)/auctions/page.tsx", import.meta.url), "utf8");
+const endingSoonPage = readFileSync(new URL("../src/app/(public)/ending-soon/page.tsx", import.meta.url), "utf8");
+const categoriesPage = readFileSync(new URL("../src/app/(public)/categories/page.tsx", import.meta.url), "utf8");
 const brandUi = readFileSync(new URL("../src/app/components/BrandUi.tsx", import.meta.url), "utf8");
 const countdownText = readFileSync(new URL("../src/app/components/CountdownText.tsx", import.meta.url), "utf8");
 const biddingForm = readFileSync(new URL("../src/app/components/BiddingForm.tsx", import.meta.url), "utf8");
@@ -74,4 +77,12 @@ test("polling refresh does not refresh during initial hydration", () => {
 test("bid form renders a stable placeholder before client mount", () => {
   assert.match(biddingForm, /const\s+\[isMounted,\s*setIsMounted\]\s*=\s*useState\(false\)/);
   assert.match(biddingForm, /if\s*\(!isMounted\)\s*\{/);
+});
+
+test("inactive products are hidden from public auction surfaces", () => {
+  assert.match(homePage, /auction\.status\s*===\s*"active"\s*&&\s*auction\.product\?\.status\s*===\s*"active"/);
+  assert.match(auctionsPage, /auction\.status\s*===\s*"active"\s*&&\s*auction\.product\?\.status\s*===\s*"active"/);
+  assert.match(endingSoonPage, /auction\.status\s*===\s*"active"\s*&&\s*auction\.product\?\.status\s*===\s*"active"/);
+  assert.match(categoriesPage, /auction\.status\s*===\s*"active"\s*&&\s*auction\.product\?\.status\s*===\s*"active"/);
+  assert.match(auctionDetail, /auc\.product\?\.status\s*!==\s*"active"[\s\S]*?notFound\(\)/);
 });

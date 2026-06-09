@@ -384,11 +384,15 @@ export async function relistAuction(auctionId: string, durationHours: number, st
     const status = "active";
     const { data: baseAuction, error: baseAuctionError } = await supabase
       .from("auctions")
-      .select("id, product_id, status, winner_id, auto_relist")
+      .select("id, product_id, status, winner_id, auto_relist, product:products(status)")
       .eq("id", auctionId)
       .maybeSingle();
     if (baseAuctionError) return { success: false, error: baseAuctionError.message };
     if (!baseAuction) return { success: false, error: "Auction not found." };
+    const product = Array.isArray(baseAuction.product) ? baseAuction.product[0] : baseAuction.product;
+    if (!product || product.status !== "active") {
+      return { success: false, error: "Only active products can be relisted." };
+    }
 
     const { data: existingOrder, error: existingOrderError } = await supabase
       .from("orders")
@@ -971,6 +975,7 @@ export async function setProductStatus(productId: string, status: "active" | "in
       status,
     });
     revalidatePath("/admin/products");
+    revalidatePath("/admin/auctions");
     revalidatePath("/auctions");
     revalidatePath("/");
     return { success: true, message: `Product marked as ${status}.` };

@@ -28,7 +28,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
   const { id: auctionId } = await params;
   const auc = await getAuctionById(auctionId);
 
-  if (!auc) notFound();
+  if (!auc || auc.product?.status !== "active") notFound();
 
   const bids = await getBidsForAuction(auctionId);
   const activeBids = bids.filter((bid) => bid.status === "active");
@@ -45,7 +45,7 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
   const isWinner = isLoggedIn && auc.winner_id === user.id;
 
   const relatedAuctions = (await getAuctions())
-    .filter((auction) => auction.id !== auctionId && auction.status === "active")
+    .filter((auction) => auction.id !== auctionId && auction.status === "active" && auction.product?.status === "active")
     .slice(0, 4);
 
   return (

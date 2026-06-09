@@ -10,11 +10,11 @@ export default async function ProfilePage() {
   return (
     <div className="grid gap-8 text-left">
       <div>
-        <h1 className="text-2xl font-extrabold text-white">Profili Im</h1>
-        <p className="mt-1 text-sm text-slate-400">Menaxhoni identitetin, kontaktin dhe te dhenat qe perdoren per ofertim.</p>
+        <h1 className="text-2xl font-extrabold text-[#352B24]">Profili Im</h1>
+        <p className="mt-1 text-sm text-[#7c614f]">Menaxhoni identitetin, kontaktin dhe te dhenat qe perdoren per ofertim.</p>
       </div>
       <ProfileCompletionCard user={user} />
-      <div className="rounded-3xl border border-slate-900 bg-slate-900/30 p-6">
+      <div className="rounded-3xl border border-[#f0d9c4] bg-white/85 p-6 shadow-[0_18px_45px_rgba(98,56,28,0.08)]">
         <ProfileForm user={user} />
       </div>
     </div>

@@ -5,6 +5,12 @@
 NjeKlik is a connected pre-production auction platform currently deployed at `https://auctionsq.vercel.app`. The core security hardening work for profile updates, bid writes, order delivery confirmation, live-auction uniqueness, public auction exposure, bid moderation scope, and bounded list reads has been implemented, deployed, and verified locally and against the live Supabase project `ewuvavurygndpgarrdfw`.
 
 Active task on 2026-06-09:
+- Cleaned up the customer dashboard/profile area:
+  - `/dashboard` no longer renders the stale dark overview screen and redirects to `/dashboard/profile`.
+  - normal user sign-in, auth callback, and non-admin admin-route fallback now land on `/dashboard/profile`.
+  - removed the redundant customer "Permbledhje" dashboard nav item.
+  - restyled the customer dashboard shell, profile, addresses, bids, won auctions, orders, password form, and order-address editor to match the current warm NjeKlik design.
+  - corrected the won-auction order details link to point to `/dashboard/orders`.
 - Consolidated admin products and auctions into one workflow page:
   - `/admin/auctions` now shows product inventory with filters for unlisted, listed, and processing.
   - the right-side card creates products directly on the same page.

@@ -36,7 +36,7 @@ test("user dashboard routes are reachable for non-admin users", () => {
   assert.doesNotMatch(middleware, /Remove client panel routes/i);
   assert.doesNotMatch(middleware, /isLegacyDashboardRoute/);
   assert.doesNotMatch(middleware, /isLegacyDashboardRoute[\s\S]*?url\.pathname\s*=\s*isAdmin\s*\?\s*"\/admin"\s*:\s*"\/profile"/);
-  assert.match(middleware, /url\.pathname\s*=\s*isAdmin\s*\?\s*"\/admin"\s*:\s*"\/dashboard"/);
+  assert.match(middleware, /url\.pathname\s*=\s*isAdmin\s*\?\s*"\/admin"\s*:\s*"\/dashboard\/profile"/);
   assert.doesNotMatch(authActions, /profile\?\.is_admin\s*\?\s*"\/admin"\s*:\s*"\/profile"/);
   assert.doesNotMatch(authCallback, /profile\?\.is_admin\s*\?\s*"\/admin"\s*:\s*"\/profile"/);
   assert.match(dashboardLayout, /return\s*\(\s*<div/);

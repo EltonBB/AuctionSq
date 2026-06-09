@@ -75,13 +75,13 @@ export async function updateSession(request: NextRequest) {
 
   // 2. Redirect logged-in users away from /login and /register
   if (user && (url.pathname.startsWith("/login") || url.pathname.startsWith("/register"))) {
-    url.pathname = isAdmin ? "/admin" : "/dashboard";
+    url.pathname = isAdmin ? "/admin" : "/dashboard/profile";
     return NextResponse.redirect(url);
   }
 
   // 3. Prevent non-admin users from accessing /admin paths
   if (user && isAdminRoute && !isAdmin) {
-    url.pathname = "/dashboard";
+    url.pathname = "/dashboard/profile";
     return NextResponse.redirect(url);
   }
 

@@ -51,14 +51,14 @@ export default function OrderAddressForm({
   return (
     <div className="w-full text-left">
       {success && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-xl flex items-center gap-2 text-emerald-400 text-xs mb-3 font-semibold">
+        <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl flex items-center gap-2 text-emerald-700 text-xs mb-3 font-semibold">
           <CheckCircle className="w-4 h-4 flex-shrink-0" />
           <span>{success}</span>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 p-3.5 rounded-xl flex items-center gap-2 text-red-500 text-xs mb-3 font-semibold">
+        <div className="bg-red-50 border border-red-200 p-3.5 rounded-xl flex items-center gap-2 text-red-700 text-xs mb-3 font-semibold">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -67,15 +67,15 @@ export default function OrderAddressForm({
       {!isEditing ? (
         <div className="flex flex-col gap-3">
           <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1 text-slate-350 text-xs leading-relaxed">
-              <span className="font-bold text-white text-sm">{fullName}</span>
+            <div className="flex flex-col gap-1 text-[#6f5a4b] text-xs leading-relaxed">
+              <span className="font-bold text-[#352B24] text-sm">{fullName}</span>
               <span>Telefon: {phone}</span>
               <span>Qyteti: {city}</span>
               <span>Adresa: {address}</span>
             </div>
             <button
               onClick={() => setIsEditing(true)}
-              className="p-2 rounded-lg bg-slate-950 hover:bg-slate-900 border border-slate-850 hover:text-white text-slate-400 transition-colors flex items-center gap-1.5 text-2xs uppercase tracking-wider font-extrabold"
+              className="p-2 rounded-lg bg-white hover:bg-[#fff7ed] border border-[#efcfb5] text-[#df6b2e] transition-colors flex items-center gap-1.5 text-2xs uppercase tracking-wider font-extrabold"
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>Ndrysho</span>
@@ -83,16 +83,16 @@ export default function OrderAddressForm({
           </div>
         </div>
       ) : (
-        <form onSubmit={handleUpdate} className="flex flex-col gap-4 border-t border-slate-900 pt-4 mt-2">
+        <form onSubmit={handleUpdate} className="flex flex-col gap-4 border-t border-[#f0d9c4] pt-4 mt-2">
           <div className="flex justify-between items-center">
-            <span className="text-blue-400 text-2xs uppercase font-extrabold tracking-wider flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-blue-500" />
+            <span className="text-[#df6b2e] text-2xs uppercase font-extrabold tracking-wider flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-[#df6b2e]" />
               <span>Perditeso Adresen e Dergimit</span>
             </span>
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="p-1 rounded bg-slate-950 hover:bg-slate-900 border border-slate-850 text-slate-500 hover:text-white transition-colors"
+              className="p-1 rounded bg-white hover:bg-[#fff7ed] border border-[#efcfb5] text-[#9b7b66] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -100,68 +100,68 @@ export default function OrderAddressForm({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-3xs uppercase font-semibold">Emri i plote i marresit</label>
+              <label className="text-[#7c614f] text-3xs uppercase font-semibold">Emri i plote i marresit</label>
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 disabled={isPending}
-                className="px-3 py-2 rounded-lg bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
+                className="px-3 py-2 rounded-lg bg-white border border-[#efcfb5] text-[#352B24] text-xs focus:border-[#df6b2e] focus:outline-none transition-colors"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-3xs uppercase font-semibold">Numri i telefonit</label>
+              <label className="text-[#7c614f] text-3xs uppercase font-semibold">Numri i telefonit</label>
               <input
                 type="text"
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 disabled={isPending}
-                className="px-3 py-2 rounded-lg bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
+                className="px-3 py-2 rounded-lg bg-white border border-[#efcfb5] text-[#352B24] text-xs focus:border-[#df6b2e] focus:outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-3xs uppercase font-semibold">Qyteti</label>
+              <label className="text-[#7c614f] text-3xs uppercase font-semibold">Qyteti</label>
               <input
                 type="text"
                 required
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 disabled={isPending}
-                className="px-3 py-2 rounded-lg bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
+                className="px-3 py-2 rounded-lg bg-white border border-[#efcfb5] text-[#352B24] text-xs focus:border-[#df6b2e] focus:outline-none transition-colors"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-slate-500 text-3xs uppercase font-semibold">Rruga, Pallati, Hyrja (Adresa e plote)</label>
+              <label className="text-[#7c614f] text-3xs uppercase font-semibold">Rruga, Pallati, Hyrja (Adresa e plote)</label>
               <input
                 type="text"
                 required
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 disabled={isPending}
-                className="px-3 py-2 rounded-lg bg-slate-950 border border-slate-850 text-slate-200 text-xs focus:border-blue-500 focus:outline-none transition-colors"
+                className="px-3 py-2 rounded-lg bg-white border border-[#efcfb5] text-[#352B24] text-xs focus:border-[#df6b2e] focus:outline-none transition-colors"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-950">
+          <div className="flex justify-end gap-2.5 pt-2 border-t border-[#f0d9c4]">
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 rounded-lg bg-slate-950 border border-slate-850 hover:bg-slate-900 text-slate-400 font-bold text-2xs uppercase transition-colors"
+              className="px-4 py-2 rounded-lg bg-white border border-[#efcfb5] hover:bg-[#fff7ed] text-[#7c614f] font-bold text-2xs uppercase transition-colors"
             >
               Anulo
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xs uppercase tracking-wider transition-colors shadow shadow-blue-500/10"
+              className="px-6 py-2 rounded-lg bg-[#df6b2e] hover:bg-[#c85f28] text-white font-bold text-2xs uppercase tracking-wider transition-colors"
             >
               {isPending ? "Duke ruajtur..." : "Ruaj Ndryshimet"}
             </button>

@@ -5,6 +5,15 @@
 NjeKlik is a connected pre-production auction platform currently deployed at `https://auctionsq.vercel.app`. The core security hardening work for profile updates, bid writes, order delivery confirmation, live-auction uniqueness, public auction exposure, bid moderation scope, and bounded list reads has been implemented, deployed, and verified locally and against the live Supabase project `ewuvavurygndpgarrdfw`.
 
 Active task on 2026-06-09:
+- Implemented the client mobile/UI request batch:
+  - home hero now uses the provided landscape product image as a subtle warm background.
+  - global theme now forces NjeKlik light colors even when a device/browser is in dark mode.
+  - mobile public menu is now controlled and closes after tapping Ballina/Ankandet/Si funksionon.
+  - admin overview cards stack winner/auction/bid values on mobile to avoid clipped right-side content.
+  - auction detail mobile order is now image, product/bid panel, description, trust notes, bid history, related auctions.
+  - related auctions on detail pages use a two-column mobile grid.
+  - product image upload now has client/server validation for file type, 5MB per image, 8 images max, and 24MB total, with a 30MB Server Actions body limit to avoid client-side crashes.
+  - product image uploads now clean up partial storage uploads if a later file upload fails.
 - Cleaned up the customer dashboard/profile area:
   - `/dashboard` no longer renders the stale dark overview screen and redirects to `/dashboard/profile`.
   - normal user sign-in, auth callback, and non-admin admin-route fallback now land on `/dashboard/profile`.

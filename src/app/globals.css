@@ -29,27 +29,27 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 6.5%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 6.5%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 142.1 70.6% 45.3%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 33 100% 97%;
+    --foreground: 25 20% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 20% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 20% 17%;
+    --primary: 23 67% 51%;
+    --primary-foreground: 33 100% 97%;
+    --secondary: 32 82% 85%;
+    --secondary-foreground: 25 20% 17%;
+    --muted: 32 82% 92%;
+    --muted-foreground: 25 19% 46%;
+    --accent: 38 78% 55%;
+    --accent-foreground: 25 20% 17%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 29 56% 86%;
+    --input: 29 56% 86%;
+    --ring: 23 67% 51%;
     --warning: 24.6 95% 53.1%;
-    --warning-foreground: 222.2 47.4% 11.2%;
+    --warning-foreground: 0 0% 100%;
   }
 }
 
@@ -59,7 +59,13 @@
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20;
+    background-color: #fff8f1;
+    color: #352B24;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  html {
+    color-scheme: light;
+    background-color: #fff8f1;
   }
   html,
   body {
@@ -86,15 +92,15 @@
 
 /* Glassmorphism Classes */
 .glass-panel {
-  @apply bg-white/75 dark:bg-slate-900/75 backdrop-blur-md border border-white/20 dark:border-white/5;
+  @apply bg-white/75 backdrop-blur-md border border-white/20;
 }
 
 .glass-card {
-  @apply bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-800/50 shadow-sm hover:shadow-md transition-all duration-300;
+  @apply bg-white/50 backdrop-blur-sm border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300;
 }
 
 .glass-input {
-  @apply bg-white/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all;
+  @apply bg-white/50 border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all;
 }
 
 /* Beautiful custom gradients */
@@ -103,11 +109,11 @@
 }
 
 .gradient-success {
-  @apply bg-gradient-to-r from-emerald-500 to-teal-600 dark:from-emerald-400 dark:to-teal-500;
+  @apply bg-gradient-to-r from-emerald-500 to-teal-600;
 }
 
 .gradient-warning {
-  @apply bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-400 dark:to-orange-500;
+  @apply bg-gradient-to-r from-amber-500 to-orange-600;
 }
 
 .gradient-text {

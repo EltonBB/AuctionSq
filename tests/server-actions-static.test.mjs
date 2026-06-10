@@ -10,6 +10,8 @@ const adminAuctionsPage = readFileSync(new URL("../src/app/admin/auctions/page.t
 const adminProductsPage = readFileSync(new URL("../src/app/admin/products/page.tsx", import.meta.url), "utf8");
 const adminUsersTable = readFileSync(new URL("../src/app/components/AdminUsersTable.tsx", import.meta.url), "utf8");
 const adminOverviewPage = readFileSync(new URL("../src/app/admin/page.tsx", import.meta.url), "utf8");
+const adminForms = readFileSync(new URL("../src/app/components/AdminForms.tsx", import.meta.url), "utf8");
+const nextConfig = readFileSync(new URL("../next.config.ts", import.meta.url), "utf8");
 
 test("admin bids page uses one admin bid query instead of per-auction fan-out", () => {
   assert.match(db, /export\s+async\s+function\s+getAdminBids\s*\(/);
@@ -49,6 +51,17 @@ test("product image uploads are cleaned up when product writes fail", () => {
   assert.match(adminActions, /async\s+function\s+cleanupUploadedProductImages\s*\(/);
   assert.match(adminActions, /storage\.from\(PRODUCT_IMAGE_BUCKET\)\.remove/);
   assert.match(adminActions, /cleanupUploadedProductImages\(uploadedImagePaths\)/);
+  assert.match(adminActions, /catch\s*\(\s*error\s*\)\s*\{\s*await cleanupUploadedProductImages\(uploadedPaths\);/);
+});
+
+test("product image uploads fail gracefully before oversized requests crash the client", () => {
+  assert.match(nextConfig, /serverActions[\s\S]*?bodySizeLimit:\s*"30mb"/);
+  assert.match(adminActions, /MAX_PRODUCT_IMAGE_SIZE_BYTES\s*=\s*5\s*\*\s*1024\s*\*\s*1024/);
+  assert.match(adminActions, /MAX_PRODUCT_UPLOAD_BYTES\s*=\s*24\s*\*\s*1024\s*\*\s*1024/);
+  assert.match(adminActions, /files\.length\s*>\s*MAX_PRODUCT_IMAGE_COUNT/);
+  assert.match(adminForms, /function\s+validateImageFiles\s*\(/);
+  assert.match(adminForms, /onSubmit=\{validateSubmit\}/);
+  assert.match(adminForms, /event\.preventDefault\(\)/);
 });
 
 test("audit log insert failures are surfaced", () => {

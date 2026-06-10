@@ -5,6 +5,9 @@ import { eurToAll } from "@/lib/currency";
 import { revalidatePath } from "next/cache";
 
 const PRODUCT_IMAGE_BUCKET = "product-images";
+const MAX_PRODUCT_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_PRODUCT_IMAGE_COUNT = 8;
+const MAX_PRODUCT_UPLOAD_BYTES = 24 * 1024 * 1024;
 const ORDER_STATUS_TRANSITIONS: Record<string, string[]> = {
   pending_confirmation: ["confirmed", "cancelled"],
   confirmed: ["processing", "cancelled"],
@@ -65,30 +68,42 @@ function getProductImageStoragePath(url: string) {
 
 async function uploadProductImages(files: File[]) {
   if (files.length === 0) return { urls: [], paths: [] };
+  if (files.length > MAX_PRODUCT_IMAGE_COUNT) {
+    throw new Error(`Upload up to ${MAX_PRODUCT_IMAGE_COUNT} product images at a time.`);
+  }
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+  if (totalBytes > MAX_PRODUCT_UPLOAD_BYTES) {
+    throw new Error("Selected images are too large together. Keep the total upload under 24MB.");
+  }
   const adminClient = createAdminClient();
   const uploadedUrls: string[] = [];
   const uploadedPaths: string[] = [];
 
-  for (const file of files) {
-    if (!file.type.startsWith("image/")) {
-      throw new Error(`File "${file.name}" is not a valid image.`);
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error(`File "${file.name}" is larger than 5MB.`);
-    }
+  try {
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        throw new Error(`File "${file.name}" is not a valid image.`);
+      }
+      if (file.size > MAX_PRODUCT_IMAGE_SIZE_BYTES) {
+        throw new Error(`File "${file.name}" is larger than 5MB.`);
+      }
 
-    const path = `products/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
-    const { error } = await adminClient.storage.from(PRODUCT_IMAGE_BUCKET).upload(path, file, {
-      contentType: file.type,
-      upsert: false,
-    });
+      const path = `products/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+      const { error } = await adminClient.storage.from(PRODUCT_IMAGE_BUCKET).upload(path, file, {
+        contentType: file.type,
+        upsert: false,
+      });
 
-    if (error) {
-      throw new Error(`Upload failed for "${file.name}": ${error.message}`);
+      if (error) {
+        throw new Error(`Upload failed for "${file.name}": ${error.message}`);
+      }
+
+      uploadedUrls.push(getPublicStorageUrl(path));
+      uploadedPaths.push(path);
     }
-
-    uploadedUrls.push(getPublicStorageUrl(path));
-    uploadedPaths.push(path);
+  } catch (error) {
+    await cleanupUploadedProductImages(uploadedPaths);
+    throw error;
   }
 
   return { urls: uploadedUrls, paths: uploadedPaths };

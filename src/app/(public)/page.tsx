@@ -27,8 +27,15 @@ export default async function HomePage() {
       <PollingRefresh intervalMs={15000} />
 
       <section className="mx-auto max-w-[1320px] px-4 pt-5">
-        <div className="reveal-up rounded-[22px] border border-[#f0d9c4] bg-[#fff2e5] px-6 py-9 shadow-[0_24px_70px_rgba(217,108,45,0.10)] sm:px-10 lg:px-14">
-          <div className="max-w-3xl">
+        <div className="reveal-up relative overflow-hidden rounded-[22px] border border-[#f0d9c4] bg-[#fff2e5] px-6 py-9 shadow-[0_24px_70px_rgba(217,108,45,0.10)] sm:px-10 lg:px-14">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/home-hero-products.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-[0.16] sm:opacity-[0.2]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#fff2e5] via-[#fff2e5]/88 to-[#fff2e5]/58" />
+          <div className="relative max-w-3xl">
             <h1 className="max-w-[620px] text-4xl font-black leading-tight text-[#352B24] sm:text-6xl">
               Oferto. Fito. Merre me <span className="text-[#D96C2D]">nje klik.</span>
             </h1>

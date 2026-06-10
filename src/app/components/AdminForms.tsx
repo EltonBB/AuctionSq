@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useActionState } from "react";
+import React, { useActionState, useState } from "react";
 import { createAuction, createProduct, updateProduct } from "@/app/actions/admin";
 import type { Category, Product } from "@/lib/db";
 import { AlertCircle, CheckCircle2, Gavel, PackagePlus } from "lucide-react";
@@ -19,17 +19,48 @@ function Message({ state }: { state: any }) {
 
 const input = "brand-focus w-full rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm text-[#352B24]";
 const fieldLabel = "grid gap-2 text-xs font-bold text-[#6f5b4c]";
+const MAX_PRODUCT_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_PRODUCT_IMAGE_COUNT = 8;
+const MAX_PRODUCT_UPLOAD_BYTES = 24 * 1024 * 1024;
+
+function validateImageFiles(files: File[]) {
+  if (files.length > MAX_PRODUCT_IMAGE_COUNT) {
+    return `Ngarko maksimumi ${MAX_PRODUCT_IMAGE_COUNT} foto per produkt.`;
+  }
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+  if (totalBytes > MAX_PRODUCT_UPLOAD_BYTES) {
+    return "Fotot jane shume te medha bashke. Mbaje ngarkimin total nen 24MB.";
+  }
+  const invalidType = files.find((file) => file.size > 0 && !file.type.startsWith("image/"));
+  if (invalidType) {
+    return `"${invalidType.name}" nuk eshte foto e vlefshme.`;
+  }
+  const oversized = files.find((file) => file.size > MAX_PRODUCT_IMAGE_SIZE_BYTES);
+  if (oversized) {
+    return `"${oversized.name}" eshte mbi 5MB. Kompresoje ose zgjidh nje foto me te vogel.`;
+  }
+  return null;
+}
 
 export function ProductCreateForm({ categories }: { categories: Category[] }) {
   const [state, formAction, isPending] = useActionState(createProduct, null);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  function validateSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const formData = new FormData(event.currentTarget);
+    const files = formData.getAll("images").filter((value) => value instanceof File && value.size > 0) as File[];
+    const error = validateImageFiles(files);
+    setLocalError(error);
+    if (error) event.preventDefault();
+  }
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-[24px] border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
+    <form action={formAction} onSubmit={validateSubmit} className="grid gap-4 rounded-[24px] border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
       <div>
         <h2 className="text-lg font-black text-[#352B24]">Shto produkt</h2>
         <p className="mt-1 text-sm text-[#6f5b4c]">Krijo inventar te kontrolluar perpara se ta kthesh ne ankand.</p>
       </div>
-      <Message state={state} />
+      <Message state={localError ? { error: localError } : state} />
       <input name="title" required placeholder="Titulli i produktit" className={input} />
       <select name="categoryId" className={input} defaultValue={categories[0]?.id || ""}>
         {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -126,14 +157,23 @@ export function ProductUpdateForm({
     },
     null
   );
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  function validateSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const formData = new FormData(event.currentTarget);
+    const files = formData.getAll("images").filter((value) => value instanceof File && value.size > 0) as File[];
+    const error = validateImageFiles(files);
+    setLocalError(error);
+    if (error) event.preventDefault();
+  }
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-[24px] border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
+    <form action={formAction} onSubmit={validateSubmit} className="grid gap-4 rounded-[24px] border border-[#f0d9c4] bg-white/86 p-5 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
       <div>
         <h2 className="text-lg font-black text-[#352B24]">Perditeso produkt</h2>
         <p className="mt-1 text-sm text-[#6f5b4c]">Edito te dhenat e produktit ose ndrysho statusin.</p>
       </div>
-      <Message state={state} />
+      <Message state={localError ? { error: localError } : state} />
       <select name="productId" className={input} defaultValue={defaultProductId || products[0]?.id || ""}>
         {products.map((product) => (
           <option key={product.id} value={product.id}>

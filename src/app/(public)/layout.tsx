@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCategories, getCurrentUserProfile } from "@/lib/db";
 import { signOut } from "@/app/actions/auth";
 import { BrandLogo } from "@/app/components/BrandUi";
+import MobilePublicMenu from "@/app/components/MobilePublicMenu";
 import {
   Bell,
   ChevronDown,
@@ -14,7 +15,6 @@ import {
   HelpCircle,
   Home,
   LogOut,
-  Menu,
   Monitor,
   Search,
   ShieldCheck,
@@ -99,22 +99,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <div className="min-w-0">
         <header className="sticky top-0 z-50 border-b border-[#f0d9c4] bg-[#fffdf8]/92 backdrop-blur">
           <div className="mx-auto flex max-w-[1500px] items-center gap-4 px-4 py-3">
-            <details className="relative lg:hidden">
-              <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-[#f0d9c4] bg-white text-[#352B24]">
-                <Menu className="h-5 w-5" />
-              </summary>
-              <div className="absolute left-0 top-14 z-50 w-[min(88vw,320px)] rounded-2xl border border-[#f0d9c4] bg-white p-3 shadow-2xl">
-                <BrandLogo className="px-2" />
-                <div className="mt-3 grid gap-1">
-                  {[...navLinks, { href: "/how-it-works", label: "Si funksionon", icon: HelpCircle }].map(({ href, label, icon: Icon }) => (
-                    <Link key={href} href={href} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-[#5e4c3f] hover:bg-[#F7D8B5]/50">
-                      <Icon className="h-4 w-4 text-[#D96C2D]" />
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </details>
+            <MobilePublicMenu />
 
             <BrandLogo compact className="lg:hidden" />
 

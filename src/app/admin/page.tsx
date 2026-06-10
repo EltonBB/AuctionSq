@@ -78,12 +78,12 @@ export default async function AdminOverviewPage() {
               <p className="rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 text-sm text-[#6f5b4c]">Nuk ka ankande te mbyllura me fitues ende.</p>
             ) : (
               recentWinners.map((order) => (
-                <div key={order.id} className="flex items-center justify-between rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3">
-                  <div>
+                <div key={order.id} className="grid gap-3 rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 sm:flex sm:items-center sm:justify-between">
+                  <div className="min-w-0">
                     <p className="font-bold text-[#352B24]">{order.auction?.product?.title}</p>
                     <p className="text-xs text-[#6f5b4c]">Fituesi: {order.winner?.full_name || "I panjohur"} - {new Date(order.created_at).toLocaleString()}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 sm:text-right">
                     <p className="inline-flex items-center gap-1 text-xs font-bold uppercase text-emerald-700">
                       <Award className="h-3.5 w-3.5" />
                       Fitues
@@ -108,12 +108,12 @@ export default async function AdminOverviewPage() {
               .filter((auction) => auction.status === "active" || auction.status === "scheduled")
               .slice(0, 6)
               .map((auction) => (
-                <div key={auction.id} className="flex items-center justify-between rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3">
-                  <div>
+                <div key={auction.id} className="grid gap-3 rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 sm:flex sm:items-center sm:justify-between">
+                  <div className="min-w-0">
                     <p className="font-bold text-[#352B24]">{auction.product?.title}</p>
                     <p className="text-xs text-[#6f5b4c]">{auction.status} - mbaron me {new Date(auction.end_time).toLocaleString()}</p>
                   </div>
-                  <span className="text-sm font-black text-[#D96C2D]">{formatEurFromAll(auction.current_price)}</span>
+                  <span className="shrink-0 text-sm font-black text-[#D96C2D] sm:text-right">{formatEurFromAll(auction.current_price)}</span>
                 </div>
             ))}
           </div>
@@ -133,14 +133,14 @@ export default async function AdminOverviewPage() {
               </p>
             ) : (
               highestActiveBids.map(({ auction, bid, bidCount }) => (
-                <div key={auction.id} className="flex items-center justify-between gap-4 rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3">
+                <div key={auction.id} className="grid gap-3 rounded-xl border border-[#f0d9c4] bg-[#FFF8F1] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
                   <div className="min-w-0">
                     <p className="truncate font-bold text-[#352B24]">{auction.product?.title}</p>
                     <p className="text-xs text-[#6f5b4c]">
                       {bid.user?.full_name || "Klient"} - {bidCount} {bidCount === 1 ? "oferte" : "oferta"}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 sm:text-right">
                     <p className="text-sm font-black text-[#D96C2D]">{formatEurFromAll(bid.amount)}</p>
                     <p className="text-[11px] font-semibold uppercase text-[#8a7565]">me e larta</p>
                   </div>

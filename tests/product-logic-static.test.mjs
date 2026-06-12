@@ -12,6 +12,7 @@ const authActions = readFileSync(new URL("../src/app/actions/auth.ts", import.me
 const authCallback = readFileSync(new URL("../src/app/auth/callback/route.ts", import.meta.url), "utf8");
 const loginPage = readFileSync(new URL("../src/app/(auth)/login/page.tsx", import.meta.url), "utf8");
 const registerPage = readFileSync(new URL("../src/app/(auth)/register/page.tsx", import.meta.url), "utf8");
+const authUi = readFileSync(new URL("../src/app/components/AuthUi.tsx", import.meta.url), "utf8");
 const auctionDetail = readFileSync(new URL("../src/app/(public)/auctions/[id]/page.tsx", import.meta.url), "utf8");
 const publicLayout = readFileSync(new URL("../src/app/(public)/layout.tsx", import.meta.url), "utf8");
 const auctionsPage = readFileSync(new URL("../src/app/(public)/auctions/page.tsx", import.meta.url), "utf8");
@@ -56,6 +57,15 @@ test("google oauth is available from login and registration", () => {
   assert.match(loginPage, /Vazhdo me Google/);
   assert.match(registerPage, /action=\{signInWithGoogle\}/);
   assert.match(registerPage, /Vazhdo me Google/);
+  assert.match(authUi, /src="\/brand\/google-g\.svg"/);
+  assert.doesNotMatch(`${loginPage}\n${registerPage}`, />G<\/span>/);
+});
+
+test("normal users land on the public site after sign-in unless a flow passes next", () => {
+  assert.match(authActions, /redirect\(profile\?\.is_admin\s*\?\s*"\/admin"\s*:\s*"\/"\)/);
+  assert.match(authCallback, /type\s*===\s*"recovery"[\s\S]*?"\/reset-password\?recovery=1"[\s\S]*?:\s*"\/"/);
+  assert.match(authCallback, /profile\?\.is_admin\s*\?\s*"\/admin"\s*:\s*"\/"/);
+  assert.match(authCallback, /if\s*\(nextParam\)\s*\{\s*return NextResponse\.redirect\(`\$\{origin\}\$\{next\}`\);/);
 });
 
 test("logged-in users can reach their profile from the public mobile menu", () => {

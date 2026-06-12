@@ -7,7 +7,9 @@ NjeKlik is a connected pre-production auction platform currently deployed at `ht
 Active task on 2026-06-09:
 - Implemented client auth/account access request batch:
   - login and registration now include a Google OAuth button that redirects through Supabase and the existing `/auth/callback` route.
+  - login and registration now share a split-screen auth design on desktop with NjeKlik visuals, compact mobile layout, and the real Google logo asset.
   - public mobile menu now shows `Profili` for logged-in clients and `Paneli Admin` for admins so users can return to account pages after visiting Ballina.
+  - normal clients now land on Ballina after login/Google OAuth by default; profile completion remains required only before bidding or when the user opens Profili.
   - confirmation email sender branding is not a repo-only change; it requires Supabase Auth custom SMTP/from-name and email template configuration once the production domain/email is ready.
 - Implemented the client mobile/UI request batch:
   - home hero now uses the provided landscape product image as a subtle warm background.

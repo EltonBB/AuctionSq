@@ -1,43 +1,53 @@
-﻿"use client";
+"use client";
 
 import React, { useActionState } from "react";
 import Link from "next/link";
 import { signInWithGoogle, signUp } from "@/app/actions/auth";
-import { AlertCircle, ArrowLeft, CheckCircle2, UserPlus } from "lucide-react";
-import { BrandLogo } from "@/app/components/BrandUi";
+import { AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
+import { AuthBrandHeader, AuthDivider, AuthFooter, AuthShell, AuthTinyTrust, GoogleLogo } from "@/app/components/AuthUi";
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(signUp, null);
 
   return (
-    <div className="brand-surface relative flex min-h-screen flex-col items-center justify-center p-4 text-[#352B24]">
-      <Link href="/" className="absolute left-6 top-6 flex items-center gap-1.5 text-xs font-bold text-[#6f5b4c] transition-colors hover:text-[#D96C2D]">
-        <ArrowLeft className="h-4 w-4" />
-        <span>Kthehu pas</span>
-      </Link>
-
-      <div className="flex w-full max-w-md flex-col gap-6 rounded-[28px] border border-[#f0d9c4] bg-white/90 p-8 text-left shadow-[0_22px_60px_rgba(53,43,36,0.08)]">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <BrandLogo />
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F7D8B5] bg-[#F7D8B5] text-[#D96C2D]">
-            <UserPlus className="h-6 w-6" />
-          </div>
-          <h2 className="text-xl font-black uppercase tracking-wide text-[#352B24]">Regjistrohu ne NjeKlik</h2>
-          <p className="text-xs leading-5 text-[#6f5b4c]">Krijo nje llogari falas per te filluar ofertimin.</p>
-        </div>
+    <AuthShell>
+      <div className="grid gap-7">
+        <AuthBrandHeader
+          icon={<UserPlus className="h-5 w-5" />}
+          title="Krijo profil"
+          copy="Hap nje llogari falas per te ruajtur ofertat, fitoret dhe porosite."
+        />
 
         <form action={formAction} className="flex flex-col gap-4">
-          <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
-            Emri & Mbiemri
-            <input type="text" name="fullName" required placeholder="Filan Fisteku" className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+          <label className="grid gap-2 text-sm font-semibold text-[#6f5b4c]">
+            Emri dhe mbiemri
+            <input
+              type="text"
+              name="fullName"
+              required
+              placeholder="Filan Fisteku"
+              className="brand-focus h-12 rounded-xl border border-[#d9c7b8] bg-white px-4 text-sm font-medium text-[#352B24] shadow-sm"
+            />
           </label>
-          <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
-            Adresa email
-            <input type="email" name="email" required placeholder="emri@shembull.com" className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+          <label className="grid gap-2 text-sm font-semibold text-[#6f5b4c]">
+            Email
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="emri@shembull.com"
+              className="brand-focus h-12 rounded-xl border border-[#d9c7b8] bg-white px-4 text-sm font-medium text-[#352B24] shadow-sm"
+            />
           </label>
-          <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
+          <label className="grid gap-2 text-sm font-semibold text-[#6f5b4c]">
             Fjalekalimi
-            <input type="password" name="password" required placeholder="Min. 6 karaktere" className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+            <input
+              type="password"
+              name="password"
+              required
+              placeholder="Min. 6 karaktere"
+              className="brand-focus h-12 rounded-xl border border-[#d9c7b8] bg-white px-4 text-sm font-medium text-[#352B24] shadow-sm"
+            />
           </label>
 
           {state?.error && (
@@ -53,20 +63,23 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <button type="submit" disabled={isPending} className="mt-2 w-full rounded-xl bg-[#D96C2D] py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-[0_12px_28px_rgba(217,108,45,0.22)] transition hover:bg-[#bf5520] disabled:opacity-60">
-            {isPending ? "Duke regjistruar..." : "Regjistrohu tani"}
+          <button
+            type="submit"
+            disabled={isPending}
+            className="mt-2 h-12 w-full rounded-xl bg-[#D96C2D] px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(217,108,45,0.22)] transition hover:bg-[#bf5520] active:translate-y-px disabled:opacity-60"
+          >
+            {isPending ? "Duke krijuar profilin..." : "Krijo profil"}
           </button>
         </form>
 
         <div className="grid gap-4">
-          <div className="flex items-center gap-3 text-xs font-bold text-[#a99584]">
-            <span className="h-px flex-1 bg-[#f0d9c4]" />
-            Ose krijo profil me
-            <span className="h-px flex-1 bg-[#f0d9c4]" />
-          </div>
+          <AuthDivider>Ose krijo profil me</AuthDivider>
           <form action={signInWithGoogle}>
-            <button type="submit" className="brand-focus flex w-full items-center justify-center gap-3 rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm font-black text-[#352B24] transition hover:border-[#D96C2D] hover:text-[#D96C2D]">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-base font-black text-[#4285F4] shadow-[inset_0_0_0_1px_#e5e7eb]">G</span>
+            <button
+              type="submit"
+              className="brand-focus flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#d9c7b8] bg-white px-4 text-sm font-black text-[#352B24] shadow-sm transition hover:border-[#D96C2D] hover:text-[#D96C2D] active:translate-y-px"
+            >
+              <GoogleLogo />
               Vazhdo me Google
             </button>
           </form>
@@ -75,11 +88,15 @@ export default function RegisterPage() {
         <div className="border-t border-[#f0d9c4] pt-4 text-center text-xs text-[#6f5b4c]">
           Keni tashme nje llogari?{" "}
           <Link href="/login" className="font-black text-[#D96C2D] hover:text-[#bf5520]">
-            Identifikohu ketu
+            Kycu ketu
           </Link>
         </div>
+
+        <div className="grid gap-4 text-center">
+          <AuthTinyTrust />
+          <AuthFooter />
+        </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }
-

@@ -12,7 +12,7 @@ export async function GET(request: Request) {
       ? nextParam
       : type === "recovery"
         ? "/reset-password?recovery=1"
-        : "/dashboard/profile";
+        : "/";
 
   const supabase = await createClient();
 
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       .select("is_admin")
       .eq("id", userData.user.id)
       .single();
-    return NextResponse.redirect(`${origin}${profile?.is_admin ? "/admin" : "/dashboard/profile"}`);
+    return NextResponse.redirect(`${origin}${profile?.is_admin ? "/admin" : "/"}`);
   }
 
   if (tokenHash && type) {

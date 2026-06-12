@@ -23,7 +23,7 @@ export async function signIn(prevState: unknown, formData: FormData) {
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
-  redirect(profile?.is_admin ? "/admin" : "/dashboard/profile");
+  redirect(profile?.is_admin ? "/admin" : "/");
 }
 
 export async function signUp(prevState: unknown, formData: FormData) {

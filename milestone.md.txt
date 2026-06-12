@@ -8,6 +8,8 @@ Active task on 2026-06-09:
 - Implemented client auth/account access request batch:
   - login and registration now include a Google OAuth button that redirects through Supabase and the existing `/auth/callback` route.
   - login and registration now share a split-screen auth design on desktop with NjeKlik visuals, compact mobile layout, and the real Google logo asset.
+  - desktop login now places the sign-in form on the left, keeps the image panel on the right, removes the crossed-out login helper/trust text, and keeps the image-panel copy as aligned white text without a logo overlay.
+  - Vercel's initial Git-triggered production deployment for `17c6f4a` stalled in `INITIALIZING` with no build logs; a manual `npx vercel deploy --prod --yes` created ready deployment `dpl_2xfLtUu9a6trfm3fY9rFPUMkeT8n` and re-aliased `https://auctionsq.vercel.app`.
   - public mobile menu now shows `Profili` for logged-in clients and `Paneli Admin` for admins so users can return to account pages after visiting Ballina.
   - normal clients now land on Ballina after login/Google OAuth by default; profile completion remains required only before bidding or when the user opens Profili.
   - confirmation email sender branding is not a repo-only change; it requires Supabase Auth custom SMTP/from-name and email template configuration once the production domain/email is ready.

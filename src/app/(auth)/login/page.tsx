@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { signIn, signInWithGoogle } from "@/app/actions/auth";
-import { AlertCircle, Eye, EyeOff, KeyRound } from "lucide-react";
-import { AuthBrandHeader, AuthDivider, AuthFooter, AuthShell, AuthTinyTrust, GoogleLogo } from "@/app/components/AuthUi";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { AuthDivider, AuthFooter, AuthShell, GoogleLogo } from "@/app/components/AuthUi";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(signIn, null);
@@ -13,11 +13,9 @@ export default function LoginPage() {
   return (
     <AuthShell>
       <div className="grid gap-7">
-        <AuthBrandHeader
-          icon={<KeyRound className="h-5 w-5" />}
-          title="Kycu"
-          copy="Vendosni email-in dhe fjalekalimin per te hyre ne llogarine tuaj."
-        />
+        <div>
+          <h1 className="text-3xl font-black leading-tight text-[#352B24]">Kycu</h1>
+        </div>
 
         <form action={formAction} className="flex flex-col gap-4">
           <label className="grid gap-2 text-sm font-semibold text-[#6f5b4c]">
@@ -93,10 +91,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="grid gap-4 text-center">
-          <AuthTinyTrust />
-          <AuthFooter />
-        </div>
+        <AuthFooter />
       </div>
     </AuthShell>
   );

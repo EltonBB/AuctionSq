@@ -10,13 +10,17 @@ const adminLayout = readFileSync(new URL("../src/app/admin/layout.tsx", import.m
 const pollingRefresh = readFileSync(new URL("../src/app/components/PollingRefresh.tsx", import.meta.url), "utf8");
 const authActions = readFileSync(new URL("../src/app/actions/auth.ts", import.meta.url), "utf8");
 const authCallback = readFileSync(new URL("../src/app/auth/callback/route.ts", import.meta.url), "utf8");
+const loginPage = readFileSync(new URL("../src/app/(auth)/login/page.tsx", import.meta.url), "utf8");
+const registerPage = readFileSync(new URL("../src/app/(auth)/register/page.tsx", import.meta.url), "utf8");
 const auctionDetail = readFileSync(new URL("../src/app/(public)/auctions/[id]/page.tsx", import.meta.url), "utf8");
+const publicLayout = readFileSync(new URL("../src/app/(public)/layout.tsx", import.meta.url), "utf8");
 const auctionsPage = readFileSync(new URL("../src/app/(public)/auctions/page.tsx", import.meta.url), "utf8");
 const endingSoonPage = readFileSync(new URL("../src/app/(public)/ending-soon/page.tsx", import.meta.url), "utf8");
 const categoriesPage = readFileSync(new URL("../src/app/(public)/categories/page.tsx", import.meta.url), "utf8");
 const brandUi = readFileSync(new URL("../src/app/components/BrandUi.tsx", import.meta.url), "utf8");
 const countdownText = readFileSync(new URL("../src/app/components/CountdownText.tsx", import.meta.url), "utf8");
 const biddingForm = readFileSync(new URL("../src/app/components/BiddingForm.tsx", import.meta.url), "utf8");
+const mobilePublicMenu = readFileSync(new URL("../src/app/components/MobilePublicMenu.tsx", import.meta.url), "utf8");
 
 function readSourceFiles(relativeDir) {
   const dir = new URL(relativeDir, import.meta.url);
@@ -41,6 +45,23 @@ test("user dashboard routes are reachable for non-admin users", () => {
   assert.doesNotMatch(authCallback, /profile\?\.is_admin\s*\?\s*"\/admin"\s*:\s*"\/profile"/);
   assert.match(dashboardLayout, /return\s*\(\s*<div/);
   assert.doesNotMatch(dashboardLayout, /redirect\("\/profile"\)/);
+});
+
+test("google oauth is available from login and registration", () => {
+  assert.match(authActions, /export\s+async\s+function\s+signInWithGoogle\s*\(/);
+  assert.match(authActions, /signInWithOAuth\(\{\s*provider:\s*"google"/);
+  assert.match(authActions, /redirectTo:\s*`\$\{baseUrl\}\/auth\/callback`/);
+  assert.match(authCallback, /exchangeCodeForSession\(code\)/);
+  assert.match(loginPage, /action=\{signInWithGoogle\}/);
+  assert.match(loginPage, /Vazhdo me Google/);
+  assert.match(registerPage, /action=\{signInWithGoogle\}/);
+  assert.match(registerPage, /Vazhdo me Google/);
+});
+
+test("logged-in users can reach their profile from the public mobile menu", () => {
+  assert.match(publicLayout, /<MobilePublicMenu\s+isLoggedIn=\{Boolean\(isLoggedIn\)\}\s+isAdmin=\{Boolean\(user\?\.is_admin\)\}\s+\/>/);
+  assert.match(mobilePublicMenu, /href=\{isAdmin\s*\?\s*"\/admin"\s*:\s*"\/dashboard\/profile"\}/);
+  assert.match(mobilePublicMenu, /isAdmin\s*\?\s*"Paneli Admin"\s*:\s*"Profili"/);
 });
 
 test("app metadata and admin shell use NjeKlik branding", () => {

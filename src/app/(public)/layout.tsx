@@ -99,7 +99,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <div className="min-w-0">
         <header className="sticky top-0 z-50 border-b border-[#f0d9c4] bg-[#fffdf8]/92 backdrop-blur">
           <div className="mx-auto flex max-w-[1500px] items-center gap-4 px-4 py-3">
-            <MobilePublicMenu />
+            <MobilePublicMenu isLoggedIn={Boolean(isLoggedIn)} isAdmin={Boolean(user?.is_admin)} />
 
             <BrandLogo compact className="lg:hidden" />
 

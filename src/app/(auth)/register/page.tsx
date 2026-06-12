@@ -2,7 +2,7 @@
 
 import React, { useActionState } from "react";
 import Link from "next/link";
-import { signUp } from "@/app/actions/auth";
+import { signInWithGoogle, signUp } from "@/app/actions/auth";
 import { AlertCircle, ArrowLeft, CheckCircle2, UserPlus } from "lucide-react";
 import { BrandLogo } from "@/app/components/BrandUi";
 
@@ -57,6 +57,20 @@ export default function RegisterPage() {
             {isPending ? "Duke regjistruar..." : "Regjistrohu tani"}
           </button>
         </form>
+
+        <div className="grid gap-4">
+          <div className="flex items-center gap-3 text-xs font-bold text-[#a99584]">
+            <span className="h-px flex-1 bg-[#f0d9c4]" />
+            Ose krijo profil me
+            <span className="h-px flex-1 bg-[#f0d9c4]" />
+          </div>
+          <form action={signInWithGoogle}>
+            <button type="submit" className="brand-focus flex w-full items-center justify-center gap-3 rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm font-black text-[#352B24] transition hover:border-[#D96C2D] hover:text-[#D96C2D]">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-base font-black text-[#4285F4] shadow-[inset_0_0_0_1px_#e5e7eb]">G</span>
+              Vazhdo me Google
+            </button>
+          </form>
+        </div>
 
         <div className="border-t border-[#f0d9c4] pt-4 text-center text-xs text-[#6f5b4c]">
           Keni tashme nje llogari?{" "}

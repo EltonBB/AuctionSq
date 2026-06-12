@@ -48,6 +48,27 @@ export async function signUp(prevState: unknown, formData: FormData) {
   return { success: true, message: "Registration successful! Check your email if confirmation is enabled." };
 }
 
+export async function signInWithGoogle() {
+  const supabase = await createClient();
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${baseUrl}/auth/callback`,
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+
+  if (error || !data.url) {
+    const message = error?.message || "Google sign-in is not available right now.";
+    redirect(`/login?error=${encodeURIComponent(message)}`);
+  }
+
+  redirect(data.url);
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

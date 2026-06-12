@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Gavel, HelpCircle, Home, Menu, X } from "lucide-react";
+import { CircleUserRound, Gavel, HelpCircle, Home, Menu, ShieldCheck, X } from "lucide-react";
 import { BrandLogo } from "@/app/components/BrandUi";
 
 const links = [
@@ -12,7 +12,12 @@ const links = [
   { href: "/how-it-works", label: "Si funksionon", icon: HelpCircle },
 ];
 
-export default function MobilePublicMenu() {
+interface MobilePublicMenuProps {
+  isLoggedIn?: boolean;
+  isAdmin?: boolean;
+}
+
+export default function MobilePublicMenu({ isLoggedIn = false, isAdmin = false }: MobilePublicMenuProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -73,6 +78,23 @@ export default function MobilePublicMenu() {
                 {label}
               </Link>
             ))}
+            {isLoggedIn ? (
+              <>
+                <div className="my-2 h-px bg-[#f0d9c4]" />
+                <Link
+                  href={isAdmin ? "/admin" : "/dashboard/profile"}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 rounded-xl bg-[#FFF8F1] px-3 py-3 text-sm font-black text-[#5e4c3f] hover:bg-[#F7D8B5]/50"
+                >
+                  {isAdmin ? (
+                    <ShieldCheck className="h-4 w-4 text-[#D96C2D]" />
+                  ) : (
+                    <CircleUserRound className="h-4 w-4 text-[#D96C2D]" />
+                  )}
+                  {isAdmin ? "Paneli Admin" : "Profili"}
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
       ) : null}

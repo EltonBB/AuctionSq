@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { Award, Calendar, ChevronRight, Crown, Gavel, Sparkles } from "lucide-react";
 import PollingRefresh from "@/app/components/PollingRefresh";
+import SafeImage from "@/app/components/SafeImage";
 import { getAuctions } from "@/lib/db";
 import { formatEurFromAll } from "@/lib/currency";
 
@@ -71,9 +72,8 @@ export default async function WinnersPage() {
             {endedAuctions.map((auction) => (
               <div key={auction.id} className="overflow-hidden rounded-[24px] border border-[#f0d9c4] bg-white/86 shadow-[0_16px_44px_rgba(53,43,36,0.06)]">
                 <div className="relative aspect-[1.3] bg-[#F7D8B5]/25">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={auction.product?.images?.[0] || "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&auto=format&fit=crop&q=80"}
+                  <SafeImage
+                    src={auction.product?.images?.[0] || "/brand/home-feature-product.png"}
                     alt={auction.product?.title}
                     className="h-full w-full object-cover"
                   />

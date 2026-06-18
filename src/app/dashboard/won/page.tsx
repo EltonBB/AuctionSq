@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import Link from "next/link";
 import { getCurrentUserProfile, getOrdersByUser } from "@/lib/db";
+import SafeImage from "@/app/components/SafeImage";
 import { Award, ShoppingBag } from "lucide-react";
 
 export const revalidate = 0;
@@ -51,8 +52,7 @@ export default async function WonAuctionsPage() {
               className="bg-white/85 border border-[#f0d9c4] p-5 rounded-2xl flex flex-col gap-4 shadow-[0_18px_45px_rgba(98,56,28,0.08)]"
             >
               <div className="aspect-[16/9] w-full rounded-xl bg-[#fff7ed] overflow-hidden relative border border-[#f0d9c4]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <SafeImage
                   src={order.auction?.product?.images?.[0]}
                   alt={order.auction?.product?.title}
                   className="w-full h-full object-cover"

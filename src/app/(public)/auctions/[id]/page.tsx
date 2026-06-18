@@ -6,6 +6,7 @@ import BiddingForm from "@/app/components/BiddingForm";
 import CountdownText from "@/app/components/CountdownText";
 import PollingRefresh from "@/app/components/PollingRefresh";
 import { BrandAuctionCard } from "@/app/components/BrandUi";
+import SafeImage from "@/app/components/SafeImage";
 import { AlertTriangle, Award, ChevronRight, Heart, RotateCcw, ShieldCheck, Truck, UserCheck } from "lucide-react";
 
 export const revalidate = 0;
@@ -68,9 +69,8 @@ export default async function AuctionDetailPage({ params }: AuctionDetailPagePro
 
         <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr] xl:gap-8">
           <div className="relative overflow-hidden rounded-[28px] border border-[#f0d9c4] bg-[#F7D8B5]/25 shadow-[0_22px_60px_rgba(53,43,36,0.08)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={auc.product?.images?.[0] || "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=1200&auto=format&fit=crop&q=80"}
+            <SafeImage
+              src={auc.product?.images?.[0] || "/brand/home-feature-product.png"}
               alt={auc.product?.title}
               className="aspect-[1.08] w-full object-cover sm:aspect-[1.18]"
             />

@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { Heart } from "lucide-react";
 import CountdownText from "@/app/components/CountdownText";
+import SafeImage from "@/app/components/SafeImage";
 import { formatEurFromAll } from "@/lib/currency";
 import type { Auction, Category, Product } from "@/lib/db";
 
@@ -29,9 +30,8 @@ export function BrandAuctionCard({ auction, compact = false }: { auction: Auctio
       className={`group block overflow-hidden rounded-[18px] border border-[#f0d9c4] bg-white shadow-[0_16px_40px_rgba(53,43,36,0.06)] transition hover:-translate-y-1 hover:border-[#D96C2D]/50 hover:shadow-[0_18px_48px_rgba(217,108,45,0.14)] sm:rounded-[22px] ${compact ? "min-w-[210px]" : ""}`}
     >
       <div className={`relative bg-[#F7D8B5]/30 ${compact ? "h-48" : "aspect-[1.18]"}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={auction.product?.images?.[0] || "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&auto=format&fit=crop&q=80"}
+        <SafeImage
+          src={auction.product?.images?.[0] || "/brand/home-feature-product.png"}
           alt={auction.product?.title || "Produkt ne ankand"}
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />

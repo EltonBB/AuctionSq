@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getOrders } from "@/lib/db";
 import { formatEurFromAll } from "@/lib/currency";
 import AdminOrderStatusForm from "@/app/components/AdminOrderStatusForm";
+import SafeImage from "@/app/components/SafeImage";
 
 export const revalidate = 0;
 
@@ -26,11 +27,10 @@ export default async function AdminOrdersPage() {
             <div key={order.id} className="rounded-2xl border border-[#f0d9c4] p-4">
               <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
                 <div className="flex gap-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <SafeImage
                     src={order.auction?.product?.images?.[0]}
-                    alt=""
-                    className="h-20 w-20 rounded-xl object-cover"
+                    alt={order.auction?.product?.title || "Produkt"}
+                    className="h-20 w-20 shrink-0 rounded-xl object-cover"
                   />
                   <div>
                     <Link href={`/auctions/${order.auction_id}`} className="font-black text-[#D96C2D]">

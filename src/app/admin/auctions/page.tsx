@@ -4,6 +4,7 @@ import { ProductCreateForm } from "@/app/components/AdminForms";
 import { cancelAuction, createAuction, deleteProduct, relistAuction, setProductStatus } from "@/app/actions/admin";
 import { ConfirmSubmitButton } from "@/app/components/AdminUi";
 import AutoRelistToggleForm from "@/app/components/AutoRelistToggleForm";
+import SafeImage from "@/app/components/SafeImage";
 import { getAuctions, getCategories, getOrders, getProducts } from "@/lib/db";
 import { allToEur, formatEurFromAll } from "@/lib/currency";
 
@@ -163,8 +164,11 @@ export default async function AdminAuctionsPage({
                 <article key={product.id} className="rounded-xl border border-[#f0d9c4] bg-white/70 p-4">
                   <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_360px]">
                     <div className="flex min-w-0 gap-4">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={product.images?.[0]} alt="" className="h-20 w-20 shrink-0 rounded-xl bg-[#FFF8F1] object-cover" />
+                      <SafeImage
+                        src={product.images?.[0]}
+                        alt={product.title}
+                        className="h-20 w-20 shrink-0 rounded-xl bg-[#FFF8F1] object-cover"
+                      />
                       <div className="min-w-0">
                         <h2 className="text-base font-black text-[#352B24]">{product.title}</h2>
                         <p className="mt-1 line-clamp-2 text-sm text-[#6f5b4c]">{product.description || "Pa pershkrim."}</p>

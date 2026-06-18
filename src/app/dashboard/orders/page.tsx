@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentUserProfile, getOrdersByUser } from "@/lib/db";
 import OrderAddressForm from "@/app/components/OrderAddressForm";
 import PollingRefresh from "@/app/components/PollingRefresh";
+import SafeImage from "@/app/components/SafeImage";
 import { ShoppingBag, Calendar, CheckCircle2, Circle, MapPin } from "lucide-react";
 
 export const revalidate = 0;
@@ -107,8 +108,7 @@ export default async function MyOrdersPage() {
                   {/* Product card info (5 cols) */}
                   <div className="lg:col-span-5 flex items-start gap-4 p-4 rounded-2xl bg-[#fff7ed] border border-[#f0d9c4] text-left">
                     <div className="w-20 h-20 rounded-xl bg-white overflow-hidden relative border border-[#f0d9c4] flex-shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <SafeImage
                         src={order.auction?.product?.images?.[0]}
                         alt={order.auction?.product?.title}
                         className="w-full h-full object-cover"

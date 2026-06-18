@@ -22,6 +22,18 @@ Active task on 2026-06-17:
   - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.
 - Removed the desktop public sidebar promo card (`Fito me shume`) before VPS deployment prep.
 
+Active task on 2026-06-18:
+- Fixed broken product thumbnails after VPS/domain deployment:
+  - added a shared `SafeImage` component that falls back to the local NjeKlik product image when a product image URL is empty or fails to load.
+  - replaced raw product image tags in admin products/auctions, admin orders, customer orders/wins/profile activity, public auction cards, auction detail, and winners pages.
+  - removed remaining Unsplash fallback URLs from product surfaces so image rendering stays aligned with the current CSP.
+- Latest checks passed:
+  - `node --test tests\*.test.mjs`: 35/35 tests.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - `npm audit --json`: 0 vulnerabilities.
+  - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.
+
 Active task on 2026-06-09:
 - Implemented client auth/account access request batch:
   - login and registration now include a Google OAuth button that redirects through Supabase and the existing `/auth/callback` route.

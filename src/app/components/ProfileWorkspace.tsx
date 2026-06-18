@@ -6,6 +6,7 @@ import { AlertCircle, CheckCircle2, Gavel, MapPin, TrendingDown, Trophy, X } fro
 import type { Auction, Bid, Order, Product, Profile } from "@/lib/db";
 import { updatePassword, updateProfile } from "@/app/actions/auth";
 import { formatEurFromAll } from "@/lib/currency";
+import SafeImage from "@/app/components/SafeImage";
 
 function Notice({ state }: { state: any }) {
   if (!state?.error && !state?.success) return null;
@@ -225,8 +226,7 @@ export default function ProfileWorkspace({ user, orders, bids }: WorkspaceProps)
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex min-w-0 gap-3">
                             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#F7D8B5]/45">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
+                              <SafeImage
                                 src={bid.auction.product?.images?.[0] || "/brand/home-feature-product.png"}
                                 alt=""
                                 className="h-full w-full object-cover transition duration-500 group-hover:scale-105"

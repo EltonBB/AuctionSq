@@ -1,16 +1,36 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { enforceRateLimits, normalizeRateLimitValue } from "@/lib/rate-limit";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function signIn(prevState: unknown, formData: FormData) {
-  const email = String(formData.get("email") || "");
+  const email = normalizeRateLimitValue(String(formData.get("email") || ""));
   const password = String(formData.get("password") || "");
 
   if (!email || !password) {
     return { success: false, error: "Please enter both email and password." };
   }
+
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "auth:sign-in:ip",
+      limit: 30,
+      windowSeconds: 15 * 60,
+      keyParts: ["sign-in"],
+      message: "Too many login attempts. Please try again in a few minutes.",
+    },
+    {
+      action: "auth:sign-in:email",
+      limit: 8,
+      windowSeconds: 15 * 60,
+      keyParts: ["sign-in", email],
+      includeIp: false,
+      message: "Too many login attempts for this email. Please wait before trying again.",
+    },
+  ]);
+  if (rateLimit) return rateLimit;
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -27,13 +47,35 @@ export async function signIn(prevState: unknown, formData: FormData) {
 }
 
 export async function signUp(prevState: unknown, formData: FormData) {
-  const email = String(formData.get("email") || "");
+  const email = normalizeRateLimitValue(String(formData.get("email") || ""));
   const password = String(formData.get("password") || "");
   const fullName = String(formData.get("fullName") || "");
 
   if (!email || !password || !fullName) {
     return { success: false, error: "All fields are required." };
   }
+  if (password.length < 8) {
+    return { success: false, error: "Password must be at least 8 characters long." };
+  }
+
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "auth:sign-up:ip",
+      limit: 5,
+      windowSeconds: 60 * 60,
+      keyParts: ["sign-up"],
+      message: "Too many registration attempts. Please try again later.",
+    },
+    {
+      action: "auth:sign-up:email",
+      limit: 3,
+      windowSeconds: 24 * 60 * 60,
+      keyParts: ["sign-up", email],
+      includeIp: false,
+      message: "Too many registration attempts for this email. Please try again later.",
+    },
+  ]);
+  if (rateLimit) return rateLimit;
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
@@ -49,6 +91,19 @@ export async function signUp(prevState: unknown, formData: FormData) {
 }
 
 export async function signInWithGoogle() {
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "auth:google:ip",
+      limit: 20,
+      windowSeconds: 15 * 60,
+      keyParts: ["google"],
+      message: "Too many Google sign-in attempts. Please try again shortly.",
+    },
+  ]);
+  if (rateLimit) {
+    redirect(`/login?error=${encodeURIComponent(rateLimit.error)}`);
+  }
+
   const supabase = await createClient();
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -98,6 +153,18 @@ export async function updateProfile(prevState: unknown, formData: FormData) {
 
   if (!user) return { success: false, error: "Unauthorized. Please log in." };
 
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "profile:update:user",
+      limit: 20,
+      windowSeconds: 60 * 60,
+      keyParts: ["profile-update", user.id],
+      includeIp: false,
+      message: "Too many profile updates. Please try again later.",
+    },
+  ]);
+  if (rateLimit) return rateLimit;
+
   const { error } = await supabase.rpc("update_own_profile", {
     p_full_name: fullName,
     p_phone_number: phoneNumber,
@@ -116,15 +183,36 @@ export async function updateProfile(prevState: unknown, formData: FormData) {
 }
 
 export async function requestPasswordReset(prevState: unknown, formData: FormData) {
-  const email = String(formData.get("email") || "");
+  const email = normalizeRateLimitValue(String(formData.get("email") || ""));
   if (!email) return { success: false, error: "Email is required." };
+
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "auth:password-reset:ip",
+      limit: 10,
+      windowSeconds: 60 * 60,
+      keyParts: ["password-reset"],
+      message: "Too many recovery requests. Please try again later.",
+    },
+    {
+      action: "auth:password-reset:email",
+      limit: 3,
+      windowSeconds: 60 * 60,
+      keyParts: ["password-reset", email],
+      includeIp: false,
+      message: "Too many recovery requests for this email. Please try again later.",
+    },
+  ]);
+  if (rateLimit) return rateLimit;
 
   const supabase = await createClient();
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   const redirectTo = `${baseUrl}/auth/callback?next=/reset-password?recovery=1`;
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
-  if (error) return { success: false, error: error.message };
+  if (error) {
+    return { success: true, message: "If this email is registered, a recovery email will be sent." };
+  }
 
   return { success: true, message: "Recovery email sent. Check your inbox." };
 }
@@ -139,11 +227,28 @@ export async function updatePassword(prevState: unknown, formData: FormData) {
   if (password !== confirmPassword) {
     return { success: false, error: "Passwords do not match." };
   }
-  if (password.length < 6) {
-    return { success: false, error: "Password must be at least 6 characters long." };
+  if (password.length < 8) {
+    return { success: false, error: "Password must be at least 8 characters long." };
   }
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Unauthorized. Please log in again." };
+
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "auth:password-update:user",
+      limit: 5,
+      windowSeconds: 60 * 60,
+      keyParts: ["password-update", user.id],
+      includeIp: false,
+      message: "Too many password updates. Please try again later.",
+    },
+  ]);
+  if (rateLimit) return rateLimit;
+
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { success: false, error: error.message };
 

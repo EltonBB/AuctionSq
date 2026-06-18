@@ -84,16 +84,6 @@ export default async function PublicLayout({ children }: { children: React.React
           </Link>
         </div>
 
-        <div className="absolute bottom-5 left-6 right-6 rounded-2xl border border-[#f3d7b8] bg-[#fff0dc] p-4 shadow-[0_16px_32px_rgba(217,108,45,0.12)] xl:left-7 xl:right-7">
-          <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/gold-bidder-medal.png" alt="" className="h-14 w-14 object-contain" />
-            <div>
-              <p className="text-sm font-black text-[#352B24]">Fito me shume.</p>
-              <p className="mt-1 text-xs leading-5 text-[#6f5b4c]">Ankande te zgjedhura dhe cmime qe ia vlejne.</p>
-            </div>
-          </div>
-        </div>
       </aside>
 
       <div className="min-w-0">

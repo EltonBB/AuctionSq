@@ -11,6 +11,10 @@ const auctionIntegrity = readFileSync(
   new URL("../supabase/migrations/20260607_high_priority_auction_integrity.sql", import.meta.url),
   "utf8"
 );
+const appRateLimits = readFileSync(
+  new URL("../supabase/migrations/20260617193233_app_rate_limits.sql", import.meta.url),
+  "utf8"
+);
 const adminActions = readFileSync(new URL("../src/app/actions/admin.ts", import.meta.url), "utf8");
 
 const combined = `${schema}\n${hardening}\n${auctionIntegrity}`;
@@ -74,4 +78,14 @@ test("auto relist is server-side and only applies to no-bid expired auctions", (
   assert.match(schema, /SELECT\s+a\.id,\s*a\.product_id,\s*a\.starting_price,\s*a\.min_increment,\s*a\.auto_relist/i);
   assert.match(schema, /IF\s+r\.auto_relist\s+THEN[\s\S]*?status\s*=\s*'relisted'[\s\S]*?now\(\)\s*\+\s*interval\s+'24 hours'[\s\S]*?'active'[\s\S]*?true/i);
   assert.match(schema, /IF\s+FOUND\s+THEN[\s\S]*?INSERT\s+INTO\s+public\.orders/);
+});
+
+test("app rate limits are stored server-side and not exposed to browser roles", () => {
+  assert.match(appRateLimits, /CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+public\.app_rate_limits/i);
+  assert.match(appRateLimits, /ALTER\s+TABLE\s+public\.app_rate_limits\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/i);
+  assert.match(appRateLimits, /REVOKE\s+ALL\s+ON\s+TABLE\s+public\.app_rate_limits\s+FROM\s+PUBLIC,\s*anon,\s*authenticated/i);
+  assert.match(appRateLimits, /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+public\.check_app_rate_limit/i);
+  assert.match(appRateLimits, /SECURITY\s+DEFINER/i);
+  assert.match(appRateLimits, /REVOKE\s+ALL\s+ON\s+FUNCTION\s+public\.check_app_rate_limit\(TEXT,\s*TEXT,\s*INTEGER,\s*INTEGER\)\s+FROM\s+PUBLIC,\s*anon,\s*authenticated/i);
+  assert.match(appRateLimits, /GRANT\s+EXECUTE\s+ON\s+FUNCTION\s+public\.check_app_rate_limit\(TEXT,\s*TEXT,\s*INTEGER,\s*INTEGER\)\s+TO\s+service_role/i);
 });

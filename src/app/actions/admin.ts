@@ -2,6 +2,7 @@
 
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { eurToAll } from "@/lib/currency";
+import { enforceRateLimits } from "@/lib/rate-limit";
 import { revalidatePath } from "next/cache";
 
 const PRODUCT_IMAGE_BUCKET = "product-images";
@@ -26,6 +27,18 @@ async function checkAdminAuth() {
 
   const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
   if (!profile?.is_admin) throw new Error("Forbidden. Admin access required.");
+
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "admin:action:user",
+      limit: 240,
+      windowSeconds: 60,
+      keyParts: ["admin-action", user.id],
+      includeIp: false,
+      message: "Too many admin actions. Please slow down.",
+    },
+  ]);
+  if (rateLimit) throw new Error(rateLimit.error);
 
   return { user, supabase };
 }

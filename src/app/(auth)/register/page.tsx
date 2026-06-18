@@ -45,7 +45,7 @@ export default function RegisterPage() {
               type="password"
               name="password"
               required
-              placeholder="Min. 6 karaktere"
+              placeholder="Min. 8 karaktere"
               className="brand-focus h-12 rounded-xl border border-[#d9c7b8] bg-white px-4 text-sm font-medium text-[#352B24] shadow-sm"
             />
           </label>

@@ -62,11 +62,11 @@ export function PasswordForm() {
       <ActionMessage state={state} />
       <label className="grid gap-1.5 text-xs font-bold text-[#7c614f]">
         Fjalekalimi i ri
-        <input name="password" type="password" required minLength={6} className="rounded-xl border border-[#efcfb5] bg-white px-4 py-3 text-sm text-[#352B24] outline-none transition focus:border-[#df6b2e] focus:ring-2 focus:ring-[#df6b2e]/15" />
+        <input name="password" type="password" required minLength={8} className="rounded-xl border border-[#efcfb5] bg-white px-4 py-3 text-sm text-[#352B24] outline-none transition focus:border-[#df6b2e] focus:ring-2 focus:ring-[#df6b2e]/15" />
       </label>
       <label className="grid gap-1.5 text-xs font-bold text-[#7c614f]">
         Konfirmo fjalekalimin
-        <input name="confirmPassword" type="password" required minLength={6} className="rounded-xl border border-[#efcfb5] bg-white px-4 py-3 text-sm text-[#352B24] outline-none transition focus:border-[#df6b2e] focus:ring-2 focus:ring-[#df6b2e]/15" />
+        <input name="confirmPassword" type="password" required minLength={8} className="rounded-xl border border-[#efcfb5] bg-white px-4 py-3 text-sm text-[#352B24] outline-none transition focus:border-[#df6b2e] focus:ring-2 focus:ring-[#df6b2e]/15" />
       </label>
       <button disabled={isPending} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#df6b2e] px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-[#c85f28] disabled:opacity-60">
         <Lock className="h-4 w-4" />

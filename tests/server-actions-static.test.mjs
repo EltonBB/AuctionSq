@@ -3,6 +3,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 const adminActions = readFileSync(new URL("../src/app/actions/admin.ts", import.meta.url), "utf8");
+const authActions = readFileSync(new URL("../src/app/actions/auth.ts", import.meta.url), "utf8");
+const bidActions = readFileSync(new URL("../src/app/actions/bids.ts", import.meta.url), "utf8");
+const finalizeRoute = readFileSync(new URL("../src/app/api/auctions/finalize/route.ts", import.meta.url), "utf8");
+const rateLimit = readFileSync(new URL("../src/lib/rate-limit.ts", import.meta.url), "utf8");
 const db = readFileSync(new URL("../src/lib/db.ts", import.meta.url), "utf8");
 const adminBidsPage = readFileSync(new URL("../src/app/admin/bids/page.tsx", import.meta.url), "utf8");
 const adminOrdersPage = readFileSync(new URL("../src/app/admin/orders/page.tsx", import.meta.url), "utf8");
@@ -11,6 +15,10 @@ const adminProductsPage = readFileSync(new URL("../src/app/admin/products/page.t
 const adminUsersTable = readFileSync(new URL("../src/app/components/AdminUsersTable.tsx", import.meta.url), "utf8");
 const adminOverviewPage = readFileSync(new URL("../src/app/admin/page.tsx", import.meta.url), "utf8");
 const adminForms = readFileSync(new URL("../src/app/components/AdminForms.tsx", import.meta.url), "utf8");
+const accountForms = readFileSync(new URL("../src/app/components/AccountForms.tsx", import.meta.url), "utf8");
+const profileWorkspace = readFileSync(new URL("../src/app/components/ProfileWorkspace.tsx", import.meta.url), "utf8");
+const registerPage = readFileSync(new URL("../src/app/(auth)/register/page.tsx", import.meta.url), "utf8");
+const resetPasswordPage = readFileSync(new URL("../src/app/(auth)/reset-password/page.tsx", import.meta.url), "utf8");
 const nextConfig = readFileSync(new URL("../next.config.ts", import.meta.url), "utf8");
 
 test("admin bids page uses one admin bid query instead of per-auction fan-out", () => {
@@ -62,6 +70,37 @@ test("product image uploads fail gracefully before oversized requests crash the 
   assert.match(adminForms, /function\s+validateImageFiles\s*\(/);
   assert.match(adminForms, /onSubmit=\{validateSubmit\}/);
   assert.match(adminForms, /event\.preventDefault\(\)/);
+});
+
+test("sensitive server actions use app-level rate limits", () => {
+  assert.match(rateLimit, /check_app_rate_limit/);
+  assert.match(rateLimit, /createHash\("sha256"\)/);
+  assert.match(rateLimit, /x-forwarded-for/);
+  assert.match(authActions, /enforceRateLimits/);
+  assert.match(authActions, /auth:sign-in:email/);
+  assert.match(authActions, /auth:sign-up:ip/);
+  assert.match(authActions, /auth:password-reset:email/);
+  assert.match(bidActions, /bid:place:auction-user/);
+  assert.match(adminActions, /admin:action:user/);
+  assert.match(finalizeRoute, /api:auction-finalize/);
+});
+
+test("password policy is at least eight characters across auth forms", () => {
+  assert.match(authActions, /password\.length\s*<\s*8/);
+  assert.match(registerPage, /Min\. 8 karaktere/);
+  assert.doesNotMatch(`${resetPasswordPage}\n${accountForms}\n${profileWorkspace}`, /minLength=\{6\}/);
+  assert.match(resetPasswordPage, /minLength=\{8\}/);
+  assert.match(accountForms, /minLength=\{8\}/);
+  assert.match(profileWorkspace, /minLength=\{8\}/);
+});
+
+test("next config applies browser security headers", () => {
+  assert.match(nextConfig, /Content-Security-Policy/);
+  assert.match(nextConfig, /frame-ancestors 'none'/);
+  assert.match(nextConfig, /X-Content-Type-Options/);
+  assert.match(nextConfig, /X-Frame-Options/);
+  assert.match(nextConfig, /Strict-Transport-Security/);
+  assert.match(nextConfig, /Permissions-Policy/);
 });
 
 test("audit log insert failures are surfaced", () => {

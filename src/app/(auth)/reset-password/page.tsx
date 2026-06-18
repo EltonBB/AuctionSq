@@ -51,11 +51,11 @@ function ResetPasswordContent() {
             <Message state={updateState} />
             <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
               Fjalekalimi i ri
-              <input type="password" name="password" required minLength={6} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+              <input type="password" name="password" required minLength={8} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
             </label>
             <label className="grid gap-1.5 text-xs font-bold uppercase text-[#8a7565]">
               Konfirmo fjalekalimin
-              <input type="password" name="confirmPassword" required minLength={6} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
+              <input type="password" name="confirmPassword" required minLength={8} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-4 py-3 text-sm normal-case text-[#352B24]" />
             </label>
             <button type="submit" disabled={updatePending} className="mt-2 w-full rounded-xl bg-[#D96C2D] py-3.5 text-xs font-black uppercase tracking-widest text-white transition hover:bg-[#bf5520] disabled:opacity-60">
               {updatePending ? "Duke ruajtur..." : "Perditeso fjalekalimin"}

@@ -151,11 +151,11 @@ export default function ProfileWorkspace({ user, orders, bids }: WorkspaceProps)
               <Notice state={passwordState} />
               <label className="grid gap-1.5 text-xs font-semibold text-[#6f5b4c]">
                 Fjalekalimi i ri
-                <input name="password" type="password" required minLength={6} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-3 py-2.5 text-sm text-[#352B24]" />
+                <input name="password" type="password" required minLength={8} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-3 py-2.5 text-sm text-[#352B24]" />
               </label>
               <label className="grid gap-1.5 text-xs font-semibold text-[#6f5b4c]">
                 Konfirmo fjalekalimin
-                <input name="confirmPassword" type="password" required minLength={6} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-3 py-2.5 text-sm text-[#352B24]" />
+                <input name="confirmPassword" type="password" required minLength={8} className="brand-focus rounded-xl border border-[#ead2bc] bg-white px-3 py-2.5 text-sm text-[#352B24]" />
               </label>
               <div className="flex justify-end">
                 <button

@@ -127,7 +127,7 @@ export async function getCurrentUserProfile(): Promise<Profile> {
 
   if (!user) return guestProfile;
 
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select(profileListColumns).eq("id", user.id).single();
   if (profile) {
     return {
       ...(profile as Profile),
@@ -155,7 +155,7 @@ export async function getCurrentUserProfile(): Promise<Profile> {
 export async function getCategories(): Promise<Category[]> {
   assertSupabaseConfigured();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("categories").select("*").order("name");
+  const { data, error } = await supabase.from("categories").select(categoryListColumns).order("name");
   if (error) throw new Error(error.message);
   return (data || []) as Category[];
 }
@@ -185,6 +185,7 @@ export type AuctionWithRelations = Auction & { product: Product; category: Categ
 
 const profileListColumns =
   "id, full_name, phone_number, country, city, address, postal_code, is_admin, is_blocked, created_at, updated_at";
+const categoryListColumns = "id, name, slug, description, created_at";
 const productListColumns =
   "id, title, description, category_id, condition, images, testing_notes, status, created_at, updated_at";
 const auctionListColumns =
@@ -353,7 +354,7 @@ export async function getCustomerProfiles(): Promise<Profile[]> {
 export async function getProfileById(id: string): Promise<Profile | null> {
   assertSupabaseConfigured();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("*").eq("id", id).single();
+  const { data, error } = await supabase.from("profiles").select(profileListColumns).eq("id", id).single();
   if (error) return null;
   return data as Profile;
 }

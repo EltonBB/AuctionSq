@@ -4,6 +4,24 @@
 
 NjeKlik is a connected pre-production auction platform currently deployed at `https://auctionsq.vercel.app`. The core security hardening work for profile updates, bid writes, order delivery confirmation, live-auction uniqueness, public auction exposure, bid moderation scope, and bounded list reads has been implemented, deployed, and verified locally and against the live Supabase project `ewuvavurygndpgarrdfw`.
 
+Active task on 2026-06-17:
+- Completed an auth/API limit, vulnerability, and scale-readiness hardening pass:
+  - added server-side app rate limits backed by `public.app_rate_limits` and the service-role-only `check_app_rate_limit` RPC.
+  - rate-limited sign-in, sign-up, Google OAuth start, password reset, password update, profile update, bid placement, admin actions, and the auction finalizer API.
+  - enforced 8-character minimum passwords consistently in auth forms and server actions.
+  - added global browser security headers: CSP, referrer policy, nosniff, frame deny, permissions policy, and production HSTS.
+  - narrowed remaining broad profile/category reads to explicit columns.
+  - resolved the npm audit finding by updating the lockfile transitive dependency resolution.
+  - applied the Supabase rate-limit migration to linked project `ewuvavurygndpgarrdfw` and verified table/function creation.
+  - Supabase advisors show no new rate-limit migration issues; remaining warnings are the known intentional authenticated RPCs plus dashboard-only leaked-password protection.
+- Latest local checks passed:
+  - `node --test tests\*.test.mjs`: 35/35 tests.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - `npm audit --json`: 0 vulnerabilities.
+  - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.
+- Removed the desktop public sidebar promo card (`Fito me shume`) before VPS deployment prep.
+
 Active task on 2026-06-09:
 - Implemented client auth/account access request batch:
   - login and registration now include a Google OAuth button that redirects through Supabase and the existing `/auth/callback` route.
@@ -254,6 +272,8 @@ Final review/deployment validation on 2026-06-08:
 
 - Enable Supabase Auth leaked-password protection in the dashboard.
 - Keep using the client-provided NjeKlik logo artwork; current transparent PNGs are generated from the uploaded/source NjeKlik files.
+- Configure Vercel WAF/rate limits for edge-level protection before requests reach Server Actions.
+- Configure production SMTP/from-name branding in Supabase Auth once the final domain/email is ready.
 
 ## Important Decisions
 

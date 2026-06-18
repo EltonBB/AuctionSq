@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { eurToAll } from "@/lib/currency";
+import { enforceRateLimits } from "@/lib/rate-limit";
 import { revalidatePath } from "next/cache";
 
 export async function placeBid(auctionId: string, bidAmountEur: number) {
@@ -32,6 +33,33 @@ export async function placeBid(auctionId: string, bidAmountEur: number) {
   if (profile?.is_admin) {
     return { success: false, error: "ti je admini nuk mund te ofrosh" };
   }
+
+  const rateLimit = await enforceRateLimits([
+    {
+      action: "bid:place:ip",
+      limit: 120,
+      windowSeconds: 60,
+      keyParts: ["bid-place"],
+      message: "Too many bid attempts. Please slow down.",
+    },
+    {
+      action: "bid:place:user",
+      limit: 60,
+      windowSeconds: 60,
+      keyParts: ["bid-place", user.id],
+      includeIp: false,
+      message: "Too many bid attempts from this account. Please slow down.",
+    },
+    {
+      action: "bid:place:auction-user",
+      limit: 20,
+      windowSeconds: 60,
+      keyParts: ["bid-place", auctionId, user.id],
+      includeIp: false,
+      message: "Too many bid attempts on this auction. Please wait a moment.",
+    },
+  ]);
+  if (rateLimit) return rateLimit;
 
   const { data: bidId, error } = await supabase.rpc("place_bid", {
     p_auction_id: auctionId,

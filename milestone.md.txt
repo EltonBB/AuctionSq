@@ -34,6 +34,22 @@ Active task on 2026-06-18:
   - `npm audit --json`: 0 vulnerabilities.
   - `git diff --check`: no whitespace errors; only Windows LF-to-CRLF warnings.
 
+Active task on 2026-06-19:
+- Investigated the production `/login` client-side exception after signup confirmation:
+  - fresh browser production `/login` load passed.
+  - invalid credential submit passed and showed the expected inline error.
+  - temporary confirmed-user login passed and redirected to the homepage; temporary user was deleted after validation.
+  - root risk found: auth pages were still prerendered/static and served with long shared-cache headers, which can leave stale server-action HTML/chunk references after deployments.
+- Fixed auth route caching:
+  - added `(auth)` route-group layout with `force-dynamic`, `revalidate = 0`, and `force-no-store`.
+  - added explicit `Cache-Control: no-store, no-cache, max-age=0, must-revalidate` headers for login, register, reset-password, setup-required, and auth callback routes.
+  - added a static regression test that auth pages remain no-store/dynamic.
+- Latest checks passed before commit:
+  - `node --test tests\*.test.mjs`: 36/36 tests.
+  - `npm run lint`: passed.
+  - `npm run build`: passed; auth pages now build as dynamic routes.
+  - local production `curl -I` confirmed `/login`, `/register`, and `/reset-password` return `Cache-Control: no-store, no-cache, max-age=0, must-revalidate`.
+
 Active task on 2026-06-09:
 - Implemented client auth/account access request batch:
   - login and registration now include a Google OAuth button that redirects through Supabase and the existing `/auth/callback` route.

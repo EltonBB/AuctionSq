@@ -19,6 +19,7 @@ const accountForms = readFileSync(new URL("../src/app/components/AccountForms.ts
 const profileWorkspace = readFileSync(new URL("../src/app/components/ProfileWorkspace.tsx", import.meta.url), "utf8");
 const registerPage = readFileSync(new URL("../src/app/(auth)/register/page.tsx", import.meta.url), "utf8");
 const resetPasswordPage = readFileSync(new URL("../src/app/(auth)/reset-password/page.tsx", import.meta.url), "utf8");
+const authLayout = readFileSync(new URL("../src/app/(auth)/layout.tsx", import.meta.url), "utf8");
 const nextConfig = readFileSync(new URL("../next.config.ts", import.meta.url), "utf8");
 
 test("admin bids page uses one admin bid query instead of per-auction fan-out", () => {
@@ -101,6 +102,17 @@ test("next config applies browser security headers", () => {
   assert.match(nextConfig, /X-Frame-Options/);
   assert.match(nextConfig, /Strict-Transport-Security/);
   assert.match(nextConfig, /Permissions-Policy/);
+});
+
+test("auth pages are not cached across deployments", () => {
+  assert.match(authLayout, /dynamic\s*=\s*"force-dynamic"/);
+  assert.match(authLayout, /revalidate\s*=\s*0/);
+  assert.match(authLayout, /fetchCache\s*=\s*"force-no-store"/);
+  assert.match(nextConfig, /const\s+noStoreHeaders/);
+  assert.match(nextConfig, /source:\s*"\/login"[\s\S]*?headers:\s*noStoreHeaders/);
+  assert.match(nextConfig, /source:\s*"\/register"[\s\S]*?headers:\s*noStoreHeaders/);
+  assert.match(nextConfig, /source:\s*"\/reset-password"[\s\S]*?headers:\s*noStoreHeaders/);
+  assert.match(nextConfig, /source:\s*"\/auth\/callback"[\s\S]*?headers:\s*noStoreHeaders/);
 });
 
 test("audit log insert failures are surfaced", () => {

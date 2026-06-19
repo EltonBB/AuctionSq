@@ -50,6 +50,13 @@ const securityHeaders = [
       ]),
 ];
 
+const noStoreHeaders = [
+  {
+    key: "Cache-Control",
+    value: "no-store, no-cache, max-age=0, must-revalidate",
+  },
+];
+
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
@@ -58,6 +65,26 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/login",
+        headers: noStoreHeaders,
+      },
+      {
+        source: "/register",
+        headers: noStoreHeaders,
+      },
+      {
+        source: "/reset-password",
+        headers: noStoreHeaders,
+      },
+      {
+        source: "/setup-required",
+        headers: noStoreHeaders,
+      },
+      {
+        source: "/auth/callback",
+        headers: noStoreHeaders,
+      },
       {
         source: "/:path*",
         headers: securityHeaders,

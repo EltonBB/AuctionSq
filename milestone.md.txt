@@ -50,6 +50,20 @@ Active task on 2026-06-19:
   - `npm run build`: passed; auth pages now build as dynamic routes.
   - local production `curl -I` confirmed `/login`, `/register`, and `/reset-password` return `Cache-Control: no-store, no-cache, max-age=0, must-revalidate`.
 
+Active task on 2026-06-22:
+- Diagnosed production auth redirect failures after moving to `xn--njklik-qva.com`:
+  - confirmation email links were still able to land on `localhost:3000`, causing Supabase PKCE verifier errors outside the original signup browser.
+  - Google OAuth callback could surface as a raw nginx 502 if the callback route threw instead of returning a controlled auth error.
+- Implemented repo-side auth hardening:
+  - added `getSiteUrl()` so production auth redirects require `NEXT_PUBLIC_SITE_URL` instead of silently falling back to localhost.
+  - sign-up now passes `emailRedirectTo` to Supabase.
+  - added `/auth/confirm` as a no-store token-hash confirmation endpoint alias.
+  - callback route now handles provider errors and unexpected exceptions by redirecting to `/login?error=...`.
+  - added static regression coverage for configured production auth redirects and `/auth/confirm` cache headers.
+- Remaining dashboard-side requirement:
+  - Supabase Auth email templates must use the production domain and token-hash confirmation links.
+  - Google OAuth provider must keep the Supabase callback URL in Google Cloud and the production app callback in Supabase redirect URLs.
+
 Active task on 2026-06-09:
 - Implemented client auth/account access request batch:
   - login and registration now include a Google OAuth button that redirects through Supabase and the existing `/auth/callback` route.

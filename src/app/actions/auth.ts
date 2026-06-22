@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { enforceRateLimits, normalizeRateLimitValue } from "@/lib/rate-limit";
+import { getSiteUrl } from "@/lib/site-url";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -78,10 +79,12 @@ export async function signUp(prevState: unknown, formData: FormData) {
   if (rateLimit) return rateLimit;
 
   const supabase = await createClient();
+  const baseUrl = getSiteUrl();
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: `${baseUrl}/auth/callback`,
       data: { full_name: fullName },
     },
   });
@@ -105,7 +108,7 @@ export async function signInWithGoogle() {
   }
 
   const supabase = await createClient();
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = getSiteUrl();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -206,7 +209,7 @@ export async function requestPasswordReset(prevState: unknown, formData: FormDat
   if (rateLimit) return rateLimit;
 
   const supabase = await createClient();
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = getSiteUrl();
 
   const redirectTo = `${baseUrl}/auth/callback?next=/reset-password?recovery=1`;
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });

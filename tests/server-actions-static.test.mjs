@@ -20,6 +20,8 @@ const profileWorkspace = readFileSync(new URL("../src/app/components/ProfileWork
 const registerPage = readFileSync(new URL("../src/app/(auth)/register/page.tsx", import.meta.url), "utf8");
 const resetPasswordPage = readFileSync(new URL("../src/app/(auth)/reset-password/page.tsx", import.meta.url), "utf8");
 const authLayout = readFileSync(new URL("../src/app/(auth)/layout.tsx", import.meta.url), "utf8");
+const authConfirmRoute = readFileSync(new URL("../src/app/auth/confirm/route.ts", import.meta.url), "utf8");
+const siteUrl = readFileSync(new URL("../src/lib/site-url.ts", import.meta.url), "utf8");
 const nextConfig = readFileSync(new URL("../next.config.ts", import.meta.url), "utf8");
 
 test("admin bids page uses one admin bid query instead of per-auction fan-out", () => {
@@ -113,6 +115,16 @@ test("auth pages are not cached across deployments", () => {
   assert.match(nextConfig, /source:\s*"\/register"[\s\S]*?headers:\s*noStoreHeaders/);
   assert.match(nextConfig, /source:\s*"\/reset-password"[\s\S]*?headers:\s*noStoreHeaders/);
   assert.match(nextConfig, /source:\s*"\/auth\/callback"[\s\S]*?headers:\s*noStoreHeaders/);
+  assert.match(nextConfig, /source:\s*"\/auth\/confirm"[\s\S]*?headers:\s*noStoreHeaders/);
+});
+
+test("auth redirects use the configured production site URL", () => {
+  assert.match(authActions, /emailRedirectTo:\s*`\$\{baseUrl\}\/auth\/callback`/);
+  assert.match(authActions, /redirectTo:\s*`\$\{baseUrl\}\/auth\/callback`/);
+  assert.match(authActions, /const\s+baseUrl\s*=\s*getSiteUrl\(\)/);
+  assert.match(siteUrl, /NEXT_PUBLIC_SITE_URL is required in production/);
+  assert.doesNotMatch(authActions, /process\.env\.NEXT_PUBLIC_SITE_URL\s*\|\|\s*"http:\/\/localhost:3000"/);
+  assert.match(authConfirmRoute, /export\s+\{\s*GET\s*\}\s+from\s+"..\/callback\/route"/);
 });
 
 test("audit log insert failures are surfaced", () => {

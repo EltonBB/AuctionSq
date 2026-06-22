@@ -86,6 +86,10 @@ const nextConfig: NextConfig = {
         headers: noStoreHeaders,
       },
       {
+        source: "/auth/confirm",
+        headers: noStoreHeaders,
+      },
+      {
         source: "/:path*",
         headers: securityHeaders,
       },

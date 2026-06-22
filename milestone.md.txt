@@ -325,3 +325,8 @@ Final review/deployment validation on 2026-06-08:
 - Supabase is the source of truth for live data; local memory data remains a fallback for sandbox/dev behavior.
 - Temporary production data is approved for release validation and must be clearly named and cleaned up where safe.
 - Uploaded logo files are the source for transparent NjeKlik logo assets.
+
+Active task on 2026-06-22:
+- Fixed VPS auth 502 root cause outside the repo by increasing nginx proxy buffers for Supabase/Next auth response headers.
+- Updated app metadata to use the production punycode domain and the existing NjeKlik transparent mark as the browser/apple icon.
+- Latest checks for this metadata change: npm run lint passed; npm run build passed.

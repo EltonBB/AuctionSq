@@ -21,6 +21,7 @@ const registerPage = readFileSync(new URL("../src/app/(auth)/register/page.tsx",
 const resetPasswordPage = readFileSync(new URL("../src/app/(auth)/reset-password/page.tsx", import.meta.url), "utf8");
 const authLayout = readFileSync(new URL("../src/app/(auth)/layout.tsx", import.meta.url), "utf8");
 const authConfirmRoute = readFileSync(new URL("../src/app/auth/confirm/route.ts", import.meta.url), "utf8");
+const authCallbackRoute = readFileSync(new URL("../src/app/auth/callback/route.ts", import.meta.url), "utf8");
 const siteUrl = readFileSync(new URL("../src/lib/site-url.ts", import.meta.url), "utf8");
 const nextConfig = readFileSync(new URL("../next.config.ts", import.meta.url), "utf8");
 
@@ -125,6 +126,9 @@ test("auth redirects use the configured production site URL", () => {
   assert.match(siteUrl, /NEXT_PUBLIC_SITE_URL is required in production/);
   assert.doesNotMatch(authActions, /process\.env\.NEXT_PUBLIC_SITE_URL\s*\|\|\s*"http:\/\/localhost:3000"/);
   assert.match(authConfirmRoute, /export\s+\{\s*GET\s*\}\s+from\s+"..\/callback\/route"/);
+  assert.match(authCallbackRoute, /const\s+baseUrl\s*=\s*getSiteUrl\(\)/);
+  assert.doesNotMatch(authCallbackRoute, /origin\}?\s*=\s*new URL\(request\.url\)/);
+  assert.doesNotMatch(authCallbackRoute, /NextResponse\.redirect\(`\$\{origin\}/);
 });
 
 test("audit log insert failures are surfaced", () => {

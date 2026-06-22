@@ -1,13 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site-url";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const baseUrl = getSiteUrl();
 
   try {
     const providerError = searchParams.get("error_description") || searchParams.get("error");
     if (providerError) {
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(providerError)}`);
+      return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(providerError)}`);
     }
 
     const code = searchParams.get("code");
@@ -26,19 +28,19 @@ export async function GET(request: Request) {
     if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (error) {
-        return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`);
+        return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(error.message)}`);
       }
       if (nextParam) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${baseUrl}${next}`);
       }
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return NextResponse.redirect(`${origin}/login`);
+      if (!userData.user) return NextResponse.redirect(`${baseUrl}/login`);
       const { data: profile } = await supabase
         .from("profiles")
         .select("is_admin")
         .eq("id", userData.user.id)
         .single();
-      return NextResponse.redirect(`${origin}${profile?.is_admin ? "/admin" : "/"}`);
+      return NextResponse.redirect(`${baseUrl}${profile?.is_admin ? "/admin" : "/"}`);
     }
 
     if (tokenHash && type) {
@@ -54,14 +56,14 @@ export async function GET(request: Request) {
           | "phone_change",
       });
       if (error) {
-        return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`);
+        return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(error.message)}`);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${baseUrl}${next}`);
     }
 
-    return NextResponse.redirect(`${origin}/login?error=missing_callback_token`);
+    return NextResponse.redirect(`${baseUrl}/login?error=missing_callback_token`);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Authentication callback failed.";
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(message)}`);
+    return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(message)}`);
   }
 }

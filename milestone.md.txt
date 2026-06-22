@@ -329,4 +329,5 @@ Final review/deployment validation on 2026-06-08:
 Active task on 2026-06-22:
 - Fixed VPS auth 502 root cause outside the repo by increasing nginx proxy buffers for Supabase/Next auth response headers.
 - Updated app metadata to use the production punycode domain and the existing NjeKlik transparent mark as the browser/apple icon.
+- Replaced the actual app `favicon.ico` with a NjeKlik mark icon because browsers prefer `/favicon.ico` over metadata icons.
 - Latest checks for this metadata change: npm run lint passed; npm run build passed.
